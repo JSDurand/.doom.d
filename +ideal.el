@@ -112,6 +112,22 @@ The buffer is considered meta if it is a live buffer and one of the following co
     (unless found
       (switch-to-buffer ori))))
 
+
+
+;; show current time
+
+;;;###autoload
+(defun durand-show-current-time ()
+  "Show the current time. With prefix arg, show in a separate window."
+  (interactive)
+  (let ((time-string (format-time-string "%A %e %B %H:%M:%S")))
+    (if current-prefix-arg
+        (with-current-buffer-window
+         "*current time*" nil nil
+         (prin1 time-string)
+         (helpful-mode))
+      (message time-string))))
+
 ;; add a custom keymap
 (define-prefix-command 'durand-switch-buffer-map)
 (define-key durand-switch-buffer-map [?\C-c ?q] 'minibuffer-keyboard-quit)
@@ -415,8 +431,10 @@ See the documentation of `durand-complete-buffer' to know more."
                                  ((equal current-prefix-arg '(16)) " ")
                                  (t "^"))
             :unwind 'reset-durand-changed
-            :caller 'durand-switch-buffer
+            :caller 'ivy-switch-buffer
             :keymap 'durand-switch-buffer-map))
+
+(map! :map doom-leader-buffer-map "b" #'durand-switch-buffer)
 
 ;;;###autoload
 ;; (defvar durand-inactive-buffers nil
@@ -1301,7 +1319,7 @@ Also open message in `mu4e-headers-mode' without forwarding to links even if no 
     (condition-case err
         (pcase major-mode
           ('org-mode
-           (org-open-at-point))
+           (org-open-at-point-decoded))
           ('help-mode
            (when (equal (push-button) nil)
              (durand-forward-link)))

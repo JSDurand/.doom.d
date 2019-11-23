@@ -95,18 +95,18 @@
   [?\;] 'evil-window-middle
   [?:] 'evil-window-bottom
   [?o] 'evil-jump-backward
-  [?a] (lambda ()
-         (interactive)
-         (org-agenda nil "o"))
+  [?a] #'durand-agenda
   [?e] 'durand-eval
-  [?t] (lambda ()
-         (interactive)
-         (if current-prefix-arg
-             (make-process
-              :name "terminal"
-              :command `("open" "-a" "terminal" ,(file-relative-name default-directory))
-              :buffer nil)
-           (eshell)))
+  ;; [?t]
+  ;; (lambda ()
+  ;;        (interactive)
+  ;;        (if current-prefix-arg
+  ;;            (make-process
+  ;;             :name "terminal"
+  ;;             :command `("open" "-a" "terminal" ,(file-relative-name default-directory))
+  ;;             :buffer nil)
+  ;;          (eshell)))
+  [?t] #'durand-open-terminal
   [?x] 'exchange-point-and-mark
   [?w] 'durand-next-window-or-frame
   [?W] 'ace-select-window

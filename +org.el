@@ -90,6 +90,106 @@
 (set-face-attribute 'org-verbatim nil :background "gray1")
 (set-face-attribute 'italic nil :foreground "light blue")
 
+;;;###autoload
+(defun durand-redo-agenda ()
+  "Redo and then go to the first block."
+  (interactive)
+  (org-agenda-redo-all)
+  (evil-emacs-state)
+  (org-agenda-first-block))
+
+;;;###autoload
+(defun durand-agenda-advice (func &rest arg)
+  "Advice the org-agenda functions so that it goes to the first
+  block after it finishes."
+  (interactive)
+  (widen)
+  (funcall func (or (car arg) 1))
+  (evil-emacs-state)
+  (org-agenda-first-block))
+
+;;;###autoload
+(defun durand-agenda-advice-for-today (func)
+  "Advice for org-agenda-goto-today."
+  (interactive)
+  (widen)
+  (funcall func)
+  (evil-emacs-state)
+  (org-agenda-first-block))
+
+;; fix org-agenda-later
+;;;###autoload
+(defun org-agenda-later (arg)
+  "Go forward in time by the current span.
+With prefix ARG, go forward that many times the current span."
+  (interactive "p")
+  (org-agenda-check-type t 'agenda)
+  (let* ((args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
+         (span (or (nth 2 args) org-agenda-current-span))
+         (sd (or (nth 1 args) (org-get-at-bol 'day) org-starting-day))
+         (greg (calendar-gregorian-from-absolute sd))
+         (cnt (org-get-at-bol 'org-day-cnt))
+         greg2)
+    (cond
+     ((numberp span)
+      (setq sd (+ (* span arg) sd)))
+     ((eq span 'day)
+      (setq sd (+ arg sd)))
+     ((eq span 'week)
+      (setq sd (+ (* 7 arg) sd)))
+     ((eq span 'fortnight)
+      (setq sd (+ (* 14 arg) sd)))
+     ((eq span 'month)
+      (setq greg2 (list (+ (car greg) arg) (nth 1 greg) (nth 2 greg))
+            sd (calendar-absolute-from-gregorian greg2))
+      (setcar greg2 (1+ (car greg2))))
+     ((eq span 'year)
+      (setq greg2 (list (car greg) (nth 1 greg) (+ arg (nth 2 greg)))
+            sd (calendar-absolute-from-gregorian greg2))
+      (setcar (nthcdr 2 greg2) (1+ (nth 2 greg2))))
+     (t
+      (setq sd (+ (* span arg) sd))))
+    (let ((org-agenda-overriding-cmd
+           ;; `cmd' may have been set by `org-agenda-run-series' which
+           ;; uses `org-agenda-overriding-cmd' to decide whether
+           ;; overriding is allowed for `cmd'
+           (get-text-property (min (1- (point-max)) (point)) 'org-series-cmd))
+          (org-agenda-overriding-arguments
+           (list (car args) sd span)))
+      (org-agenda-redo)
+      ;; I added the following line.
+      (org-agenda-first-block)
+      (org-agenda-find-same-or-today-or-agenda cnt))))
+
+;; Fix org-agenda-goto-today
+
+;;;###autoload
+(defun org-agenda-goto-today ()
+  "Go to today."
+  (interactive)
+  (org-agenda-check-type t 'agenda)
+  (let* ((args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
+         (curspan (nth 2 args))
+         (tdpos (text-property-any (point-min) (point-max) 'org-today t)))
+    (cond
+     (tdpos (goto-char tdpos))
+     ((eq org-agenda-type 'agenda)
+      (let* ((sd (org-agenda-compute-starting-span
+                  (org-today) (or curspan org-agenda-span)))
+             (org-agenda-overriding-arguments args))
+        (setf (nth 1 org-agenda-overriding-arguments) sd)
+        (org-agenda-redo)
+        ;; I added the following line.
+        (org-agenda-first-block)
+        (org-agenda-find-same-or-today-or-agenda)))
+     (t (error "Cannot find today")))))
+
+(advice-add 'org-agenda-later :around 'durand-agenda-advice)
+(advice-add 'org-agenda-goto-today :around 'durand-agenda-advice-for-today)
+
+(map! :map org-agenda-mode-map [?g] #'durand-redo-agenda)
+
+
 ;; (use-package org-habit
 ;;   :config
 ;;   (setq org-habit-show-habits-only-for-today t)
@@ -198,6 +298,60 @@ Don't bind it to a key in `general-hydra/heads'"
 				("S" . org-schedule)
 				("v" . orgy-view)
                                 ("§" . durand-org-hydra/body)))
+
+;; link support
+
+;; Record the link types that I know until now.
+(defvar durand-link-types '(mu4e-url shr-url button htmlize-link)
+  "Link types that I know until now.")
+
+(put (intern "durand-forward-link") 'function-documentation (concat
+                                                             "Forward to "
+                                                             (mapconcat #'prin1-to-string
+                                                                        (reverse (cdr (reverse durand-link-types)))
+                                                                        ", ")
+                                                             (format ", or %s" (-last #'identity durand-link-types))
+                                                             " changes."))
+
+;; Find the next link
+;;;###autoload
+(defun durand-find-next-link (&optional pos func)
+  "Find the next link. POS defaults to `(point)' and FUNC defaults to `next-single-property-change'."
+  (let ((pos (or pos (point)))
+        (func (or func 'next-single-property-change))
+        res)
+    (dolist (le_type durand-link-types res)
+      (setq res (or res (funcall func pos le_type))))))
+
+;;;###autoload
+(defun durand-find-previous-link (&optional pos func)
+  "Find the previous link. POS defaults to `(point)' and FUNC defaults to `previous-single-property-change'."
+  (let ((pos (or pos (point)))
+        (func (or func 'previous-single-property-change))
+        res)
+    (dolist (le_type durand-link-types res)
+      (setq res (or res (funcall func pos le_type))))))
+
+;;;###autoload
+(defun durand-forward-link ()
+  (interactive)
+  (let* ((next-change (durand-find-next-link))
+         (next-url (when next-change (durand-find-next-link next-change 'get-text-property)))
+         (final-change (if next-url next-change (durand-find-next-link next-change))))
+    (if final-change
+        (goto-char final-change)
+      (message "No links found!"))))
+
+;;;###autoload
+(defun durand-backward-link ()
+  (interactive)
+  (let* ((next-change (durand-find-previous-link))
+         (next-url (when next-change (durand-find-previous-link next-change 'get-text-property)))
+         (final-change (if next-url next-change (durand-find-previous-link next-change))))
+    (if final-change
+        (goto-char final-change)
+      (message "No links found!"))))
+
 
 (defun orgy-view ()
   "Recenter to top; if already there, return to previous position"
@@ -1081,6 +1235,14 @@ Press \\[durand-view-last-day] to view the last day;
   (set-evil-initial-state!
     '(org-agenda-mode)
     'emacs)
+;;;###autoload
+  (defun durand-agenda ()
+    "My own customized agenda view."
+    (interactive)
+    (org-agenda nil "o")
+    (org-agenda-first-block)
+    (evil-emacs-state))
+  (map! :leader :n "oaa" #'durand-agenda)
   (add-hook 'org-agenda-mode-hook #'org-agenda-first-block))
 
 ;; (setq org-agenda-custom-commands
@@ -1857,6 +2019,9 @@ and whose `caddr' is a list of strings, the content of the note."
     (with-current-buffer-window
      "*durand-org-view-notes*"
      nil nil
+     (let ((temp-map (make-sparse-keymap)))
+       (define-key temp-map [?q] 'quit-window)
+       (set-transient-map temp-map))
      (goto-char (point-min))
      (insert "#+STARTUP: showall\n")
      ;; insert log graph if any
@@ -1884,7 +2049,15 @@ and whose `caddr' is a list of strings, the content of the note."
      (goto-char (point-min))
      (org-mode))
     (message "%s note%s found" (if (= 0 len) "No" (number-to-string len))
-	     (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
+             (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
+
+;; pop up rule for it
+(set-popup-rule! "\\*durand-org-view-notes\\*"
+  :size #'+popup-shrink-to-fit
+  :side 'bottom
+  :quit t
+  :select t
+  :modeline nil)
 
 ;;;###autoload
 (defun durand-org-view-all-logs (&optional match)
@@ -2528,7 +2701,7 @@ If ARG is `youtube', then return (text list point)"
          (liste (let (res)
                   (while (re-search-forward org-link-any-re limite t)
                     (push (list (match-string-no-properties 2)
-                                (match-string-no-properties 4))
+                                (match-string-no-properties 3))
                           res))
                   res)))
     (cond
@@ -2622,6 +2795,7 @@ With \\[universal-argument]\\[universal-argument], show all links."
              (let ((sel (durand-choose-list cands t "Chois un roman: "))
                    temp)
                (dolist (ele sel temp)
+                 (message "ele: %s" (assoc-default ele cands))
                  (setf temp (append temp
                                     (durand-choose-list
                                      (assoc-default ele cands)
@@ -2720,10 +2894,184 @@ With \\[universal-argument] \\[universal-argument], don't kill the entry."
 attempts to handle them."
   (org-open-link-from-string
    (org-make-link-string
-    (org-link-unescape (if (stringp str)
-                           str
-                         (car str)))
+    (org-link-decode (if (stringp str)
+                         str
+                       (car str)))
     "fake link")))
+
+;; the original open link function is broken over links with spaces, and here is a fix.
+;;;###autoload
+(defun org-open-at-point-decoded (&optional arg reference-buffer)
+  "Open link, timestamp, footnote or tags at point.
+
+When point is on a link, follow it.  Normally, files will be
+opened by an appropriate application.  If the optional prefix
+argument ARG is non-nil, Emacs will visit the file.  With
+a double prefix argument, try to open outside of Emacs, in the
+application the system uses for this file type.
+
+When point is on a timestamp, open the agenda at the day
+specified.
+
+When point is a footnote definition, move to the first reference
+found.  If it is on a reference, move to the associated
+definition.
+
+When point is on a headline, display a list of every link in the
+entry, so it is possible to pick one, or all, of them.  If point
+is on a tag, call `org-tags-view' instead.
+
+When optional argument REFERENCE-BUFFER is non-nil, it should
+specify a buffer from where the link search should happen.  This
+is used internally by `org-open-link-from-string'.
+
+On top of syntactically correct links, this function also tries
+to open links and time-stamps in comments, node properties, and
+keywords if point is on something looking like a timestamp or
+a link."
+  (interactive "P")
+  (org-load-modules-maybe)
+  (setq org-window-config-before-follow-link (current-window-configuration))
+  (org-remove-occur-highlights nil nil t)
+  (unless (run-hook-with-args-until-success 'org-open-at-point-functions)
+    (let* ((context
+	    ;; Only consider supported types, even if they are not the
+	    ;; closest one.
+	    (org-element-lineage
+	     (org-element-context)
+	     '(clock comment comment-block footnote-definition
+		     footnote-reference headline inline-src-block inlinetask
+		     keyword link node-property planning src-block timestamp)
+	     t))
+	   (type (org-element-type context))
+	   (value (org-element-property :value context)))
+      (cond
+       ((not type) (user-error "No link found"))
+       ;; No valid link at point.  For convenience, look if something
+       ;; looks like a link under point in some specific places.
+       ((memq type '(comment comment-block node-property keyword))
+	(call-interactively #'org-open-at-point-global))
+       ;; On a headline or an inlinetask, but not on a timestamp,
+       ;; a link, a footnote reference.
+       ((memq type '(headline inlinetask))
+	(org-match-line org-complex-heading-regexp)
+	(if (and (match-beginning 5)
+		 (>= (point) (match-beginning 5))
+		 (< (point) (match-end 5)))
+	    ;; On tags.
+	    (org-tags-view arg (substring (match-string 5) 0 -1))
+	  ;; Not on tags.
+	  (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
+	    (`(nil . ,_)
+	     (require 'org-attach)
+	     (org-attach-reveal 'if-exists))
+	    (`(,links . ,links-end)
+	     (dolist (link (if (stringp links) (list links) links))
+	       (search-forward link nil links-end)
+	       (goto-char (match-beginning 0))
+	       (org-open-at-point))))))
+       ;; On a footnote reference or at definition's label.
+       ((or (eq type 'footnote-reference)
+	    (and (eq type 'footnote-definition)
+		 (save-excursion
+		   ;; Do not validate action when point is on the
+		   ;; spaces right after the footnote label, in order
+		   ;; to be on par with behavior on links.
+		   (skip-chars-forward " \t")
+		   (let ((begin
+			  (org-element-property :contents-begin context)))
+		     (if begin (< (point) begin)
+		       (= (org-element-property :post-affiliated context)
+			  (line-beginning-position)))))))
+	(org-footnote-action))
+       ;; On a planning line.  Check if we are really on a timestamp.
+       ((and (eq type 'planning)
+	     (org-in-regexp org-ts-regexp-both nil t))
+	(org-follow-timestamp-link))
+       ;; On a clock line, make sure point is on the timestamp
+       ;; before opening it.
+       ((and (eq type 'clock)
+	     value
+	     (>= (point) (org-element-property :begin value))
+	     (<= (point) (org-element-property :end value)))
+	(org-follow-timestamp-link))
+       ((eq type 'src-block) (org-babel-open-src-block-result))
+       ;; Do nothing on white spaces after an object.
+       ((>= (point)
+	    (save-excursion
+	      (goto-char (org-element-property :end context))
+	      (skip-chars-backward " \t")
+	      (point)))
+	(user-error "No link found"))
+       ((eq type 'inline-src-block) (org-babel-open-src-block-result))
+       ((eq type 'timestamp) (org-follow-timestamp-link))
+       ((eq type 'link)
+	(let ((type (org-element-property :type context))
+        ;; NOTE: I changed this part.
+	      (path (org-link-decode (org-element-property :path context))))
+	  ;; Switch back to REFERENCE-BUFFER needed when called in
+	  ;; a temporary buffer through `org-open-link-from-string'.
+	  (with-current-buffer (or reference-buffer (current-buffer))
+	    (cond
+	     ((equal type "file")
+	      (if (string-match "[*?{]" (file-name-nondirectory path))
+		  (dired path)
+		;; Look into `org-link-parameters' in order to find
+		;; a DEDICATED-FUNCTION to open file.  The function
+		;; will be applied on raw link instead of parsed link
+		;; due to the limitation in `org-add-link-type'
+		;; ("open" function called with a single argument).
+		;; If no such function is found, fallback to
+		;; `org-open-file'.
+		(let* ((option (org-element-property :search-option context))
+		       (app (org-element-property :application context))
+		       (dedicated-function
+			(org-link-get-parameter
+			 (if app (concat type "+" app) type)
+			 :follow)))
+		  (if dedicated-function
+		      (funcall dedicated-function
+			       (concat path
+				       (and option (concat "::" option))))
+		    (apply #'org-open-file
+			   path
+			   (cond (arg)
+				 ((equal app "emacs") 'emacs)
+				 ((equal app "sys") 'system))
+			   (cond ((not option) nil)
+				 ((string-match-p "\\`[0-9]+\\'" option)
+				  (list (string-to-number option)))
+				 (t (list nil option))))))))
+	     ((functionp (org-link-get-parameter type :follow))
+	      (funcall (org-link-get-parameter type :follow) path))
+	     ((member type '("coderef" "custom-id" "fuzzy" "radio"))
+	      (unless (run-hook-with-args-until-success
+		       'org-open-link-functions path)
+		(if (not arg) (org-mark-ring-push)
+		  (switch-to-buffer-other-window
+		   (org-get-buffer-for-internal-link (current-buffer))))
+		(let ((destination
+		       (org-with-wide-buffer
+			(if (equal type "radio")
+			    (org-search-radio-target
+			     (org-element-property :path context))
+			  (org-link-search
+			   (pcase type
+			     ("custom-id" (concat "#" path))
+			     ("coderef" (format "(%s)" path))
+			     (_ path))
+			   ;; Prevent fuzzy links from matching
+			   ;; themselves.
+			   (and (equal type "fuzzy")
+				(+ 2 (org-element-property :begin context)))))
+			(point))))
+		  (unless (and (<= (point-min) destination)
+			       (>= (point-max) destination))
+		    (widen))
+		  (goto-char destination))))
+	     (t (browse-url-at-point))))))
+       (t (user-error "No link found")))))
+  (run-hook-with-args 'org-follow-link-hook))
 
 ;;;###autoload
 (defmacro with-current-file (file-name &optional buffer-name &rest form)
@@ -2815,6 +3163,7 @@ If ARG is (4), then execute `durand-update-weblink'."
       (setf cands
             (mapcar (lambda (x) (cons (durand-org-filter-dates (car x)) (cdr x))) cands))
       (setf cands (reverse cands))
+      (message "cands: %s" cands)
       (let ((liste-de-choix
              (let (temp)
                (let* ((sel (durand-choose-list cands nil "Chois un lien de web: ")))

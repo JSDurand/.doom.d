@@ -705,6 +705,16 @@ the query history stack."
   '(mu4e-headers-mode)
   'emacs)
 
+;; advice update function to log something.
+(defun mu4e-update-advice (run-in-background)
+  "Log it after the update."
+  (if run-in-background
+      (message "Update in background finished.")
+    (message "Update finished.")))
+
+(advice-add 'mu4e-update-mail-and-index :after 'mu4e-update-advice)
+
+
 ;; doom for some weird reason does not want to delete mails, but I do.
 
 (setf mu4e-marks
