@@ -722,6 +722,219 @@ Version 2018-06-04"
 
 
 
+;; search french words
+;;;###autoload
+(defun chercher-français (query)
+  "Rechercher un mot dans la liste des mots français dans le fichier wiki.org"
+  (interactive (list (read-string "Question: ")))
+  (let* ((route_du_fichier "~/org/français/français.org")
+         (nom_du_fichier "français.org")
+         (a_tuer (not (get-buffer nom_du_fichier)))
+         (chose (mapconcat #'identity
+                           (org-ql--query route_du_fichier `(and (regexp ,query) (tags "mots"))
+                             :action (lambda ()
+                                       (let ((element (cadr (org-element-headline-parser (line-end-position)))))
+                                         (concat
+                                          (plist-get element :raw-value)
+                                          ": "
+                                          (plist-get element :MEANING)))))
+                           "\n")))
+    (if (and a_tuer (get-buffer nom_du_fichier))
+        (kill-buffer nom_du_fichier))
+    (if (/= (length chose) 0)
+        (with-current-buffer-window "*mots*" nil nil
+                                    (insert chose))
+      (define-word query 'wordreference))))
+
+
+
+;; Rechercher les fichiers pdf
+;;;###autoload
+(defvar pdf-dir-list
+  '("/Users/durand/Downloads/"
+    "/Users/durand/Desktop/Centre/Documents partout"
+    "/Users/durand/Desktop/Centre/Je veux lire/"
+    "/Users/durand/Desktop/Centre/LaTeX temporaire/"
+    "/Users/durand/Desktop/Centre/MaoBaoBao/Autres/PDF/"
+    "/Users/durand/Desktop/Centre/MaoBaoBao/Mao Problems/"
+    "/Users/durand/Desktop/Centre/Mes notes/"
+    "/Users/durand/Desktop/Centre/PDF/"
+    "/Users/durand/Desktop/Centre/Pour thèse/"
+    "/Users/durand/Desktop/Centre/TeX/"
+    "/Users/durand/Desktop/Centre/Œuvres de professeur/"
+    "/Users/durand/Desktop/Centre/方便與智慧無二/"
+    "/Users/durand/Desktop/Centre/Échecs")
+  "La liste des dossiers où je peux chercher les fichiers pdf quand j'ai besoin.")
+
+(defface durand-pdf-dir-face '((t :foreground "orange2"))
+  "Face for directory in durand-pdf-mode")
+
+(defface durand-pdf-nom-face '((t :foreground "SkyBlue1"))
+  "Face for file name in durand-pdf-mode")
+
+;;;###autoload
+(defun durand-modify-pdf-buffer ()
+  "Changer le tampon"
+  (goto-char (point-min))
+  (save-excursion
+    (while (/= (point) (point-max))
+      (put-text-property (point) (line-end-position) 'face 'durand-pdf-nom-face)
+      (forward-line)))
+  (let* ((chemin (buffer-substring-no-properties
+                  (point) (line-end-position)))
+         (dossier (file-name-directory chemin))
+         (nom (file-name-nondirectory chemin))
+         (inhibit-read-only t))
+    (insert (propertize (concat dossier "\n")
+                        'face 'durand-pdf-dir-face
+                        'chemin dossier))
+    (put-text-property (point) (line-end-position) 'display nom)
+    (put-text-property (point) (line-end-position) 'chemin chemin)
+    (save-excursion
+      (while (/= (point) (point-max))
+        (let* ((nouveau-chemin (buffer-substring-no-properties
+                                (point) (line-end-position)))
+               (nouveau-dossier (file-name-directory nouveau-chemin))
+               (nouveau-nom (file-name-nondirectory nouveau-chemin)))
+          (when (not (string-equal nouveau-dossier dossier))
+            (setf dossier nouveau-dossier)
+            (insert (propertize (concat "\n" nouveau-dossier "\n")
+                                'face 'durand-pdf-dir-face
+                                'chemin nouveau-dossier)))
+          (put-text-property (point) (line-end-position) 'display nouveau-nom)
+          (put-text-property (point) (line-end-position) 'chemin nouveau-chemin)
+          (forward-line)))))
+  (goto-char (point-min)))
+
+(define-derived-mode durand-pdf-mode special-mode "Durand PDF"
+  "chercher pdf"
+  (face-remap-add-relative 'default '(:foreground "orange2"))
+  (goto-char (point-min))
+  (let ((inhibit-read-only t))
+    (save-excursion
+      (while (re-search-forward "\\([^p]..$\\|p[^d].$\\|pd[^f]$\\)" nil t)
+        (delete-region (max (1- (line-beginning-position))
+                            (point-min))
+                       (line-end-position))))
+    (durand-modify-pdf-buffer)))
+
+(map! :map durand-pdf-mode-map
+      [?q] 'quit-window
+      [?N] 'forward-line
+      [?n] 'durand-pdf-next-pdf-line
+      [?P] (lambda () (interactive) (forward-line -1))
+      [?p] 'durand-pdf-previous-pdf-line
+      [return] 'durand-pdf-open-pdf
+      [32] 'durand-pdf-open-or-scroll-up
+      [backspace] 'durand-pdf-open-or-scroll-down
+      [?o] 'kill-other-buffer-window
+      [?k] 'kill-current-buffer)
+
+;;;###autoload
+(defun durand-pdf-open-pdf ()
+  "Open pdf or directory under point"
+  (interactive)
+  (let ((inhibit-read-only t)
+        (chemin (get-text-property (point) 'chemin)))
+    (if (and chemin (file-readable-p chemin))
+        (find-file chemin)
+      (message "Command not allowed on this line"))))
+
+;;;###autoload
+(defun durand-pdf-open-or-scroll-up ()
+  "Open pdf or directory under point in another window"
+  (interactive)
+  (let* ((inhibit-read-only t)
+         (chemin (get-text-property (point) 'chemin))
+         (nom (file-name-nondirectory chemin)))
+    (cond
+     ((get-buffer nom)
+      (save-selected-window
+        (other-window 1)
+        (pdf-view-scroll-up-or-next-page)))
+     ((and chemin (file-readable-p chemin))
+      (save-selected-window
+        (find-file-other-window chemin)))
+     (t
+      (message "Command not allowed on this line")))))
+
+;;;###autoload
+(defun durand-pdf-open-or-scroll-down ()
+  "Scroll down pdf"
+  (interactive)
+  (let* ((inhibit-read-only t)
+         (chemin (get-text-property (point) 'chemin))
+         (nom (file-name-nondirectory chemin)))
+    (cond
+     ((get-buffer nom)
+      (save-selected-window
+        (other-window 1)
+        (pdf-view-scroll-down-or-previous-page)))
+     ((and chemin (file-readable-p chemin))
+      (save-selected-window
+        (find-file-other-window chemin)))
+     (t
+      (message "Command not allowed on this line")))))
+
+;;;###autoload
+(defun durand-pdf-next-pdf-line ()
+  "Next PDF line"
+  (interactive)
+  (let ((orig (point)))
+    (end-of-line)
+    (if (re-search-forward ".pdf$" nil t)
+        (beginning-of-line)
+      (goto-char orig)
+      (message "No next pdf line"))))
+
+;;;###autoload
+(defun durand-pdf-previous-pdf-line ()
+  "Next PDF line"
+  (interactive)
+  (let ((orig (point)))
+    (beginning-of-line)
+    (if (re-search-forward ".pdf$" nil t -1)
+        (beginning-of-line)
+      (goto-char orig)
+      (message "No previous pdf line"))))
+
+;;;###autoload
+(defun durand-chercher-pdf (nom)
+  "Chercher les fichers pdf par NOM"
+  (interactive (list (read-string "Chercher: ")))
+  (let ((chercher-buffer "*chercher pdf*")
+        (nom (concat "*" nom "*")))
+    (when (get-buffer chercher-buffer)
+      (kill-buffer chercher-buffer))
+    (switch-to-buffer chercher-buffer)
+    ;; (pop-to-buffer-same-window chercher-buffer)
+    ;; (delete-other-windows)
+    (delete-region (point-min) (point-max))
+    (dolist (dir pdf-dir-list)
+      (let ((pro (make-process
+                  :name "chercher"
+                  :buffer chercher-buffer
+                  :sentinel 'ignore
+                  :command `("rg" "--files" "--no-messages" "--follow" "--iglob" ,nom ,dir))))
+        (accept-process-output pro)))
+    (durand-pdf-mode))
+  (message "Chercher %s" nom))
+
+;; ;; pop up rule for pdf buffer
+;; ;; I prefer full-screen view of search results.
+;; (set-popup-rule! "\\*chercher pdf\\*"
+;;   :quit t
+;;   :modeline nil
+;;   :size 0.5
+;;   :ttl 5
+;;   :select t)
+
+(set-evil-initial-state!
+  '(durand-pdf-mode)
+  'emacs)
+
+
+
 ;; editing - copying and cutting
 
 ;;;###autoload
@@ -1940,7 +2153,7 @@ If ARG is non-nil, then turn off mu4e as well if necessary."
 ;; (define-key general-spc-map [? ] 'insert-hydra/body)
 ;; (define-key general-spc-map [?\d] 'insert-hydra/body)
 ;; (define-key general-spc-map [?\r] general-spc-ret-map)
-                                             
+
 ;; (define-key general-spc-ret-map [?w] 'delete-window)
 ;; (define-key general-spc-ret-map [?d] (lambda ()
 ;;                                        "forward delete word"

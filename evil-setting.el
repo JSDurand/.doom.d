@@ -272,7 +272,7 @@ With ARG, open the index file even not in `js2-mode'."
   [?\d] 'back-to-indentation
   [?t] (lambda () (interactive) (recenter 0))
   [?z] (lambda () (interactive) (recenter (/ (window-body-height) 2)))
-  [?b] (lambda () (interactive) (recenter -3))
+  [?b] (lambda () (interactive) (recenter -1))
   [?£] 'org-retreat)
 
 ;; motion map
@@ -374,6 +374,12 @@ With ARG, open the index file even not in `js2-mode'."
                   (and (null display-line-numbers)
                        'relative)))
   [?\à] 'durand-beginning-of-line-or-block)
+
+;; outline mode interferes with my key bindings
+(map! :map outline-mode-map
+      :n "z" durand-evil-dollar-map
+      :map evil-org-mode-map
+      :m "gh" 'evil-goto-line)
 
 ;; universal argument mode
 (define-key universal-argument-map [?\(] 'universal-argument-more)

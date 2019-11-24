@@ -17,22 +17,31 @@
           (t . ivy--regex-fuzzy))))
 
 ;; minibuffer color customisation
-(set-face-foreground 'minibuffer-prompt "goldenrod2")
-(set-face-background 'minibuffer-prompt "chocolate4")
+;; (set-face-foreground 'minibuffer-prompt "#010101")
+;; (set-face-background 'minibuffer-prompt "#fafafa")
+
+;; (set-face-foreground 'minibuffer-prompt "goldenrod2")
+;; (set-face-background 'minibuffer-prompt "chocolate4")
 
 (when (boundp 'ivy-re-builders-alist)
   (add-to-list 'ivy-re-builders-alist (cons 'swiper-isearch 'ivy--regex-ignore-order)))
 
 ;; format function
 
+(defface durand-arrow-face
+  '((t
+     (:inherit minibuffer-prompt :height 300)))
+  "Face for the arrow used by `durand-ivy-format-function-arrow'.")
+
 ;;;###autoload
 (defun durand-ivy-format-function-arrow (cands)
-  "Transform CAND-PAIRS into a string for minibuffer using \"->\" instead of \">\"."
+  "Transform CANDS into a string for minibuffer using \"☸\" instead of \">\"."
   (ivy--format-function-generic
    (lambda (str)
      (concat (propertize "☸ "
                          'face
-                         '(:foreground "gold" :height 300))
+                         'durand-arrow-face)
+             ;; '(:foreground "gold" :height 300))
              (ivy--add-face str 'ivy-current-match)))
    (lambda (str)
      (concat "   " str))

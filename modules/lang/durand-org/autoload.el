@@ -1,86 +1,3 @@
- ;; package --- Summary: super-org.el
-
-;; some custom org functionalities upon which I rely heavily.
-
-;; (use-package org
-;;   :ensure t
-;;   :defer t
-;;   :config
-;;   (require 'org))
-;; use amsfont in latex preview
-(setf org-latex-packages-alist '(("" "amsfonts" t)))
-;; Necessary since org-mode 9.2
-(ignore-errors (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5)))
-(require 'org-tempo)
-(add-to-list 'org-structure-template-alist '("g" . "src durand-greek"))
-(setq org-todo-keywords '((sequence "TODO(t)" "START(s)" "WORKING(w)" "HARD-WORKING(h)" "ALMOST(a)" "|" "DONE(d)")
-                          (sequence "TO-THINK(c)" "PENDING(p)" "HARD(r)" "IMPOSSIBLE(i)" "|" "SOLVED(v)")))
-(setq org-agenda-files '("~/org/agenda.org" "~/org/notes.org" "~/org/aujourdhui.org"))
-;; (setq org-log-state-notes-insert-after-drawers nil)
-(setq org-log-into-drawer t)
-(setf org-hide-emphasis-markers t)
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(org-babel-load-file (expand-file-name "tex.org" doom-private-dir))
-(define-key org-mode-map [?\ù] abbrev-prefix-map)
-(define-key org-mode-map [?\§] (lambda () (interactive) (insert "\\")))
-;; (add-hook 'org-archive-hook 'org-archive-kill-archive-file)
-(require 'org-agenda)
-(use-package! org-super-agenda)
-(define-key org-mode-map [?\C-c tab] 'durand-forward-link)
-(define-key org-mode-map [?\C-c \S-tab] 'find-previous-link-in-buffer)
-(define-key org-mode-map [f8] 'org-account-prefix-map)
-(define-key org-mode-map [?\C-c ?\C-j] 'counsel-org-goto)
-(define-key org-agenda-mode-map [?\M-n] 'org-super-agenda-next-group)
-(define-key org-agenda-mode-map [?\M-p] 'org-super-agenda-previous-group)
-(define-key org-agenda-mode-map [f8] 'durand-org-account-prefix-map)
-(define-key org-agenda-mode-map [?c] 'org-agenda)
-(define-key org-agenda-mode-map [?V] 'orgy-view)
-(define-key org-agenda-mode-map [?x] 'durand-agenda-exit)
-(define-key org-agenda-mode-map [?\)] 'org-agenda-next-block)
-(define-key org-agenda-mode-map [?-] 'org-agenda-previous-block)
-(define-key org-agenda-mode-map [?$] 'org-agenda-go-to-block)
-(define-key org-agenda-mode-map [?j] 'org-agenda-jump-to-item)
-(define-key org-agenda-mode-map [?\M-j] 'org-agenda-open-novels)
-(define-key org-agenda-mode-map [?\H-b] 'org-open-bookmarks)
-(define-key org-agenda-mode-map [?\C-j] 'org-agenda-goto-date)
-(define-key org-agenda-mode-map [?n] 'org-agenda-next-item)
-(define-key org-agenda-mode-map [?N] 'org-agenda-next-line)
-(define-key org-agenda-mode-map [?p] 'org-agenda-previous-item)
-(define-key org-agenda-mode-map [?P] 'org-agenda-previous-line)
-(define-key org-agenda-mode-map (kbd "<backspace>") 'org-agenda-first-block)
-(define-key org-agenda-mode-map (kbd "à") 'org-agenda-last-block)
-(define-key org-agenda-mode-map (kbd "s-)") 'org-super-agenda-next-group)
-(define-key org-agenda-mode-map (kbd "s-(") 'org-super-agenda-previous-group)
-(define-key org-agenda-mode-map (kbd "s--") 'org-super-agenda-previous-group)
-(define-key org-agenda-mode-map (kbd "L") 'org-agenda-update-link)
-(define-key org-agenda-mode-map (kbd "<s-return>") '(lambda ()
-                                                      "Delete other windows"
-                                                      (interactive)
-                                                      (org-agenda-open-link)
-                                                      (delete-other-windows)))
-(define-key org-super-agenda-header-map [?j] 'org-agenda-jump-to-item)
-(define-key org-super-agenda-header-map [?\)] 'org-agenda-next-block)
-(define-key org-super-agenda-header-map [?-] 'org-agenda-previous-block)
-(define-key org-super-agenda-header-map (kbd "s-)") 'org-super-agenda-next-group)
-(define-key org-super-agenda-header-map (kbd "s-(") 'org-super-agenda-previous-group)
-(define-key org-super-agenda-header-map (kbd "s--") 'org-super-agenda-previous-group)
-(define-key org-super-agenda-header-map [f8] 'durand-org-account-prefix-map)
-(define-key org-super-agenda-header-map [?\M-n] 'org-super-agenda-next-group)
-(define-key org-super-agenda-header-map [?\M-p] 'org-super-agenda-previous-group)
-(define-key org-super-agenda-header-map [?n] 'org-agenda-next-item)
-(define-key org-super-agenda-header-map [?N] 'org-agenda-next-line)
-(define-key org-super-agenda-header-map [?p] 'org-agenda-previous-item)
-(define-key org-super-agenda-header-map [?P] 'org-agenda-previous-line)
-(advice-add 'org-edit-special :after '(lambda (&optional orig-fun)
-                                        "Make it full frame"
-                                        (delete-other-windows)))
-(set-face-attribute 'org-block nil :background "gray5" :foreground "DarkOrange1")
-(set-face-attribute 'bold nil :foreground "OrangeRed1")
-(set-face-attribute 'org-verbatim nil :background "gray1")
-(set-face-attribute 'italic nil :foreground "light blue")
-
 ;;;###autoload
 (defun durand-redo-agenda ()
   "Redo and then go to the first block."
@@ -175,28 +92,6 @@ With prefix ARG, go forward that many times the current span."
         (org-agenda-find-same-or-today-or-agenda)))
      (t (error "Cannot find today")))))
 
-(advice-add 'org-agenda-later :around 'durand-agenda-advice)
-(advice-add 'org-agenda-goto-today :around 'durand-agenda-advice-for-today)
-
-(map! :map org-agenda-mode-map [?g] #'durand-redo-agenda)
-
-
-;; (use-package org-habit
-;;   :config
-;;   (setq org-habit-show-habits-only-for-today t)
-;;   (setq org-habit-show-all-today t)
-;;   (setq org-habit-graph-column 55)
-;;   (setq org-habit-today-glyph ?|))
-
-(map! :map evil-org-mode-map :n (kbd "RET") 'durand-open-link)
-(map! :map evil-org-mode-map :n [return] 'durand-open-link)
-
-(use-package org
-  :ensure org-plus-contrib)
-
-;; org-drill
-;; (require 'org-drill)
-
 ;;;###autoload
 (defun durand-agenda-exit ()
   "Execute `general-hydra/body' after `org-agenda-exit'.
@@ -204,105 +99,12 @@ Don't bind it to a key in `general-hydra/heads'"
   (interactive)
   (org-agenda-exit))
 
-;; the original org-drill contains invalid calls to org-map-entries
-;;;###autoload
-;; (defun org-drill-hide-subheadings-if (test)
-;;   "TEST is a function taking no arguments. TEST will be called for each
-;; of the immediate subheadings of the current drill item, with the point
-;; on the relevant subheading. TEST should return nil if the subheading is
-;; to be revealed, non-nil if it is to be hidden.
-;; Returns a list containing the position of each immediate subheading of
-;; the current topic."
-;;   (let ((drill-entry-level (org-current-level))
-;;         (drill-sections nil))
-;;     (org-show-subtree)
-;;     (save-excursion
-;;       (org-map-entries
-;;        (lambda ()
-;;          (when (and (not (org-invisible-p))
-;;                     (> (org-current-level) drill-entry-level))
-;;            (when (or (/= (org-current-level) (1+ drill-entry-level))
-;;                         (funcall test))
-;;              (hide-subtree))
-;;            (push (point) drill-sections)))
-;;        nil 'tree))
-;;     (reverse drill-sections)))
-
-;; I only need basic functionality for french words here.
-;;;###autoload
-;; (defun org-drill-present-français ()
-;;   "Hide the entry basically"
-;;   (interactive)
-;;   (outline-hide-subtree)
-;;   (prog1 (org-drill-presentation-prompt)
-;;     (org-drill-hide-subheadings-if 'org-drill-entry-p)))
-
-;;;###autoload
-;; (defun org-drill-present-français-answer (reschedule-fn)
-;;   "Show the entry basically"
-;;   (interactive)
-;;   (outline-show-subtree)
-;;   (funcall reschedule-fn))
-
-;; (add-to-list 'org-drill-card-type-alist
-;;              '("français" org-drill-present-français org-drill-present-français-answer))
-
-;; delete scheduling information after drilling
-;; (defun org-remove-schedule (&rest choses)
-;;   "remove scheduling information"
-;;   (interactive)
-;;   (let ((inhibit-modification-hooks t)
-;;         (inhibit-message t))
-;;     (org-map-entries
-;;      (lambda () (org--deadline-or-schedule '(4) 'scheduled nil))
-;;      "drill"))
-;;   (ignore-errors (save-buffer 0)))
-
-;; (advice-add 'org-drill :after 'org-remove-schedule)
-
-;; This can cause org mode to fontify todo items with priority cookies
-;; wrong.
-;; (setq org-drill-use-visible-cloze-face-p t)
-
-;; Do a recenter afterwards
-;; (advice-remove 'org-agenda-next-blo 'recenter-to-top)
-;; (advice-remove 'org-agenda-previous- 'recenter-to-top)
-
-;; do delete-other-windows
-(advice-add 'org-agenda :after '(lambda (&rest params)
-                                  "Full frame"
-                                  (delete-other-windows)))
-
 ;; Recenter to top
 ;;;###autoload
 (defun recenter-to-top (&rest some)
   "Recenter to top"
   (interactive)
   (recenter 0))
-
-(setq org-use-speed-commands t)
-(setq org-speed-commands-user '(("j" . counsel-org-goto)
-				("P" . org-set-property)
-				("a" . org-toggle-archive-tag)
-				("U" . undo-tree-undo)
-				("k" . (kill-buffer (current-buffer)))
-				("S" . org-schedule)
-				("v" . orgy-view)
-                                ("§" . durand-org-hydra/body)))
-
-;; link support
-
-;; Record the link types that I know until now.
-(defvar durand-link-types '(mu4e-url shr-url button htmlize-link)
-  "Link types that I know until now.")
-
-(put (intern "durand-forward-link") 'function-documentation (concat
-                                                             "Forward to "
-                                                             (mapconcat #'prin1-to-string
-                                                                        (reverse (cdr (reverse durand-link-types)))
-                                                                        ", ")
-                                                             (format ", or %s" (-last #'identity durand-link-types))
-                                                             " changes."))
 
 ;; Find the next link
 ;;;###autoload
@@ -343,7 +145,7 @@ Don't bind it to a key in `general-hydra/heads'"
         (goto-char final-change)
       (message "No links found!"))))
 
-
+;;;###autoload
 (defun orgy-view ()
   "Recenter to top; if already there, return to previous position"
   (interactive)
@@ -353,6 +155,7 @@ Don't bind it to a key in `general-hydra/heads'"
       (put 'orgy-recenter :line window-line)
       (recenter 0))))
 
+;;;###autoload
 (defun count-visible-lines (beg end)
   "Count visible lines between BEG and END"
   (interactive)
@@ -363,48 +166,6 @@ Don't bind it to a key in `general-hydra/heads'"
       (setq line-num (1+ line-num)))
     line-num))
 
-(defhydra durand-org-hydra (org-mode-map "<f8>" :color blue)
-  "
-  Org speed key hydra
-  "
-  ("o" delete-other-windows "s-w")
-  ("I" org-insert-todo-heading-respect-content "C-S-ret"))
-
-;; (defun org-archive-kill-archive-file ()
-;;   "Kill the archive file after archiving"
-;;   (interactive)
-;;   (with-current-buffer (file-name-nondirectory (org-extract-archive-file))
-;;     (save-buffer 0)
-;;     (kill-buffer)))
-
-(set-face-attribute 'org-ellipsis nil :foreground nil)
-
-(setq org-ellipsis " ⤵")
-
-;; Not needed for now
-
-;;;###autoload
-;; (defun org-summary-todo (n-done n-not-done)
-;;   "Switch entry to DONE when all subentries are done, to TODO otherwise."
-;;   (org-todo (if (= n-not-done 0) "DONE" "TODO")))
-
-;;;###autoload
-;; (defun durand-org-repeat-item ()
-;;   "Move the time of the current item forward one day"
-;;   (interactive)
-;;   (when (string= org-state "REPEATED")
-;;     (let* ((appointment (org-entry-get (point) "APPOINTMENT"))
-;; 	   (appointment-time (org-parse-time-string appointment))
-;; 	   (appointment-year (nth 5 appointment-time))
-;; 	   (appointment-month (nth 4 appointment-time))
-;; 	   (appointment-day (nth 3 appointment-time))
-;; 	   (new-appointment (format-time-string (org-time-stamp-format)
-;; 						(encode-time 0 0 0
-;; 							     (1+ appointment-day)
-;; 							     appointment-month
-;; 							     appointment-year))))
-;;       (org-set-property "APPOINTMENT" new-appointment))))
-
 ;;;###autoload
 (defun durand-org-back-to-repeat ()
   (interactive)
@@ -413,73 +174,18 @@ Don't bind it to a key in `general-hydra/heads'"
     (org-add-log-setup 'state "REPEATED" "TO-REPEAT" 'time)
     (org-todo "TO-REPEAT")))
 
-;; (remove-hook 'org-after-todo-statistics-hook 'org-summary-todo)
-(add-hook 'org-after-todo-state-change-hook 'durand-org-back-to-repeat)
-
-(setq org-refile-targets nil)
-
-;; org-capture and org-protocol
-(require 'org-capture)
-(require 'org-protocol)
-
-;; The original org-protocol-convert handles youtube links wrong
-(setq org-capture-templates
-      '(("m" "Account records" entry
-	 (file+datetree "~/org/account/account.org")
-	 "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %^{COST|0}\n  :FROM: %^{FROM|Cash}\n  :RECORD_TIME: %U\n  :END:\n  %?\n\n  - "
-	 :jump-to-captured t)
-	("d" "Record Diaries" entry
-	 (file+datetree "~/org/diary.org")
-	 "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
-	 :jump-to-captured t)
-	("w" "Withdrawal records" entry
-	 (file+headline "~/org/wiki.org" "Money Withdrawal")
-	 "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
-	 :kill-buffer t)
-	("l" "Store links" entry
-	 (file+headline "~/org/notes.org" "Links")
-	 "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
-        ("L" "for storing webpages" entry
-         (file+headline "~/org/notes.org" "Links")
-         "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
-         :empty-lines 1
-         :kill-buffer t
-         :immediate-finish t)
-	("t" "TODO" entry
-	 (file "~/org/aujourdhui.org")
-	 "* TODO %? %^{Date to do:}t\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
-	 :kill-buffer t)
-	("b" "Blog posts" entry
-	 (file+headline "~/org/notes.org" "Blog posts")
-	 "* %? %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%i\n")
-	("a" "Abstractions" entry
-	 (file+headline "~/org/wiki.org" "Abstractions")
-	 "* ABSTRACT %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n")
-	("A" "Agenda" entry
-	 (file+headline "~/org/agenda.org" "Agenda")
-	 "* TODO %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :DURATION: %^{Date: }t\n  :END:\n\n")
-	("y" "YiFu" entry
-	 (file+headline "~/org/wiki.org" "Yi Fu Tips")
-	 "* MEMO %^{word}\n  :PROPERTIES:\n  :STORY: %\\2\n  :MEANING: %\\3\n  :END:\n** Yi Fu story\n   %^{story}\n** Meaning\n   %^{meaning}"
-	 :kill-buffer t
-	 :immediate-finish t)
-        ("c" "Chansons" entry
-	 (file+headline "~/org/wiki.org" "Liste de Chansons")
-	 "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: %A\n  :END:\n  %?"
-	 :jump-to-captured t)
-        ("f" "français" entry
-	 (file+headline "~/org/français/français.org" "Liste de mots français")
-	 "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
-	 :jump-to-captured t)))
-
-
- (defun org-protocol-convert-query-to-plist (query)
+;;;###autoload
+(defun org-protocol-convert-query-to-plist (query)
   "Convert QUERY key=value pairs in the URL to a property list."
   (when query
-    (apply 'append (mapcar (lambda (x)
-			     (let ((c (split-string x "=")))
-			       (list (intern (concat ":" (car c))) (mapconcat #'identity (cdr c) "="))))
-			   (split-string query "&")))))
+    (apply 'append
+           (mapcar
+            (lambda (x)
+              (let ((c (split-string x "=")))
+                (list
+                 (intern (concat ":" (car c)))
+                 (mapconcat #'identity (cdr c) "="))))
+            (split-string query "&")))))
 
 ;; filter out the title
 ;;;###autoload
@@ -530,16 +236,6 @@ Don't bind it to a key in `general-hydra/heads'"
      (t
       ":web_link:"))))
 
-;; Save the link in different locations based on the URL
-;;;###autoload
-;; (defun org-handle-link ()
-;;   "Save the link in different locations based on the URL"
-;;   (let ((link (plist-get org-store-link-plist :link)))
-;;     (cond
-;;      ((string-match "https?://www.youtube.com" link)
-;;       (find-file "~/org/notes.org")
-;;       (search-forward "Links")))))
-
 ;; automatically update account when capturing
 ;;;###autoload
 (defun durand-capture-update-account ()
@@ -550,210 +246,6 @@ Don't bind it to a key in `general-hydra/heads'"
       (org-update-account)
       (ignore-errors (save-buffer 0))
       (durand-show-account-report))))
-
-(add-hook 'org-capture-after-finalize-hook 'durand-capture-update-account)
-
-;; offer completion of shops
-;; I think I am better off using a predefined list...
-(setq durand-frequent-shops '("新永泉"
-                              "Four directions"
-                              "Kebuke"
-                              "Family mart"
-                              "Sell Tzu Mo Noodle"
-                              "Big pot"))
-;; (defun org-complete-shop ()
-;;   "Offer completion of shops."
-;;   (interactive)
-;;   (insert (ivy-read "Choose a shop" durand-frequent-shops)))
-
-(setq account-history '())
-
-(defun org-complete-shop ()
-  "Offer completion of shops."
-  (interactive)
-  (if (s-suffix? "account.org" (buffer-name))
-      (let (choice)
-        (save-excursion
-          (outline-previous-heading)
-          ;; ensure level 4
-          (if (= (car (org-heading-components)) 4)
-              (let ((res durand-frequent-shops))
-                ;; widen so that this can work in capture buffer
-                (save-restriction
-                  (widen)
-                  (org-map-entries
-                   (lambda ()
-                     (let ((level (car (org-heading-components)))
-                           contents)
-                       (when (= level 4)
-                         (let ((title (save-excursion
-                                        (org-end-of-meta-data)
-                                        (org-skip-whitespace)
-                                        (buffer-substring-no-properties (point) (line-end-position)))))
-                           (push title res)))))))
-                (setq res (remove nil res))
-                (setq res (cdr res))
-                (setq res (nreverse res))
-                (setq res (cl-remove-duplicates
-                           res
-                           :test (lambda (x y)
-                                   (and x y
-                                        (string-equal
-                                         (upcase x)
-                                         (upcase y))))))
-                (setq res (nreverse res))
-                (setq choice (ivy-read "Choose one possible shop: " res
-                                       :preselect "新永泉"
-                                       :history account-history)))
-            (user-error "Not at a heading of level 4!")))
-        (insert choice))
-    (user-error "This is not the account file, which is \"/Users/durand/org/account/account.org\"")))
-
-
-;; offer completion for items in the same shop
-(defun org-complete-item-same-shop ()
-  "Offer completion for items in the same shop."
-  (interactive)
-  (if (s-suffix? "account.org" (buffer-name))
-      (let (choice)
-        (save-excursion
-          (outline-previous-heading)
-          ;; ensure level 4
-          (if (= (car (org-heading-components)) 4)
-              (let ((orig-title (save-excursion
-                                  (org-end-of-meta-data)
-                                  (org-skip-whitespace)
-                                  (thing-at-point 'word)))
-                    res)
-                ;; widen so that this can work in capture buffer
-                (save-restriction
-                  (widen)
-                  (org-map-entries
-                   (lambda ()
-                     (let ((level (car (org-heading-components)))
-                           contents)
-                       (when (= level 4)
-                         (let ((title (save-excursion
-                                        (org-end-of-meta-data)
-                                        (org-skip-whitespace)
-                                        (thing-at-point 'word)))
-                               (limite (save-excursion
-                                         (outline-next-heading)
-                                         (point))))
-                           (when (string-equal
-                                  (and title (upcase title))
-                                  (and orig-title (upcase orig-title)))
-                             ;; (push (number-to-string (point)) contents)
-                             ;; (push (number-to-string limite) contents)
-                             (save-excursion
-                               (while (search-forward "- " limite t)
-                                 (push (buffer-substring-no-properties
-                                        (point)
-                                        (line-end-position))
-                                       contents)))
-                             (setq res (append res contents)))))))))
-                (setq res (nreverse
-                           (cl-remove-duplicates
-                            res
-                            :test (lambda (x y)
-                                    (string-equal (upcase x) (upcase y))))))
-                (setq choice (ivy-read "Choose one possible item" res)))
-            (user-error "Not at a heading of level 4!")))
-        (insert choice))
-    (user-error "This is not the account file, which is \"/Users/durand/org/account/account.org\"")))
-
-;; smart completion
-;;;###autoload
-(defun org-smart-complete-item-or-shop-or-jump-to-next-item ()
-  "When after \"- \" then complete item; otherwise complete shop"
-  (interactive)
-  (cond
-   ((looking-back "- " (- (point) 2))
-    (org-complete-item-same-shop))
-   ((looking-back "^\\s-+" (line-beginning-position))
-    (org-complete-shop))
-   (t
-    (org-account-jump-to-next-item))))
-
-;; jump to next item
-;;;###autoload
-(defun org-account-jump-to-next-item ()
-  "Jump to next item"
-  (interactive)
-  (end-of-line)
-  (if (search-forward "-" nil t)
-      (insert " ")
-    (insert "\n")
-    (indent-relative)
-    (insert "- ")))
-
-;; produce a report of accounting information
-
-;;;###autoload
-;; (defvar durand-account-info nil "An alist to hold the information for separate shops")
-
-;; gather information
-
-;;;###autoload
-(defun durand-collect-shop-infos ()
-  "Return relevant information from the heading."
-  (when (= (car (org-heading-components)) 4)
-    ;; It is possible to be called inside `org-map-entries'.
-    (let* ((date-string (if (save-excursion
-                              (outline-up-heading 1)
-                              (re-search-forward org-date-tree-headline-regexp (line-end-position) t))
-                            (match-string-no-properties 1)
-                          (user-error "No matching date found!")))
-           (title
-            (save-excursion
-              (org-end-of-meta-data)
-              (org-skip-whitespace)
-              (buffer-substring-no-properties (point) (line-end-position))))
-           (cost (org-entry-get (point) "cost"))
-           (from-string (org-entry-get (point) "from"))
-           (from (when from-string
-                   (let ((ori (split-string from-string "\\( \\|:\\)"))
-                         res)
-                     (dolist (ele ori)
-                       (unless (numberp (read ele))
-                         (push ele res)))
-                     (setf res (nreverse res))
-                     (dotimes (i (length ori) res)
-                       (when (numberp (read (nth i ori)))
-                         (if (= i 0)
-                             (user-error "The first element of FROM cannot be a number!")
-                           (setf res (remove (nth (1- i) ori) res)
-                                 res (append res
-                                             (list (cons (nth (1- i) ori)
-                                                         (read (nth i ori))))))))))))
-           (balanced-from (when from-string
-                            (let (temp ave (cur 0))
-                              (dolist (ele from)
-                                (cond
-                                 ((consp ele)
-                                  (setf cur (+ cur (cdr ele))))
-                                 ((stringp ele)
-                                  (push ele temp))
-                                 (t
-                                  (user-error "ELE is strange: %s" ele))))
-                              (setf ave (/ (- (read cost) cur) (float (length temp))))
-                              (dolist (ele temp from)
-                                (setf from (remove ele from)
-                                      from (append from
-                                                   (list (cons ele ave)))))))))
-      (dolist (ele balanced-from balanced-from)
-        (setf balanced-from (remove ele balanced-from)
-              balanced-from (push (cons (car ele)
-                                        (- (cdr ele)))
-                                  balanced-from)))
-      (list date-string title cost balanced-from))))
-
-;; report
-
-;;;###autoload
-(defvar durand-account-report-period-str "LAST DAY"
-  "The string to show in report buffer.
-This should be setted by the PERIOD-FUNC argument.")
 
 ;;;###autoload
 (defun durand-show-account-report (&optional period-func report-mode sum-type exclude-type)
@@ -1040,20 +532,6 @@ Press \\[durand-view-last-day] to view the last day;
 \\[durand-view-last-year] to view the last year;
 \\[durand-view-last-custom] to specify a custom continuous range.")
 
-(define-key account-report-mode-map [?d] #'durand-view-last-day)
-(define-key account-report-mode-map [?w] #'durand-view-last-week)
-(define-key account-report-mode-map [?m] #'durand-view-last-month)
-(define-key account-report-mode-map [?y] #'durand-view-last-year)
-(define-key account-report-mode-map [?c] #'durand-view-last-custom)
-(define-key account-report-mode-map [?s] #'durand-view-include)
-(define-key account-report-mode-map [?e] #'durand-view-exclude)
-(define-key account-report-mode-map [?r] #'durand-view-report-mode)
-(define-key account-report-mode-map [?j] #'durand-view-go-to-account-day)
-(define-key account-report-mode-map [?n] #'durand-view-go-to-next-day)
-(define-key account-report-mode-map [?p] #'durand-view-go-to-previous-day)
-(define-key account-report-mode-map [?v] #'durand-view-entry)
-(define-key account-report-mode-map [?x] #'durand-kill-buffer)
-
 ;;;###autoload
 (defun durand-view-go-to-next-day (&optional arg)
   "Go to the next ARG day."
@@ -1099,316 +577,13 @@ Press \\[durand-view-last-day] to view the last day;
     (user-error "No date specified here!")))
   (select-window (get-buffer-window "*ACCOUNT REPORT*")))
 
-;; define a capture minor mode for this purpose
-
 ;;;###autoload
-(setq account-mode-map (make-sparse-keymap))
-
-;;;###autoload
-(define-minor-mode account-mode "For completing in capturing accounts"
-  nil
-  "ACCOUNT"
-  account-mode-map)
-
-(add-hook 'org-capture-mode-hook (lambda ()
-                                   "Activate account minor mode if in capturing accounts"
-                                   (when (s-suffix? "account.org" (buffer-name))
-                                     (account-mode))))
-
-(define-key account-mode-map [tab] 'org-smart-complete-item-or-shop-or-jump-to-next-item)
-;; (define-key account-mode-map (vector ?<) 'org-account-jump-to-next-item)
-;; (define-key account-mode-map (vector ?\C-c ?x) 'org-complete-item-same-shop)
-
-;; current money
-;; (defvar durand-current-money 2215)
-
-;; display current money
-;;;###autoload
-;; (defun durand-display-money ()
-;;   "Display the current amount of money in the wallet"
-;;   (interactive)
-;;   (message "NTD %d" durand-current-money))
-
-;; update current money
-;; it turns out quite weird...
-;;;###autoload
-;; (defun durand-update-money ()
-;;   "Update the current amount of money according to the record in wiki.org"
-;;   (interactive)
-;;   (with-current-buffer (or (get-buffer "wiki.org")
-;; 			   (find-file "~/org/wiki.org"))
-;;     (search-forward "** current money")
-;;     (beginning-of-line)
-;;     (let ((cur (org-entry-get (point) "CURRENT_MONEY"))
-;; 	  (last-date (org-parse-time-string (org-entry-get (point) "LAST_UPDATE"))))
-;;       (search-forward "** Money Withdrawal")
-;;       (beginning-of-line)
-;;       (let ((lim (save-excursion
-;; 		   (outline-next-heading)
-;; 		   (point)))
-;; 	    (re "\\*\\*\\* WITHDRAW .* \\([[:alnum:]]+\\) .*\\(<.*>\\).*$"))
-;; 	(while (re-search-forward re lim t)
-;; 	  (when (time-less-p
-;; 		 (apply 'encode-time last-date)
-;; 		 (apply 'encode-time (org-parse-time-string (match-string 2))))))))))
-
-
-(setq org-agenda-use-time-grid nil)
-					; The time grid in agenda view is a little annoying
-(setq org-agenda-start-with-follow-mode nil)
-(setq org-agenda-start-with-log-mode nil)
-(setq org-global-properties '((Effort_ALL . "0 0:10 0:20 0:30 0:40 0:50 1:00 1:30 2:00")))
-(setq org-columns-default-format "%40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM %PRIORITY")
-;; (remove-hook 'org-agenda-finalize-hook (lambda ()
-;; 				      (let ((buffer-read-only nil))
-;; 					(put-text-property (point-min) (point-max)
-;; 							   'keymap 'org-agenda-mode-map)
-;; 					(put-text-property (point-min) (point-max)
-;; 							   'local-map 'org-agenda-mode-map))))
-
-(use-package! org-super-agenda
-  :after org-agenda
-  :init
-  (setf org-agenda-start-day "+0d")
-  (setf org-agenda-custom-commands
-        '(("o" "Custom"
-           ((agenda ""
-                    ((org-super-agenda-groups
-                      '((:name "Progress today"
-                               :log t
-                               :order -1)
-                        (:name "Morning Tasks"
-                               :log t
-                               :tag "morning"
-                               :order 1)
-                        (:name "Afternoon Taks"
-                               :log t
-                               :tag "afternoon"
-                               :order 2)
-                        (:name "Night Taks"
-                               :log t
-                               :tag "night"
-                               :order 3)
-                        (:name "Deadlines" :deadline t)
-                        (:name "Health"
-                               :tag "santé"
-                               :log t
-                               :order 5)
-                        (:name "MATH"
-                               :tag "math"
-                               :order -1)
-                        (:name "Très Important"
-                               :priority "A"
-                               :order -1)
-                        (:name "Scheduled"
-                               :and (:scheduled t :not (:priority "A"))
-                               :order 5
-                               :log t)))
-                     (org-agenda-span 'day)
-                     (org-agenda-sorting-strategy '(priority-down time-up))))
-            (tags "plan"
-                  ((org-agenda-files '("~/org/plan.org"))
-                   (org-super-agenda-groups
-                    '((:name "Début" :todo "DÉBUT")
-                      (:name "Essaiyer" :todo "ESSAIYER")
-                      (:name "Progresser" :todo "PROGRESSER")
-                      (:name "Complété" :todo "COMPLÉTÉ")))
-                   (org-agenda-overriding-header "PLAN")))
-            (todo "TO-THINK"
-                  ((org-super-agenda-groups
-                    '((:name "À Voir" :tag "a_voir")
-                      (:name "Mathématiques" :tag "math")
-                      (:name "TeX" :tag "tex")
-                      (:name "Question" :tag "question")))
-                   (org-agenda-overriding-header "TO-THINK"))))
-           ((org-agenda-block-separator nil)))))
-  :config
-  (set-evil-initial-state!
-    '(org-agenda-mode)
-    'emacs)
-;;;###autoload
-  (defun durand-agenda ()
-    "My own customized agenda view."
-    (interactive)
-    (org-agenda nil "o")
-    (org-agenda-first-block)
-    (evil-emacs-state))
-  (map! :leader :n "oaa" #'durand-agenda)
-  (add-hook 'org-agenda-mode-hook #'org-agenda-first-block))
-
-;; (setq org-agenda-custom-commands
-;;       '(("o" "Custom"
-;;          ((agenda ""
-;;                   ((org-super-agenda-groups
-;;                     '((:name "Progress today"
-;;                              :log t
-;;                              :order -1)
-;;                       (:name "Morning Tasks"
-;;                              :log t
-;;                              :tag "morning"
-;;                              :order 1)
-;;                       (:name "Afternoon Tasks"
-;;                              :log t
-;;                              :tag "afternoon"
-;;                              :order 2)
-;;                       (:name "Night Tasks"
-;;                              :tag "night"
-;;                              :log t
-;;                              :order 3)
-;;                       (:name "Deadlines" :deadline t)
-;;                       ;; (:name "Daily items"
-;;                       ;; 	    :heading-regexp "Martin\\|Midi\\|Après-Midi\\|Soir"
-;;                       ;; 	    :order 3)
-;;                       ;; (:name "Regular Habits"
-;;                       ;;        :and (:tag "regular" :habit t))
-;;                       (:name "Health Habits"
-;;                              :tag ("santé")
-;;                              :order 5
-;;                              :log t)
-;;                       (:name "MATH"
-;;                              :tag "math"
-;;                              :order -1)
-;;                       (:name "Très Important"
-;;                              :priority "A"
-;;                              :order -1)
-;;                       (:name "Scheduled"
-;;                              :and (:scheduled t :not (:priority "A"))
-;;                              :order 5
-;;                              :log t)))
-;;                    (org-agenda-span 'day)
-;;                    (org-agenda-sorting-strategy '(priority-down time-up))))
-;;           ;; (tags "personnes"
-;;           ;;       ((org-super-agenda-groups
-;;           ;;         '((:name "Personnes" :anything t)))
-;;           ;;        (org-agenda-overriding-header "Personnes")))
-;;           (todo "PENDING"
-;;                 ((org-super-agenda-groups
-;;                   '((:name "Des Romans" :discard (:tag "roman"))
-;;                     (:name "YouTube" :tag "youtube")
-;;                     (:name "Stack" :tag "stack")
-;;                     (:name "Spécial" :tag "special")
-;;                     (:name "Web Link" :discard (:tag "personnes"))
-;;                     ;; (:name "Personnes" :tag "personnes")
-;;                     (:name "PENDING" :anything t)))
-;;                  (org-agenda-overriding-header "PENDING")))
-;;           (tags "plan"
-;;                 ((org-agenda-files '("~/org/plan.org"))
-;;                  (org-super-agenda-groups
-;;                   '((:name "Début" :todo "DÉBUT")
-;;                     (:name "Essaiyer" :todo "ESSAIYER")
-;;                     (:name "Progresser" :todo "PROGRESSER")
-;;                     (:name "Complété" :todo "COMPLÉTÉ")))
-;;                  (org-agenda-overriding-header "PLAN")))
-;;           (todo "TO-THINK"
-;;                 ((org-super-agenda-groups
-;;                   '((:name "À Voir" :tag "a_voir")
-;;                     (:name "Mathématiques" :tag "math")
-;;                     (:name "TeX" :tag "tex")
-;;                     (:name "Question" :tag "question")))
-;;                  (org-agenda-overriding-header "TO-THINK"))))
-;;          ((org-agenda-block-separator nil)))
-;;         ;; ("a" "Custom"
-;;         ;;  ((agenda ""
-;;         ;;           ((org-super-agenda-groups
-;;         ;;             '((:name "Progress today"
-;;         ;;                      :log t
-;;         ;;                      :order -1)
-;;         ;;               (:name "Morning Tasks"
-;;         ;;                      :log t
-;;         ;;                      :tag "morning"
-;;         ;;                      :order 1)
-;;         ;;               (:name "Afternoon Tasks"
-;;         ;;                      :log t
-;;         ;;                      :tag "afternoon"
-;;         ;;                      :order 2)
-;;         ;;               (:name "Night Tasks"
-;;         ;;                      :tag "night"
-;;         ;;                      :log t
-;;         ;;                      :order 3)
-;;         ;;               (:name "Deadlines" :deadline t)
-;;         ;;               ;; (:name "Daily items"
-;;         ;;               ;; 	    :heading-regexp "Martin\\|Midi\\|Après-Midi\\|Soir"
-;;         ;;               ;; 	    :order 3)
-;;         ;;               ;; (:name "Regular Habits"
-;;         ;;               ;;        :and (:tag "regular" :habit t))
-;;         ;;               (:name "Health Habits"
-;;         ;;                      :and (:tag "habit" :tag "health")
-;;         ;;                      :order 5
-;;         ;;                      :log t)
-;;         ;;               (:name "MATH"
-;;         ;;                      :tag "math"
-;;         ;;                      :order -1)
-;;         ;;               (:name "Très Important"
-;;         ;;                      :priority "A"
-;;         ;;                      :order -1)
-;;         ;;               (:name "Scheduled"
-;;         ;;                      :and (:scheduled t :not (:priority "A"))
-;;         ;;                      :order 5
-;;         ;;                      :log t)))
-;;         ;;            (org-agenda-span 'day)
-;;         ;;            (org-agenda-sorting-strategy '(priority-down))))))
-;;         ;; ("A" todo "ACCOUNT"
-;;         ;;  ((org-agenda-files `(,org-account-file-name))
-;;         ;;   (org-agenda-text-search-extra-files nil)
-;;         ;;   (org-agenda-overriding-columns-format "%TIMESTAMP(DAY) %dashes(GRAPH) %total(TOTAL){+}")))
-;;         ("w" . "Waiting or withdrawal")
-;;         ("ww" "Waiting to be completed"
-;;          ((todo "TO-THINK")
-;;           (todo "PENDING"))
-;;          ((org-agenda-sorting-strategy '(priority-down))
-;;           (org-agenda-tag-filter-preset '("-youtube"
-;;                                           "-web_link"
-;;                                           "-stack"))
-;;           (org-super-agenda-groups
-;;            '((:name "Articles to read or links"
-;;                     :todo "TO-THINK")
-;;              (:name "Things to accomplish"
-;;                     :todo "PENDING")))))
-;;         ("wy" "YouTube links"
-;;          ((todo "PENDING"))
-;;          ((org-agenda-sorting-strategy '(priority-down))
-;;           (org-agenda-tag-filter-preset '("+youtube"))))
-;;         ("ws" "Stack Exchange links"
-;;          ((todo "PENDING"))
-;;          ((org-agenda-sorting-strategy '(priority-down))
-;;           (org-agenda-tag-filter-preset '("+stack"))))
-;;         ("wl" "Web Links"
-;;          ((todo "PENDING"))
-;;          ((org-agenda-sorting-strategy '(priority-down))
-;;           (org-agenda-tag-filter-preset '("+web_link"))))
-;;         ("wm" "Money withdrawal record"
-;;          todo "WITHDRAW"
-;;          ((org-agenda-files '("~/org/wiki.org"))
-;;           (org-agenda-text-search-extra-files nil)
-;;           (org-agenda-overriding-columns-format "%item(DETAIL) %TIMESTAMP(DAY)")
-;;           (org-agenda-view-columns-initially t)
-;;           (org-super-agenda-groups
-;;            '((:name "Withdrawal Records"
-;;                     :and (:todo "WITHDRAW" :tag "withdraw"))))))))
-
-
-
-(setq org-account-file-name (format "~/org/account/account-%d-%d.org"
-				                            (caddr (calendar-current-date))
-				                            (car (calendar-current-date))))
-
-;; use super agenda
-(use-package org-super-agenda
-  :ensure t
-  :config
-  (org-super-agenda-mode 1)
-  (define-key org-super-agenda-header-map [?n] 'org-agenda-next-line)
-  (define-key org-super-agenda-header-map [?N] 'org-agenda-next-item)
-  (define-key org-super-agenda-header-map [?p] 'org-agenda-previous-line)
-  (define-key org-super-agenda-header-map [?P] 'org-agenda-previous-item)
-  (define-key org-super-agenda-header-map [?x] 'org-agenda-exit)
-  (define-key org-super-agenda-header-map [?q] 'org-agenda-quit)
-  (define-key org-super-agenda-header-map [?f] 'org-agenda-later)
-  (define-key org-super-agenda-header-map [?b] 'org-agenda-earlier)
-  (define-key org-super-agenda-header-map [?d] 'org-agenda-day-view)
-  (define-key org-super-agenda-header-map [?w] 'org-agenda-week-view)
-  (define-key org-super-agenda-header-map [?l] 'org-agenda-log-mode)
-  (define-key org-super-agenda-header-map [?o] 'delete-other-windows))
+(defun durand-agenda ()
+  "My own customized agenda view."
+  (interactive)
+  (org-agenda nil "o")
+  (org-agenda-first-block)
+  (evil-emacs-state))
 
 ;; The original function does not offer an option to select all.
 ;;;###autoload
@@ -1429,7 +604,7 @@ there is one, return it."
        (save-excursion
 	 (org-back-to-heading t)
 	 (setq end (save-excursion (outline-next-heading) (point)))
-	 (while (re-search-forward org-any-link-re end t)
+	 (while (re-search-forward org-link-any-re end t)
 	   (push (match-string 0) links))
 	 (setq links (org-uniquify (reverse links))))
        (cond
@@ -1566,9 +741,11 @@ If this information is not given, the function uses the tree at point."
     (goto-char res)
     (org-agenda-narrow-block)))
 
+;;;###autoload
 (defvar org-agenda-total-blocks nil
   "Le nombre total de blocs dans org-agenda")
 
+;;;###autoload
 (defvar org-agenda-block-seps nil
   "Les séparateurs de blocs dans org-agenda comme une liste des positions")
 
@@ -1668,6 +845,7 @@ If this information is not given, the function uses the tree at point."
 ;;   "My agenda mode")
 
 ;; fix org-agenda-kill
+;;;###autoload
 (defun org-agenda-kill ()
   "Kill the entry or subtree belonging to the current agenda entry."
   (interactive)
@@ -1706,11 +884,13 @@ If this information is not given, the function uses the tree at point."
 
 ;; La fonction `org-agenda-set-mode-name' est carrément inutile!
 ;; La fonction originale est dans le fichier org-agenda.el
+;;;###autoload
 (defun org-agenda-set-mode-name ()
   "Cette fonction ne sert rien!")
 
 ;; redefine org-agenda-goto
 (require 'org-agenda)
+;;;###autoload
 (defun org-agenda-goto (&optional highlight)
   "Go to the entry at point in the corresponding Org file."
   (interactive)
@@ -1758,47 +938,6 @@ If this information is not given, the function uses the tree at point."
 ;; It turns out I do not need these functions now, as I directly go to the account file.
 
 ;;;###autoload
-;; (defun durand-org-account-new ()
-;;   "Make a new day from agenda buffer"
-;;   (interactive)
-;;   (org-agenda-goto-with-fun 'org-new-account))
-
-;;;###autoload
-;; (defun durand-org-account-insert ()
-;;   "Insert a new entry and update from agenda buffer"
-;;   (interactive)
-;;   (org-agenda-goto-with-fun (lambda () (progn
-;; 					 (call-interactively 'org-set-item-price-note)
-;; 					 (org-update-account)))))
-
-;;;###autoload
-;; (defun durand-org-account-update ()
-;;   "Update the account from agenda buffer"
-;;   (interactive)
-;;   (org-agenda-goto-with-fun 'org-update-account))
-
-;;;###autoload
-;; (defun durand-org-account-calc ()
-;;   "Calculate the averages in agenda buffer"
-;;   (interactive)
-;;   (org-agenda-goto-with-fun 'org-calc-account))
-
-;;;###autoload
-;; (defun durand-org-account-modify ()
-;;   "Modify the account field in agenda buffer"
-;;   (interactive)
-;;   (org-agenda-goto-with-fun 'org-modify-account))
-
-(define-prefix-command 'durand-org-account-prefix-map)
-;; (define-key durand-org-account-prefix-map [?n] 'durand-org-account-new)
-;; (define-key durand-org-account-prefix-map [?i] 'durand-org-account-insert)
-;; (define-key durand-org-account-prefix-map [?u] 'durand-org-account-update)
-;; (define-key durand-org-account-prefix-map [?c] 'durand-org-account-calc)
-;; (define-key durand-org-account-prefix-map [?m] 'durand-org-account-modify)
-(define-key durand-org-account-prefix-map [?a] 'durand-org-agenda-append-text)
-(define-key durand-org-account-prefix-map [?v] 'durand-org-agenda-goto-view-note)
-
-;;;###autoload
 (defun org-agenda-update-link (&optional arg)
   "Update the link in agenda buffer"
   (interactive "P")
@@ -1829,11 +968,11 @@ If this information is not given, the function uses the tree at point."
                                   (point)))
          (current (let (res)
                     (save-excursion
-                      (while (re-search-forward org-any-link-re
+                      (while (re-search-forward org-link-any-re
                                                 next-heading-position
                                                 t)
                         (push (list (match-string 2)
-                                    (match-string 4)
+                                    (match-string 3)
                                     (match-beginning 0)
                                     (match-end 0))
                               res)))
@@ -1918,18 +1057,6 @@ If this information is not given, the function uses the tree at point."
   "Append some text to the end of the entry at the point"
   (interactive)
   (org-agenda-goto-with-fun 'org-append-text))
-
-(add-hook 'org-capture-mode-hook (lambda ()
-				   "Activate fill-column in org capture"
-				   (interactive)
-				   (setq-local fill-column 90)
-				   (auto-fill-mode 1)))
-(add-hook 'org-log-buffer-setup-hook
-	  (lambda ()
-	    "Activate fill-column in org capture"
-	    (interactive)
-	    (setq-local fill-column 90)
-	    (auto-fill-mode 1)))
 
 ;;;###autoload
 (defun durand-org-get-notes ()
@@ -2041,14 +1168,6 @@ and whose `caddr' is a list of strings, the content of the note."
     (message "%s note%s found" (if (= 0 len) "No" (number-to-string len))
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
-;; pop up rule for it
-(set-popup-rule! "\\*durand-org-view-notes\\*"
-  :size #'+popup-shrink-to-fit
-  :side 'bottom
-  :quit t
-  :select t
-  :modeline nil)
-
 ;;;###autoload
 (defun durand-org-view-all-logs (&optional match)
   "View all logs recorded in \"aujourdhui.org\" and
@@ -2074,24 +1193,6 @@ and whose `caddr' is a list of strings, the content of the note."
     (switch-to-buffer log-buffer-name)
     (durand-draw-calendar-days logs)
     (org-mode)))
-
-;;;###autoload
-;; (defun durand-draw-calendar-days (days-list)
-;;   "Draw days in calendar"
-;;   (calendar)
-;;   (read-only-mode -1)
-;;   (dolist (day days-list)
-;;     (let* ((time (decode-time day))
-;;            (day (nth 3 time))
-;;            (month (nth 4 time))
-;;            (year (nth 5 time)))
-;;       (calendar-goto-date (list month day year))
-;;       (add-text-properties (if (looking-back "\\s-" (- (point) 2))
-;;                                (point)
-;;                              (- (point) 1))
-;;                            (+ (point) 1)
-;;                            ('face '(:foreground "red")))))
-;;   (read-only-mode 1))
 
 ;;;###autoload
 (defun durand-draw-calendar-days (days-list)
@@ -2659,10 +1760,10 @@ The two lists should have the same lengths."
                   :action (lambda ()
                             (org-offer-links-in-entry (buffer-name) (point)))))
          (choice (durand-choose-list (mapcar (lambda (x)
-                                               (string-match org-any-link-re (format "%s" (car x)))
+                                               (string-match org-link-any-re (format "%s" (car x)))
                                                (list
                                                 (substring-no-properties
-                                                 (match-string 4 (format "%s" (car x)))
+                                                 (match-string 3 (format "%s" (car x)))
                                                  1 -1)
                                                 "rien"))
                                              cands)
@@ -2785,7 +1886,6 @@ With \\[universal-argument]\\[universal-argument], show all links."
              (let ((sel (durand-choose-list cands t "Chois un roman: "))
                    temp)
                (dolist (ele sel temp)
-                 (message "ele: %s" (assoc-default ele cands))
                  (setf temp (append temp
                                     (durand-choose-list
                                      (assoc-default ele cands)
@@ -2889,6 +1989,10 @@ attempts to handle them."
                        (car str)))
     "fake link")))
 
+;; Escape bracket chars as well
+;; (add-to-list org-link-escape-chars 20)
+
+
 ;; the original open link function is broken over links with spaces, and here is a fix.
 ;;;###autoload
 (defun org-open-at-point-decoded (&optional arg reference-buffer)
@@ -2925,141 +2029,141 @@ a link."
   (org-remove-occur-highlights nil nil t)
   (unless (run-hook-with-args-until-success 'org-open-at-point-functions)
     (let* ((context
-	    ;; Only consider supported types, even if they are not the
-	    ;; closest one.
-	    (org-element-lineage
-	     (org-element-context)
-	     '(clock comment comment-block footnote-definition
-		     footnote-reference headline inline-src-block inlinetask
-		     keyword link node-property planning src-block timestamp)
-	     t))
-	   (type (org-element-type context))
-	   (value (org-element-property :value context)))
+            ;; Only consider supported types, even if they are not the
+            ;; closest one.
+	          (org-element-lineage
+	           (org-element-context)
+	           '(clock comment comment-block footnote-definition
+		                 footnote-reference headline inline-src-block inlinetask
+		                 keyword link node-property planning src-block timestamp)
+	           t))
+	         (type (org-element-type context))
+	         (value (org-element-property :value context)))
       (cond
        ((not type) (user-error "No link found"))
        ;; No valid link at point.  For convenience, look if something
        ;; looks like a link under point in some specific places.
        ((memq type '(comment comment-block node-property keyword))
-	(call-interactively #'org-open-at-point-global))
+	      (call-interactively #'org-open-at-point-global))
        ;; On a headline or an inlinetask, but not on a timestamp,
        ;; a link, a footnote reference.
        ((memq type '(headline inlinetask))
-	(org-match-line org-complex-heading-regexp)
-	(if (and (match-beginning 5)
-		 (>= (point) (match-beginning 5))
-		 (< (point) (match-end 5)))
-	    ;; On tags.
-	    (org-tags-view arg (substring (match-string 5) 0 -1))
-	  ;; Not on tags.
-	  (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
-	    (`(nil . ,_)
-	     (require 'org-attach)
-	     (org-attach-reveal 'if-exists))
-	    (`(,links . ,links-end)
-	     (dolist (link (if (stringp links) (list links) links))
-	       (search-forward link nil links-end)
-	       (goto-char (match-beginning 0))
-	       (org-open-at-point))))))
+	      (org-match-line org-complex-heading-regexp)
+	      (if (and (match-beginning 5)
+		             (>= (point) (match-beginning 5))
+		             (< (point) (match-end 5)))
+            ;; On tags.
+	          (org-tags-view arg (substring (match-string 5) 0 -1))
+          ;; Not on tags.
+	        (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
+	          (`(nil . ,_)
+	           (require 'org-attach)
+	           (org-attach-reveal 'if-exists))
+	          (`(,links . ,links-end)
+	           (dolist (link (if (stringp links) (list links) links))
+	             (search-forward link nil links-end)
+	             (goto-char (match-beginning 0))
+	             (org-open-at-point))))))
        ;; On a footnote reference or at definition's label.
        ((or (eq type 'footnote-reference)
-	    (and (eq type 'footnote-definition)
-		 (save-excursion
-		   ;; Do not validate action when point is on the
-		   ;; spaces right after the footnote label, in order
-		   ;; to be on par with behavior on links.
-		   (skip-chars-forward " \t")
-		   (let ((begin
-			  (org-element-property :contents-begin context)))
-		     (if begin (< (point) begin)
-		       (= (org-element-property :post-affiliated context)
-			  (line-beginning-position)))))))
-	(org-footnote-action))
+	          (and (eq type 'footnote-definition)
+		             (save-excursion
+                   ;; Do not validate action when point is on the
+                   ;; spaces right after the footnote label, in order
+                   ;; to be on par with behavior on links.
+		               (skip-chars-forward " \t")
+		               (let ((begin
+			                    (org-element-property :contents-begin context)))
+		                 (if begin (< (point) begin)
+		                   (= (org-element-property :post-affiliated context)
+			                    (line-beginning-position)))))))
+	      (org-footnote-action))
        ;; On a planning line.  Check if we are really on a timestamp.
        ((and (eq type 'planning)
-	     (org-in-regexp org-ts-regexp-both nil t))
-	(org-follow-timestamp-link))
+	           (org-in-regexp org-ts-regexp-both nil t))
+	      (org-follow-timestamp-link))
        ;; On a clock line, make sure point is on the timestamp
        ;; before opening it.
        ((and (eq type 'clock)
-	     value
-	     (>= (point) (org-element-property :begin value))
-	     (<= (point) (org-element-property :end value)))
-	(org-follow-timestamp-link))
+	           value
+	           (>= (point) (org-element-property :begin value))
+	           (<= (point) (org-element-property :end value)))
+	      (org-follow-timestamp-link))
        ((eq type 'src-block) (org-babel-open-src-block-result))
        ;; Do nothing on white spaces after an object.
        ((>= (point)
-	    (save-excursion
-	      (goto-char (org-element-property :end context))
-	      (skip-chars-backward " \t")
-	      (point)))
-	(user-error "No link found"))
+	          (save-excursion
+	            (goto-char (org-element-property :end context))
+	            (skip-chars-backward " \t")
+	            (point)))
+	      (user-error "No link found"))
        ((eq type 'inline-src-block) (org-babel-open-src-block-result))
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ((eq type 'link)
-	(let ((type (org-element-property :type context))
-        ;; NOTE: I changed this part.
-	      (path (org-link-decode (org-element-property :path context))))
-	  ;; Switch back to REFERENCE-BUFFER needed when called in
-	  ;; a temporary buffer through `org-open-link-from-string'.
-	  (with-current-buffer (or reference-buffer (current-buffer))
-	    (cond
-	     ((equal type "file")
-	      (if (string-match "[*?{]" (file-name-nondirectory path))
-		  (dired path)
-		;; Look into `org-link-parameters' in order to find
-		;; a DEDICATED-FUNCTION to open file.  The function
-		;; will be applied on raw link instead of parsed link
-		;; due to the limitation in `org-add-link-type'
-		;; ("open" function called with a single argument).
-		;; If no such function is found, fallback to
-		;; `org-open-file'.
-		(let* ((option (org-element-property :search-option context))
-		       (app (org-element-property :application context))
-		       (dedicated-function
-			(org-link-get-parameter
-			 (if app (concat type "+" app) type)
-			 :follow)))
-		  (if dedicated-function
-		      (funcall dedicated-function
-			       (concat path
-				       (and option (concat "::" option))))
-		    (apply #'org-open-file
-			   path
-			   (cond (arg)
-				 ((equal app "emacs") 'emacs)
-				 ((equal app "sys") 'system))
-			   (cond ((not option) nil)
-				 ((string-match-p "\\`[0-9]+\\'" option)
-				  (list (string-to-number option)))
-				 (t (list nil option))))))))
-	     ((functionp (org-link-get-parameter type :follow))
-	      (funcall (org-link-get-parameter type :follow) path))
-	     ((member type '("coderef" "custom-id" "fuzzy" "radio"))
-	      (unless (run-hook-with-args-until-success
-		       'org-open-link-functions path)
-		(if (not arg) (org-mark-ring-push)
-		  (switch-to-buffer-other-window
-		   (org-get-buffer-for-internal-link (current-buffer))))
-		(let ((destination
-		       (org-with-wide-buffer
-			(if (equal type "radio")
-			    (org-search-radio-target
-			     (org-element-property :path context))
-			  (org-link-search
-			   (pcase type
-			     ("custom-id" (concat "#" path))
-			     ("coderef" (format "(%s)" path))
-			     (_ path))
-			   ;; Prevent fuzzy links from matching
-			   ;; themselves.
-			   (and (equal type "fuzzy")
-				(+ 2 (org-element-property :begin context)))))
-			(point))))
-		  (unless (and (<= (point-min) destination)
-			       (>= (point-max) destination))
-		    (widen))
-		  (goto-char destination))))
-	     (t (browse-url-at-point))))))
+	      (let ((type (org-element-property :type context))
+              ;; NOTE: I changed this part.
+	            (path (org-link-decode (org-element-property :path context))))
+          ;; Switch back to REFERENCE-BUFFER needed when called in
+          ;; a temporary buffer through `org-open-link-from-string'.
+	        (with-current-buffer (or reference-buffer (current-buffer))
+	          (cond
+	           ((equal type "file")
+	            (if (string-match "[*?{]" (file-name-nondirectory path))
+		              (dired path)
+                ;; Look into `org-link-parameters' in order to find
+                ;; a DEDICATED-FUNCTION to open file.  The function
+                ;; will be applied on raw link instead of parsed link
+                ;; due to the limitation in `org-add-link-type'
+                ;; ("open" function called with a single argument).
+                ;; If no such function is found, fallback to
+                ;; `org-open-file'.
+		            (let* ((option (org-element-property :search-option context))
+		                   (app (org-element-property :application context))
+		                   (dedicated-function
+			                  (org-link-get-parameter
+			                   (if app (concat type "+" app) type)
+			                   :follow)))
+		              (if dedicated-function
+		                  (funcall dedicated-function
+			                         (concat path
+				                               (and option (concat "::" option))))
+		                (apply #'org-open-file
+			                     path
+			                     (cond (arg)
+				                         ((equal app "emacs") 'emacs)
+				                         ((equal app "sys") 'system))
+			                     (cond ((not option) nil)
+				                         ((string-match-p "\\`[0-9]+\\'" option)
+				                          (list (string-to-number option)))
+				                         (t (list nil option))))))))
+	           ((functionp (org-link-get-parameter type :follow))
+	            (funcall (org-link-get-parameter type :follow) path))
+	           ((member type '("coderef" "custom-id" "fuzzy" "radio"))
+	            (unless (run-hook-with-args-until-success
+		                   'org-open-link-functions path)
+		            (if (not arg) (org-mark-ring-push)
+		              (switch-to-buffer-other-window
+		               (org-get-buffer-for-internal-link (current-buffer))))
+		            (let ((destination
+		                   (org-with-wide-buffer
+			                  (if (equal type "radio")
+			                      (org-search-radio-target
+			                       (org-element-property :path context))
+			                    (org-link-search
+			                     (pcase type
+			                       ("custom-id" (concat "#" path))
+			                       ("coderef" (format "(%s)" path))
+			                       (_ path))
+                           ;; Prevent fuzzy links from matching
+                           ;; themselves.
+			                     (and (equal type "fuzzy")
+				                        (+ 2 (org-element-property :begin context)))))
+			                  (point))))
+		              (unless (and (<= (point-min) destination)
+			                         (>= (point-max) destination))
+		                (widen))
+		              (goto-char destination))))
+	           (t (browse-url-at-point))))))
        (t (user-error "No link found")))))
   (run-hook-with-args 'org-follow-link-hook))
 
@@ -3153,7 +2257,6 @@ If ARG is (4), then execute `durand-update-weblink'."
       (setf cands
             (mapcar (lambda (x) (cons (durand-org-filter-dates (car x)) (cdr x))) cands))
       (setf cands (reverse cands))
-      (message "cands: %s" cands)
       (let ((liste-de-choix
              (let (temp)
                (let* ((sel (durand-choose-list cands nil "Chois un lien de web: ")))
@@ -3237,43 +2340,6 @@ the link comes from the most recently stored link, so choose carefully the targe
 	 (end (1+ (cadr choice-meta))))
     (kill-region beg end)))
 
-(setq temp-buffer-max-height
-      (/ (frame-height) 3))
-
-(add-hook 'org-agenda-mode-hook (lambda () (hl-line-mode 1)))
-
-;; org clock
-(setq org-clock-mode-line-total 'current)
-;; (setq org-clock-persist t)
-;; (org-clock-persistence-insinuate)
-
-;; adjust org-goto styles
-(setq org-goto-interface 'outline-path-completion)
-(setq org-outline-path-complete-in-steps nil)
-(setq counsel-outline-face-style nil)
-(setq counsel-org-goto-separator " ➜ ")
-
-(define-prefix-command 'org-account-prefix-map)
-(define-key org-account-prefix-map [?n] 'org-new-account)
-(define-key org-account-prefix-map [?u] 'org-update-account)
-(define-key org-account-prefix-map [?c] 'org-calc-account)
-(define-key org-account-prefix-map [?r] 'org-run-src-block)
-(define-key org-account-prefix-map [?i] 'org-set-item-price-note)
-(define-key org-account-prefix-map [?m] 'org-modify-account)
-(define-key org-account-prefix-map [?d] 'org-delete-account)
-(define-key org-account-prefix-map [?g] 'org-account-go-to-day)
-(define-key org-account-prefix-map [?G] 'org-account-go-to-last-day)
-(define-key org-account-prefix-map [?q] 'org-clear-buffers)
-(define-key org-account-prefix-map [tab] 'durand-forward-link)
-(define-key org-account-prefix-map [S-tab] 'find-previous-link-in-buffer)
-(define-key org-account-prefix-map [?v] #'durand-org-view-notes)
-(define-key org-account-prefix-map [?a] #'durand-show-account-report)
-
-;; org-cycle
-(map! :map org-mode-map
-      :n [tab] 'org-cycle
-      :n [C-tab] 'org-force-cycle-archived)
-
 ;;;###autoload
 (defun org-clear-buffers ()
   "Clear all org mode buffers as well as /not needed/ buffers"
@@ -3282,6 +2348,7 @@ the link comes from the most recently stored link, so choose carefully the targe
     (clean-up-buffers)
     (clean-up-buffers-regex "org$")))
 
+;;;###autoload
 (defmacro with-account (account-form)
   "Execute ACCOUNT-FORM only when we are visiting an account file."
   `(cond
@@ -3313,22 +2380,6 @@ the link comes from the most recently stored link, so choose carefully the targe
 	(org-previous-visible-heading 1)
       (org-backward-heading-same-level 1)))
   (org-narrow-to-subtree))
-
-;;;###autoload
-;; (defun org-get-account-num ()
-;;   "count how many days have been tagged 'account'"
-;;   (interactive)
-;;   (let ((org-use-tag-inheritance nil))
-;;     (length (org-map-entries t "account"))))
-
-;;;###autoload
-;; (defun org-get-account-total ()
-;;   "get the total value of the accuont values"
-;;   (interactive)
-;;   (let ((org-use-tag-inheritance nil))
-;;     (apply '+ (mapcar 'string-to-number
-;; 		      (org-map-entries (lambda ()
-;; 					 (org-entry-get nil "total")) "account")))))
 
 ;;;###autoload
 (defun org-get-account-entries (&optional day month year span)
@@ -3618,29 +2669,6 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
      (kill-whole-line 2)
      (outline-hide-body))))
 
-  ;;;###autoload
-;; (defun org-account-go-to-day (day)
-;;   "Go to the position of day DAY"
-;;   (interactive (list (ivy-read "DAY: " (org-find-all-days))))
-;;   (with-account
-;;    (let* ((name (buffer-file-name))
-;; 	  (first-dash (search "-" name))
-;; 	  (last-dash (search "-" name :from-end t))
-;; 	  (first-dot (search "." name))
-;; 	  (year (string-to-number
-;; 		 (substring name (1+ first-dash) last-dash)))
-;; 	  (month (string-to-number
-;; 		  (substring name (1+ last-dash) first-dot)))
-;; 	  (day (string-to-number day))
-;; 	  (date (org-day-format-transform day month year)))
-;;      (progn
-;;        (widen)
-;;        (outline-hide-sublevels 2)
-;;        (goto-char (org-find-pos-of-day date))
-;;        (outline-show-entry)
-;;        (recenter-top-bottom 0)
-;;        (org-narrow-to-subtree)))))
-
 ;;;###autoload
 (defun org-account-go-to-day (day &optional no-narrowp)
   "Go to the position of day DAY"
@@ -3716,6 +2744,7 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
 ;; it's the last day of the month & it is a weekday
 ;; it's a friday, and it's the last-but-one or last-but-two day
 ;; of the month
+;;;###autoload
 (defun last-week-day-of-month-p (date)
   (let* ((day-of-week (calendar-day-of-week date))
 	 (month (calendar-extract-month date))
@@ -3731,64 +2760,15 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
 		     (- last-month-day 2)))))))
 
 ;; select week days
+;;;###autoload
 (defun selected-week-days (list-of-days date)
   "Return true if the date is in one of the days of week"
   (let ((day-of-week (calendar-day-of-week date)))
     (not (null
 	  (memq day-of-week list-of-days)))))
 
-;; just in case I need this
-;; (defun org-retrieve-value ()
-;;   "retrieve value from property drawer"
-;;   (org-element-map (org-element-parse-buffer) 'property-drawer (lambda (hl)
-;; 								 (nth 3 (nth 1 (assoc 'node-property hl))))))
-
-;; (interactive (let ((c-day (cadr (calendar-current-date)))
-;; 		     (c-month (car (calendar-current-date)))
-;; 		     (c-year (caddr (calendar-current-date))))
-;; 		 (cond
-;; 		  ((null current-prefix-arg)
-;; 		   (list c-day c-month c-year))
-;; 		  ((equal current-prefix-arg '(4))
-;; 		   (list (read-number "Day: " c-day) c-month c-year))
-;; 		  ((equal current-prefix-arg '(16))
-;; 		   (list
-;; 		    (read-number "Day: " c-day)
-;; 		    (read-number "Month: " c-month)
-;; 		    (read-number "Year: " c-year)))
-;; 		  (t
-;; 		   (progn
-;; 		     (message "Only \"C-u\" and \"C-uC-u\" and \"nil\" are accepted")
-;; 		     (list 'wrong 'wrong 'wrong))))))
-
-;; org-mime
-;; (add-to-list 'load-path "~/elisp_packages/org-mime/")
-;; (require 'org-mime)
-
-;; (defun org-mime-change-signature-color ()
-;;   "Change the color of the signature of an email to rgb(6,144,255)"
-;;   (goto-char (point-max))
-;;   (when (search-backward "&#x2013;" nil t)
-;;     (forward-line)
-;;     (insert "<span style=\"color: rgb(6,144,255)\">")
-;;     (forward-line)
-;;     (insert "</span>")))
-
-;; (remove-hook 'org-mime-html-hook 'org-mime-change-signature-color)
-
-;; The process to attach color to signature in a mail:
-;; In header, run (org-mu4e-compose-org-mode)
-;; Then type the mail in the body
-;; Then run (org-mime-htmlize)
-;; Finally run (message-send-and-exit)
-;; In theory the color of the signature will be correctly adjusted this way.
-
-;; Now the signature is automatically blue-ish. To change it back to
-;; normal, just delete the export block and do not run
-;; (org-mime-htmlize).
-
 ;; durand-capture
-
+;;;###autoload
 (defun durand-capture ()
   "Use `ivy-read' to choose a key."
   (interactive)
@@ -3807,53 +2787,3 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
                                        :initial-input "^")
                              choix)))
     (org-capture nil clé)))
-
-;; archive
-
-;; (mapc (lambda (x)
-;;         ;; x is the x-th day since the first log
-;;         (cond
-;;          ((member (+ x first-day) sorted-days-list)
-;;           (let* ((temps (car (-filter (lambda (y)
-;;                                         (= (time-to-days y)
-;;                                            (+ x first-day)))
-;;                                       logs)))
-;;                  (temps-list (decode-time temps))
-;;                  (an (nth 5 temps-list))
-;;                  (mois (nth 4 temps-list))
-;;                  (jour (nth 3 temps-list))
-;;                  (heure (nth 2 temps-list))
-;;                  (minute (nth 1 temps-list)))
-;;             (insert (propertize "*" 'font-lock-face '(:foreground "white" :background "green")
-;;                                 'help-echo (concat
-;;                                             (mapconcat #'number-to-string
-;;                                                        (list an mois jour)
-;;                                                        "-")
-;;                                             " "
-;;                                             (number-to-string heure)
-;;                                             ":"
-;;                                             (number-to-string minute))))))
-;;          (t
-;;           (let* ((temps (encode-time 0 0 0
-;;                                      (+ x (nth 3 first-time))
-;;                                      (nth 4 first-time)
-;;                                      (nth 5 first-time)))
-;;                  (temps-list (decode-time temps))
-;;                  (an (nth 5 temps-list))
-;;                  (mois (nth 4 temps-list))
-;;                  (jour (nth 3 temps-list)))
-;;             (insert (propertize " " 'font-lock-face '(:background "red")
-;;                                 'help-echo (mapconcat #'number-to-string
-;;                                                       (list an mois jour)
-;;                                                       "-")))))))
-;;       (number-sequence 0 total-days-between))
-
-;; (let (temp)
-;;   (let* ((sel (durand-choose-list cands t "Chois un roman: ")))
-;;     (mapc (lambda (x)
-;;             (setf temp (append temp
-;;                                (durand-choose-list
-;;                                 (mapcar (lambda (x) (cons x '("1"))) (assoc-default x cands))
-;;                                 t "Chois un lien: "))))
-;;           sel)
-;;     temp))

@@ -7,6 +7,13 @@
       doom-unicode-font nil
       doom-big-font nil)
 
+;; try light theme
+(setf doom-theme 'doom-solarized-light)
+
+;; mode line help echo
+(setf mode-line-default-help-echo t)
+(tooltip-mode)
+
 ;; option key
 (setq mac-option-key-is-meta t)
 (setq mac-right-option-modifier nil)
@@ -27,51 +34,66 @@
 
 (require 'use-package)
 
-(setf use-package-always-ensure t)
+;; (setf use-package-always-ensure t)
 ;; +org.el
-(load! "+org.el" doom-private-dir)
+;; (load! "+org.el" doom-private-dir)
 
 ;; evil-setting.el
 (load! "evil-setting.el" doom-private-dir)
 
 ;; use home key
 (map! :meorgvi [home] #'evil-force-normal-state
-      :mov "à" #'evil-digit-argument-or-evil-beginning-of-line
+      :mov "à" #'durand-beginning-of-line-or-block
       :n (kbd "<backspace>") #'evil-switch-to-windows-last-buffer)
 
 ;; some custom mappings
 (use-package! org-pdfview
-              :ensure t
-              :demand
-              :config
-              ;; custom store link function to store the height as well
-              (defun org-pdfview-store-link ()
-                "Store a link to a pdfview buffer."
-                (when (eq major-mode 'pdf-view-mode)
-                  ;; This buffer is in pdf-view-mode
-                  (let* ((path buffer-file-name)
-                         (page (pdf-view-current-page))
-                         (height (let ((ori (substring-no-properties (pdf-misc-size-indication) 1)))
-                                   (cond
-                                     ((string= ori "Bot")
-                                      "55")
-                                     ((string= ori "Top")
-                                      nil)
-                                     (t
-                                       (if (string-match "%%" ori)
-                                         (replace-match "" nil nil ori)
-                                         ori)))))
-                         (real-height (when height
-                                        (number-to-string (/ (string-to-number height) 100.0))))
-                         (link (concat "pdfview:" path "::" (number-to-string page)
-                                       (when height (concat "++" real-height)))))
-                    (org-store-link-props
-                      :type "pdfview"
-                      :link link
-                      :description path)))))
+  ;; :ensure t
+  ;; :demand
+  :config
+  ;; custom store link function to store the height as well
+  (defun org-pdfview-store-link ()
+    "Store a link to a pdfview buffer."
+    (when (eq major-mode 'pdf-view-mode)
+      ;; This buffer is in pdf-view-mode
+      (let* ((path buffer-file-name)
+             (page (pdf-view-current-page))
+             (height (let ((ori (substring-no-properties (pdf-misc-size-indication) 1)))
+                       (cond
+                        ((string= ori "Bot")
+                         "55")
+                        ((string= ori "Top")
+                         nil)
+                        (t
+                         (if (string-match "%%" ori)
+                             (replace-match "" nil nil ori)
+                           ori)))))
+             (real-height (when height
+                            (number-to-string (/ (string-to-number height) 100.0))))
+             (link (concat "pdfview:" path "::" (number-to-string page)
+                           (when height (concat "++" real-height)))))
+        (org-store-link-props
+         :type "pdfview"
+         :link link
+         :description path)))))
 
 (map! :ngvm (kbd "s-w") 'delete-other-windows
       :map doom-leader-code-map "c" 'clean-up-buffers)
+
+;; transpose word is very important
+(map! :n [?\M-t] #'transpose-words
+      :map lispyville-mode-map :n [?\M-t] #'transpose-words)
+
+;; this should be put here in order not to interfere with doom's internal
+;; workings
+(setq org-highest-priority ?A
+      org-lowest-priority ?E
+      org-default-priority ?B
+      org-agenda-deadline-faces '((0.5 . org-warning)
+                                  (0.4 . org-upcoming-deadline)
+                                  (0.0 . default))
+      org-agenda-block-separator ?\—
+      org-pretty-entities t)
 
 ;;;###autoload
 (defun load-config ()
@@ -89,7 +111,8 @@
 
 ;; pdf-tools
 
-(setq-default pdf-view-display-size 'fit-width)
+(after! pdf-tools
+  (setq-default pdf-view-display-size 'fit-width))
 
 ;; bookmark remap
 (map! :leader :nv (kbd "RET") 'durand-evil-spc-ret-map
@@ -134,21 +157,21 @@
 ;; default frames behaviour
 
 (setq initial-frame-alist '((width . 118)
-                            (alpha . 90)))
+                            (alpha . 83)))
 (set-frame-width nil 118)
-(set-frame-parameter nil 'alpha 90)
+(set-frame-parameter nil 'alpha 83)
 (add-to-list 'default-frame-alist '(width . 118))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono for Powerline 20"))
-(add-to-list 'default-frame-alist '(alpha . 90))
+(add-to-list 'default-frame-alist '(alpha . 83))
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 (setq frame-resize-pixelwise t)
 (setq revert-without-query '(".*"))
 
-;; org-agenda should start with emacs state
+;; org-agenda and magit should start with emacs state
 (set-evil-initial-state!
-  '(org-agenda-mode)
+  '(org-agenda-mode magit-status-mode)
   'emacs)
 
 ;; modeline config
@@ -196,7 +219,7 @@ except when in `org-agenda-mode' it uses `org-agenda-show-blocks-number' instead
    (t
     (doom-modeline-segment--buffer-position))))
 
-(byte-compile 'doom-modeline-segment--buffer-position)
+(byte-compile 'doom-modeline-segment--buffer-position-durand)
 
 (add-to-list 'doom-modeline-fn-alist
              (cons 'buffer-position-durand
@@ -248,10 +271,24 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 
 ;; pdf view scrolling
+
+;;;###autoload
+(defun durand-pdf-scroll-up-or-next-page ()
+  "Scroll half a page instead of nearly a page."
+  (interactive)
+  (durand-buffer-scroll 'up nil nil))
+
+;;;###autoload
+(defun durand-pdf-scroll-down-or-previous-page ()
+  "Scroll half a page instead of nearly a page."
+  (interactive)
+  (durand-buffer-scroll 'down nil nil))
+
 (map! (:map pdf-view-mode-map
+        :n [return] durand-evil-ret-map
         :n (kbd "s-m") 'set-durand-mode-line
-        :n [?§] 'pdf-view-scroll-up-or-next-page
-        :n [?è] 'pdf-view-scroll-down-or-previous-page
+        :n [?§] 'durand-pdf-scroll-up-or-next-page
+        :n [?è] 'durand-pdf-scroll-down-or-previous-page
         :n [?!] 'evil-collection-pdf-view-next-line-or-next-page
         :n [?ç] 'evil-collection-pdf-view-previous-line-or-previous-page
         :n [?q] 'bury-buffer))
@@ -263,7 +300,15 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
   (interactive)
   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
   (force-mode-line-update))
-(add-hook 'pdf-view-mode-hook #'set-durand-mode-line)
+
+;;;###autoload
+(defun set-nil-mode-line ()
+  "Disable mode line."
+  (interactive)
+  (setf mode-line-format nil)
+  (force-mode-line-update))
+
+(add-hook 'pdf-view-mode-hook #'set-nil-mode-line)
 ;; doom-emacs automatically modifies the mode line format for pdf mode, so I
 ;; want to stop it.
 (setf pdf-view-mode-hook (remq 'doom-modeline-set-pdf-modeline pdf-view-mode-hook))
@@ -299,3 +344,40 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 (map! :map doom-leader-notes-map
       [?n] #'+default/browse-notes
       [?j] 'evil-ex-nohighlight)
+
+;; count the size of a buffer
+;;;###autoload
+(defun durand-file-size (&optional arg)
+  "Show the buffer size in echo area.
+If ARG is non-nil, show raw file size;
+if ARG is nil, then show human-readable format."
+  (interactive "P")
+  (message
+   "%s"
+   (cond
+    (arg
+     (- (point-max) (point-min)))
+    (t
+     (file-size-human-readable
+      (- (point-max) (point-min)))))))
+
+;;;###autoload
+(defun show-buffer-name (&optional arg)
+  "Show the name of the buffer in echo area.
+If ARG is non-nil, show the full name of the buffer."
+  (interactive "P")
+  (cond
+   (arg
+    (message (buffer-file-name)))
+   (t
+    (message (buffer-name)))))
+
+(map! :g
+      [f5] #'durand-file-size
+      [f6] #'show-buffer-name)
+
+;; pdf viewer
+(setf +latex-viewers '(pdf-tools skim))
+
+;; ispell default dictionary
+(setq-default ispell-dictionary "english")
