@@ -150,7 +150,7 @@ The buffer is considered meta if it is a live buffer and one of the following co
                            ))
         ;; ("account.ledger" . (lambda ()
         ;;                       (goto-char (point-max))))
-        (".*tex$" . durand-tex-action)
+        ;; (".*tex$" . durand-tex-action)
         ("ideal.el" . (lambda ()
                         (ignore-errors
                           (goto-char (point-min))

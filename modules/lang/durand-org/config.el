@@ -22,7 +22,8 @@
       ;; org-agenda-block-separator ?\—
       org-pretty-entities t)
 
-(define-prefix-command 'abbrev-prefix-map)
+(unless (boundp 'abbrev-prefix-map)
+  (define-prefix-command 'abbrev-prefix-map))
 
 ;; org tab command!
 ;; (map! :map org-mode-map :n [tab] 'org-cycle)
@@ -290,7 +291,9 @@ This should be setted by the PERIOD-FUNC argument.")
                       (:name "TeX" :tag "tex")
                       (:name "Question" :tag "question")))
                    (org-agenda-overriding-header "TO-THINK"))))
-           ((org-agenda-block-separator nil))))))
+           ((org-agenda-block-separator nil)))))
+  :config
+  (org-super-agenda-mode))
 
 (set-evil-initial-state!
   '(org-agenda-mode)
@@ -304,11 +307,19 @@ This should be setted by the PERIOD-FUNC argument.")
 (define-key durand-org-account-prefix-map [?a] 'durand-org-agenda-append-text)
 (define-key durand-org-account-prefix-map [?v] 'durand-org-agenda-goto-view-note)
 
+;; I like auto-fill-mode a lot.
+
+(add-hook 'org-mode-hook (lambda ()
+                           "Activate `auto-fill-mode'."
+                           (interactive)
+                           (setq-local fill-column 90)
+                           (auto-fill-mode 1)) t)
+
 (add-hook 'org-capture-mode-hook (lambda ()
-				   "Activate fill-column in org capture"
-				   (interactive)
-				   (setq-local fill-column 90)
-				   (auto-fill-mode 1)))
+				                           "Activate fill-column in org capture"
+				                           (interactive)
+				                           (setq-local fill-column 90)
+				                           (auto-fill-mode 1)))
 (add-hook 'org-log-buffer-setup-hook
 	  (lambda ()
 	    "Activate fill-column in org capture"

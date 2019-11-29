@@ -259,16 +259,15 @@ See `durand-play-with-mpv' also."
 
 ;;;###autoload
 (defun durand-download-youtube (url &optional title)
-  "
-Download the URL with youtube-dl"
+  "Download the URL with youtube-dl"
   (interactive)
   (let ((current-prefix-arg '(4)))
     (call-interactively 'eshell))
   (insert "cd ~/Desktop/Centre/Vidéos")
   (eshell-send-input)
   (insert (if (not title)
-              (format "youtube-dl -f 22 %s" url)
-            (format "youtube-dl -f 22 %s -o \"%s.mp4\"" url title)))
+              (format "youtube-dl -f 22 \"%s\"" url)
+            (format "youtube-dl -f 22 \"%s\" -o \"%s.mp4\"" url title)))
   (eshell-send-input)
   (if title
       (message "Downloading %s as %s.mp4" url title)

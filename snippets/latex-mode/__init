@@ -1,0 +1,45 @@
+# -*- mode: snippet -*-
+# name: LaTeX init file
+# key: __init
+# --
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{amsfonts, amsthm}
+\usepackage{enumitem}
+\author{${1:Durand}}
+\date{${2:`(format (format-time-string "%%s %%s, %Y")
+                   (capitalize (format-time-string "%B"))
+                   (string-to-number (format-time-string "%d")))`}}
+\title{${3:TITLE}}
+\hypersetup{
+ pdfauthor={$2},
+ pdftitle={$3},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={$1},
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\begin{abstract}
+
+${4:% TODO: ABSTRACT}
+
+\end{abstract}
+$0
+\end{document}

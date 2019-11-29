@@ -1,24 +1,29 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
-;; Fonts
+;;* Fonts
 
 (setq doom-font "DejaVu Sans Mono for Powerline 20"
       doom-variable-pitch-font nil ; inherits `doom-font''s :size
       doom-unicode-font nil
       doom-big-font nil)
 
-;; try light theme
-(setf doom-theme 'doom-solarized-light)
+;;* disable line numbers, as that is a performace killer for me.
 
-;; mode line help echo
-(setf mode-line-default-help-echo t)
+(setq-default display-line-numbers-type nil)
+(global-display-line-numbers-mode -1)
+
+;;* try light theme
+;; (setf doom-theme 'doom-solarized-light)
+
+;;* mode line help echo
+;; (setf mode-line-default-help-echo t)
 (tooltip-mode)
 
-;; option key
+;;* option key
 (setq mac-option-key-is-meta t)
 (setq mac-right-option-modifier nil)
 
-;; ideal.el
+;;* ideal.el
 (load! "+ideal.el" doom-private-dir)
 
 (setq package-enable-at-startup nil)
@@ -38,15 +43,15 @@
 ;; +org.el
 ;; (load! "+org.el" doom-private-dir)
 
-;; evil-setting.el
+;;* evil-setting.el
 (load! "evil-setting.el" doom-private-dir)
 
-;; use home key
+;;* use home key
 (map! :meorgvi [home] #'evil-force-normal-state
       :mov "à" #'durand-beginning-of-line-or-block
       :n (kbd "<backspace>") #'evil-switch-to-windows-last-buffer)
 
-;; some custom mappings
+;;* some custom mappings
 (use-package! org-pdfview
   ;; :ensure t
   ;; :demand
@@ -80,11 +85,11 @@
 (map! :ngvm (kbd "s-w") 'delete-other-windows
       :map doom-leader-code-map "c" 'clean-up-buffers)
 
-;; transpose word is very important
+;;* transpose word is very important
 (map! :n [?\M-t] #'transpose-words
       :map lispyville-mode-map :n [?\M-t] #'transpose-words)
 
-;; this should be put here in order not to interfere with doom's internal
+;;* this should be put here in order not to interfere with doom's internal
 ;; workings
 (setq org-highest-priority ?A
       org-lowest-priority ?E
@@ -101,6 +106,8 @@
   (interactive)
   (load! "config.el" doom-private-dir)
   (display-battery-mode)
+  (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
+  (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand)))))
 
 (map! :prefix "g" :m "h" 'evil-goto-line)
@@ -109,19 +116,19 @@
 ;; (map! :nvm "s" nil)
 ;; (map! :g "c" 'self-insert-command)
 
-;; pdf-tools
+;;* pdf-tools
 
 (after! pdf-tools
   (setq-default pdf-view-display-size 'fit-width))
 
-;; bookmark remap
+;;* bookmark remap
 (map! :leader :nv (kbd "RET") 'durand-evil-spc-ret-map
       :map doom-leader-map "fp" #'doom/open-private-config)
 
-;; mu4e and elfeed
+;;* mu4e and elfeed
 (load! "mu-el.el" doom-private-dir)
 
-;; pop up rule for timer list
+;;* pop up rule for timer list
 (set-popup-rule! "timer-list"
                  :side 'bottom
                  :quit t
@@ -137,7 +144,7 @@
 
 (map! :map timer-list-mode-map :n "q" #'quit-window)
 
-;; popup rule for org capture
+;;* popup rule for org capture
 (set-popup-rule! "^CAPTURE.*\\.org$"
   :side 'bottom
   :select t
@@ -145,36 +152,40 @@
   :quit nil
   :modeline nil)
 
-;; wrap-region
+;;* wrap-region
 (use-package! wrap-region
-  :ensure t
   :config
   (wrap-region-global-mode t)
   (wrap-region-add-wrapper "$" "$")
   (wrap-region-add-wrapper "=" "=")
   (wrap-region-add-wrapper "-" "-"))
 
-;; default frames behaviour
+;;* default frames behaviour
 
 (setq initial-frame-alist '((width . 118)
-                            (alpha . 83)))
+                            (alpha . 90)))
 (set-frame-width nil 118)
-(set-frame-parameter nil 'alpha 83)
+(set-frame-parameter nil 'alpha 90)
 (add-to-list 'default-frame-alist '(width . 118))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono for Powerline 20"))
-(add-to-list 'default-frame-alist '(alpha . 83))
+(add-to-list 'default-frame-alist '(alpha . 90))
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 (setq frame-resize-pixelwise t)
 (setq revert-without-query '(".*"))
 
-;; org-agenda and magit should start with emacs state
+;;* org-agenda and magit should start with emacs state
 (set-evil-initial-state!
   '(org-agenda-mode magit-status-mode)
   'emacs)
 
-;; modeline config
+;;* dired should start with the normal state
+(set-evil-initial-state!
+  '(dired-mode)
+  'normal)
+
+;;* modeline config
 (setf doom-modeline-height 30
       doom-modeline-enable-word-count nil
       doom-modeline-buffer-encoding nil
@@ -184,7 +195,7 @@
       doom-modeline-mu4e t)
 (setq inhibit-compacting-font-caches t)
 
-;;  I want to cut down the buffer name
+;;*  I want to cut down the buffer name
 
 (require 'doom-modeline)
 (defvar durand-buffer-name-max 50)
@@ -193,7 +204,12 @@
 (defun doom-modeline-segment--buffer-info-durand ()
   "Almost the same as `doom-modeline-segment--buffer-info',
 but it truncates the buffer name within a fixed length."
-  (s-truncate durand-buffer-name-max (doom-modeline-segment--buffer-info) "..."))
+  (s-truncate durand-buffer-name-max
+              (format-mode-line (doom-modeline-segment--buffer-info))
+              "..."))
+
+;;* buffer file name style
+(setf doom-modeline-buffer-file-name-style 'buffer-name)
 
 (byte-compile 'doom-modeline-segment--buffer-info-durand)
 
@@ -225,7 +241,7 @@ except when in `org-agenda-mode' it uses `org-agenda-show-blocks-number' instead
              (cons 'buffer-position-durand
                    'doom-modeline-segment--buffer-position-durand))
 
-;; the original function does not work
+;;* the original function does not work
 
 (defun doom-modeline-set-modeline-durand (key &optional default)
   "Set the modeline format. Does nothing if the modeline KEY doesn't exist.
@@ -256,7 +272,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
     mu4e
     ;; github
     debug
-    ;; lsp
+    lsp
     ;; minor-modes
     input-method
     indent-info
@@ -270,7 +286,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 
-;; pdf view scrolling
+;;* pdf view scrolling
 
 ;;;###autoload
 (defun durand-pdf-scroll-up-or-next-page ()
@@ -293,7 +309,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
         :n [?ç] 'evil-collection-pdf-view-previous-line-or-previous-page
         :n [?q] 'bury-buffer))
 
-;; pdf view mode mode line
+;;* pdf view mode mode line
 ;;;###autoload
 (defun set-durand-mode-line ()
   "Set the mode line to durand style."
@@ -309,43 +325,43 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
   (force-mode-line-update))
 
 (add-hook 'pdf-view-mode-hook #'set-nil-mode-line)
-;; doom-emacs automatically modifies the mode line format for pdf mode, so I
+;;* doom-emacs automatically modifies the mode line format for pdf mode, so I
 ;; want to stop it.
 (setf pdf-view-mode-hook (remq 'doom-modeline-set-pdf-modeline pdf-view-mode-hook))
 ;; (remove-hook 'pdf-view-mode-hook (lambda () (setf (buffer-local-value mode-line-format (current-buffer))
 ;;                                                   nil)))
 
+;;* don't ask me if I want to open a file!
 (setf large-file-warning-threshold nil)
 
-;; don't ask me if I want to open a file!
-;; c++ needs include files
+;;* c++ needs include files
 (setq-default flycheck-clang-include-path '("include"))
 
-;; ay-go-to-char
+;;* ay-go-to-char
 (map! :leader :n "y" #'evil-avy-goto-char-timer)
 
-;; soft wrap lines
+;;* soft wrap lines
 (global-visual-line-mode)
 
-;; I like my narrow-dwim function
+;;* I like my narrow-dwim function
 (map! :leader :n :desc "narrow do what I mean" [?'] #'durand-narrow-dwim)
 
-;; ivy configurations
+;;* ivy configurations
 (load! "+ivy.el" doom-private-dir)
 
-;; I don't like which-key-mode, as it slows down emacs a lot...
+;;* I don't like which-key-mode, as it slows down emacs a lot...
 (which-key-mode -1)
 
-;; load my dashboard configurations
+;;* load my dashboard configurations
 (load! "dashboard.el" doom-private-dir)
 
-;; +default/find-in-notes sometimes crashes because of project detection issues.
+;;* +default/find-in-notes sometimes crashes because of project detection issues.
 ;; and no highlights
 (map! :map doom-leader-notes-map
       [?n] #'+default/browse-notes
       [?j] 'evil-ex-nohighlight)
 
-;; count the size of a buffer
+;;* count the size of a buffer
 ;;;###autoload
 (defun durand-file-size (&optional arg)
   "Show the buffer size in echo area.
@@ -376,8 +392,48 @@ If ARG is non-nil, show the full name of the buffer."
       [f5] #'durand-file-size
       [f6] #'show-buffer-name)
 
-;; pdf viewer
+;;* pdf viewer
 (setf +latex-viewers '(pdf-tools skim))
 
-;; ispell default dictionary
+;;* ispell default dictionary
 (setq-default ispell-dictionary "english")
+
+;;* dashboard banner directory
+(setf +doom-dashboard-banner-dir (expand-file-name "banners" doom-private-dir))
+
+;;* flyspell save a word to the current dictionary
+;;;###autoload
+(defun durand-save-word ()
+  (interactive)
+  (let ((current-location (point))
+         (word (flyspell-get-word)))
+    (cond
+     ((consp word)
+      (flyspell-do-correct
+       'save
+       nil
+       (car word)
+       current-location
+       (cadr word)
+       (caddr word)
+       current-location))
+     (t
+      (message "No word to save.")))))
+
+;;* this replaces `save-buffer', but I have my custom key bindings.
+(map! :map doom-leader-file-map
+      "s" 'durand-save-word)
+
+;;* scratch buffer major mode
+(setf doom-scratch-buffer-major-mode 'emacs-lisp-mode)
+
+;;* some temporary binding before the `fold' module supports `outline-minor-mode'
+;; correctly.
+
+(map!
+ :prefix [?z]
+ :n [?o] 'outline-show-all
+ :n [?m] 'outline-hide-body
+ :n [?a] 'outline-cycle
+ :n [?j] 'outline-next-visible-heading
+ :n [?k] 'outline-previous-visible-heading)

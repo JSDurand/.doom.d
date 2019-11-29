@@ -1,0 +1,41 @@
+#+TITLE:   lang/durand-org
+#+DATE:    novembre 28, 2019
+#+STARTUP: inlineimages
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+- [[#configuration][Configuration]]
+- [[#troubleshooting][Troubleshooting]]
+
+* TODO Description
+My org configs.
+
++ If possible, include a brief list of feature highlights here
++ Like code completion, syntax checking or available snippets
++ Include links to packages & external things where possible
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
+This module has no plugins.
+
+** TODO Hacks
+{A list of internal modifications to included packages}
+
+* Prerequisites
+This module has no prereqisites.
+
+* TODO Features
+An in-depth list of features, how to use them, and their dependencies.
+
+* TODO Configuration
+How to configure this module, including common problems and how to address them.
+
+* TODO Troubleshooting
+Common issues and their solution, or places to look for help.

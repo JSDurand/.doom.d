@@ -330,8 +330,8 @@ EXCLUDE-TYPE can be nil or a regexp matching what would not be summed."
                                (string-match sum-type (format "%s" (nth (* 2 j) date-info))))
                            (or (eq exclude-type 'nothing)
                                (not (string-match exclude-type (format "%s" (nth (* 2 j) date-info))))))
-                  (incf all-total (nth (1+ (* 2 j)) date-info))
-                  (incf day-total (nth (1+ (* 2 j)) date-info)))
+                  (cl-incf all-total (nth (1+ (* 2 j)) date-info))
+                  (cl-incf day-total (nth (1+ (* 2 j)) date-info)))
                 (insert (format "  %s: %s\n"
                                 (nth (* 2 j) date-info)
                                 (nth (1+ (* 2 j)) date-info))))
@@ -995,7 +995,7 @@ If this information is not given, the function uses the tree at point."
                                                :unwind (lambda ()
                                                          ;; (swiper--cleanup)
                                                          (setf durand-before-obj nil)))))
-                         (car (find choice current
+                         (car (cl-find choice current
                                     :test (lambda (x y)
                                             (string=
                                              x
@@ -1132,13 +1132,10 @@ and whose `caddr' is a list of strings, the content of the note."
   (interactive)
   (let* ((notes (durand-org-get-notes))
          (logs (durand-org-get-logs))
-	 (len (length notes)))
+         (len (length notes)))
     (with-current-buffer-window
      "*durand-org-view-notes*"
      nil nil
-     (let ((temp-map (make-sparse-keymap)))
-       (define-key temp-map [?q] 'quit-window)
-       (set-transient-map temp-map))
      (goto-char (point-min))
      (insert "#+STARTUP: showall\n")
      ;; insert log graph if any
@@ -1150,21 +1147,26 @@ and whose `caddr' is a list of strings, the content of the note."
      (insert "\n")
      ;; insert notes
      (let ((times (mapcar #'car notes))
-	   (metas (mapcar #'cadr notes))
-	   (contents (mapcar #'caddr notes)))
+           (metas (mapcar #'cadr notes))
+           (contents (mapcar #'caddr notes)))
        (if (/= 0 len)
-	   (dotimes (i len)
-	     (insert (concat
-		      "\n"
-		      (propertize "*" :note-meta (elt metas i))
-		      " Note on "
-		      (elt times i)
-		      "\n"
-		      (elt contents i)
-		      "\n")))
-	 (insert "No notes found!")))
+           (dotimes (i len)
+             (insert (concat
+                      "\n"
+                      (propertize "*" :note-meta (elt metas i))
+                      " Note on "
+                      (elt times i)
+                      "\n"
+                      (elt contents i)
+                      "\n")))
+         (insert "No notes found!")))
      (goto-char (point-min))
-     (org-mode))
+     (org-mode)
+     (let ((temp-map (make-sparse-keymap)))
+       (set-keymap-parent temp-map org-mode-map)
+       (map! :map temp-map
+             :n [?q] 'quit-window)
+       (use-local-map temp-map)))
     (message "%s note%s found" (if (= 0 len) "No" (number-to-string len))
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
@@ -1297,7 +1299,7 @@ DAYS-LIST should be a list of time values."
                                     (make-list (- 7 len) "  "))
                                    " "))))
             (push str rows)
-            (incf pointer len)))
+            (cl-incf pointer len)))
         (push (append (list padded-header week-header) (nreverse rows))
               res-strings)))
     (setf res-strings (nreverse res-strings))
@@ -1794,7 +1796,11 @@ If ARG is `youtube', then return (text list point)"
                     (push (list (match-string-no-properties 2)
                                 (match-string-no-properties 3))
                           res))
-                  res)))
+                  (cl-remove-if
+                   (lambda (ls)
+                     (or (null (car ls))
+                         (null (cadr ls))))
+                   res))))
     (cond
      ((null arg)
       (cons texte liste))
@@ -1908,7 +1914,7 @@ With \\[universal-argument]\\[universal-argument], show all links."
                    tags)))
     (let* ((choix (ivy-read "Chois un roman à mettre à jour: " cands
                             :require-match t))
-           (item (assoc* choix cands :test #'equal))
+           (item (cl-assoc choix cands :test #'equal))
            (lien (read-string "Le lien: " (current-kill 0 t))))
       (with-current-file "/Users/durand/org/notes.org" nil
         (goto-char (-last (lambda (x) t) item))
@@ -2192,29 +2198,29 @@ If BUFFER-NAME is nil, then it defaults to the name of the file without director
 (defun org-open-articles (&optional arg)
   "Open all articles, that is, entries in \"notes.org\" with \"a_voir\" tag.
 If ARG is (4), then execute `durand-update-article'.
-If ARG is (16), then open entries in \"notes.org\" with \"math\" tag.
+If ARG is (16), then open entries in \"notes.org\" with \"TO-THINK\" TODO keyword
 If ARG is (64), then execute `(durand-update-article t)'."
   (interactive "P")
   (cond
    ((or (null arg) (equal arg '(16)))
-    (let* ((tag (if (null arg) "a_voir-ARCHIVE" "math-a_voir-ARCHIVE"))
+    (let* ((tag (if (null arg) "a_voir-ARCHIVE" "TODO=\"TO-THINK\"-ARCHIVE"))
            cands)
       (with-current-file "/Users/durand/org/notes.org" nil
         (setf cands (org-map-entries #'durand-org-link-info tag)
               cands (nreverse (mapcar (lambda (x) (cons (durand-org-filter-dates (car x)) (cdr x)))
                                       cands))))
-        (let ((liste-de-choix
-               (let (temp)
-                 (let* ((sel (durand-choose-list cands nil "Chois un article: ")))
-                   (mapc (lambda (x)
-                           (setf temp (append temp
-                                              (durand-choose-list
-                                               (mapcar (lambda (x) (cons x '("1"))) (assoc-default x cands))
-                                               t "Chois un lien: "))))
-                         sel)
-                   temp))))
-          (mapc #'durand-org-open-link liste-de-choix)
-          (delete-other-windows))))
+      (let ((liste-de-choix
+             (let (temp)
+               (let* ((sel (durand-choose-list cands nil "Chois un article: ")))
+                 (mapc (lambda (x)
+                         (setf temp (append temp
+                                            (durand-choose-list
+                                             (mapcar (lambda (x) (cons x '("1"))) (assoc-default x cands))
+                                             t "Chois un lien: "))))
+                       sel)
+                 temp))))
+        (mapc #'durand-org-open-link liste-de-choix)
+        (delete-other-windows))))
    ((equal arg '(4))
     (durand-update-article))
    ((equal arg '(64))
@@ -2223,12 +2229,14 @@ If ARG is (64), then execute `(durand-update-article t)'."
     (message "This ARG is not supported: %s" arg))))
 
 ;;;###autoload
-(defun durand-update-article (&optional math)
+(defun durand-update-article (&optional all)
   "Update the link to an article;
-the link comes from the most recently stored link, so choose carefully the target to update.
-If MATH is non-nil, then the range is articles taged MATH but not A_VOIR, instead of A_VOIR."
+the link comes from the most recently stored link, so choose
+carefully the target to update. If ALL is non-nil, then the range
+is articles with TO-THINK TODO keyword but not archived, instead
+of A_VOIR."
   (interactive)
-  (let* ((tag (if math "math-a_voir-ARCHIVE" "a_voir-ARCHIVE")) cands)
+  (let* ((tag (if all "math-a_voir-ARCHIVE" "TODO=\"TO-THINK\"-ARCHIVE")) cands)
     (with-current-file "/Users/durand/org/notes.org" nil
       (setf cands (org-map-entries
                    (lambda () (let ((pos (point))) (append (durand-org-link-info) (list pos))))

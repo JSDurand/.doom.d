@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: display equation
+# key: eq
+# --
+
+\[$1\]
+$0

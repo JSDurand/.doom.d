@@ -116,6 +116,7 @@
 (define-prefix-command 'durand-evil-spc-ret-map)
 
 (evil-define-key nil durand-evil-spc-ret-map
+  [?j] 'bookmark-bmenu-list
   [?g] 'revert-buffer
   [?b] 'org-open-bookmarks
   [?B] 'describe-bindings
@@ -155,6 +156,50 @@
    (t
     (user-error "Unknown situation"))))
 
+;; wifi handling
+
+;;;###autoload
+(defvar durand-wifi-on-p nil
+  "If WIFI is on or not.
+This is defined in \"evil-setting.el\"")
+
+;;;###autoload
+(defun durand-wifi-filter (proc output)
+  "Filter function to set the wifi variable.
+This should only be used for the process \"durand-wifi\".
+This is defined in \"evil-setting.el\""
+  (unless (string= (process-name proc) "durand-wifi")
+    (user-error "Filter function applied to a wrong process."))
+  (setf durand-wifi-on-p (string-match "On$" output)))
+
+;;;###autoload
+(defun durand-wifi ()
+  "Check if WIFI is enabled, then ask for confirmation to toggle WIFI.
+This is defined in \"custom.el\""
+  (interactive)
+  (make-process
+   :name "durand-wifi"
+   :buffer nil
+   :command '("networksetup" "-getairportpower" "en0")
+   :filter #'durand-wifi-filter
+   :sentinel #'ignore)
+  (let* ((prompt (format "WIFI is %s. Do you want to turn WIFI %s"
+                         (if durand-wifi-on-p "on" "off")
+                         (if durand-wifi-on-p "off?" "on?")))
+         (decision (y-or-n-p prompt)))
+    (when decision
+      (let* ((new-state (if durand-wifi-on-p "off" "on")))
+        (make-process
+         :name "durand-toggle-wifi"
+         :buffer nil
+         :command `("networksetup"
+                    "-setairportpower"
+                    "en0"
+                    ,new-state)
+         :sentinel #'ignore
+         :filter #'ignore)
+        (message "WIFI turned %s" new-state)))))
+
 ;; v map
 (defvar durand-view-map (make-keymap)
   "The map for space v. Generally the map for viewing things, like
@@ -175,6 +220,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
 (define-prefix-command 'durand-evil-space-map)
 
 (evil-define-key nil durand-evil-space-map
+  [tab] 'yas-expand
   [?x] ctl-x-map
   [?n] 'evil-ex-nohighlight
   [?=] 'evil-align-regexp
@@ -457,71 +503,73 @@ next VCOUNT - 1 lines below the current one."
 (define-and-bind-text-object "environment" "e" "\\\\begin{[^{}]+}$" "\\\\end{[^{}]+}")
 
 ;; for indentation
-(defun evil-indent--current-indentation ()
-  "Return the indentation of the current line. Moves point."
-  (buffer-substring-no-properties (point-at-bol)
-                                  (progn (back-to-indentation)
-                                         (point))))
+;; Now doom-emac comes equipped with default bindings for indentation text
+;; objects.
+;; (defun evil-indent--current-indentation ()
+;;   "Return the indentation of the current line. Moves point."
+;;   (buffer-substring-no-properties (point-at-bol)
+;;                                   (progn (back-to-indentation)
+;;                                          (point))))
 
-(defun evil-indent--same-indent-range (&optional point)
-  "Return the point at the begin and end of the text block with the same indentation.
-If `point' is supplied and non-nil it will return the begin and
-end of the block surrounding point."
-  (save-excursion
-    (when point
-      (goto-char point))
-    (let ((start (point))
-          (indent (evil-indent--current-indentation))
-          begin end)
-      (loop while (and (/= (point) (point-min))
-                       (string= (evil-indent--current-indentation) indent))
-            do (progn
-                 (setq begin (point-at-bol))
-                 (forward-line -1)))
-      (goto-char start)
-      (loop while (and (/= (point) (point-max))
-                       (string= (evil-indent--current-indentation) indent))
-            do (progn
-                 (setq end (point-at-eol))
-                 (forward-line 1)))
-      (list begin end))))
+;; (defun evil-indent--same-indent-range (&optional point)
+;;   "Return the point at the begin and end of the text block with the same indentation.
+;; If `point' is supplied and non-nil it will return the begin and
+;; end of the block surrounding point."
+;;   (save-excursion
+;;     (when point
+;;       (goto-char point))
+;;     (let ((start (point))
+;;           (indent (evil-indent--current-indentation))
+;;           begin end)
+;;       (cl-loop while (and (/= (point) (point-min))
+;;                        (string= (evil-indent--current-indentation) indent))
+;;             do (progn
+;;                  (setq begin (point-at-bol))
+;;                  (forward-line -1)))
+;;       (goto-char start)
+;;       (cl-loop while (and (/= (point) (point-max))
+;;                        (string= (evil-indent--current-indentation) indent))
+;;             do (progn
+;;                  (setq end (point-at-eol))
+;;                  (forward-line 1)))
+;;       (list begin end))))
 
-(evil-define-text-object evil-indent-a-indent (&optional count beg end type)
-  "Text object describing the block with the same indentation as
-the current line and the line above."
-  :type line
-  (let ((range (evil-indent--same-indent-range)))
-    (evil-range (save-excursion
-                  (goto-char (first (evil-indent--same-indent-range)))
-                  (forward-line -1)
-                  (point-at-bol))
-                (second range) 'line)))
+;; (evil-define-text-object evil-indent-a-indent (&optional count beg end type)
+;;   "Text object describing the block with the same indentation as
+;; the current line and the line above."
+;;   :type line
+;;   (let ((range (evil-indent--same-indent-range)))
+;;     (evil-range (save-excursion
+;;                   (goto-char (cl-first (evil-indent--same-indent-range)))
+;;                   (forward-line -1)
+;;                   (point-at-bol))
+;;                 (cl-second range) 'line)))
 
-(evil-define-text-object evil-indent-a-indent-lines (&optional count beg end type)
-  "Text object describing the block with the same indentation as
-the current line and the lines above and below."
-  :type line
-  (let ((range (evil-indent--same-indent-range)))
-    (evil-range (save-excursion
-                  (goto-char (first range))
-                  (forward-line -1)
-                  (point-at-bol))
-                (save-excursion
-                  (goto-char (second range))
-                  (forward-line 1)
-                  (point-at-eol))
-                'line)))
+;; (evil-define-text-object evil-indent-a-indent-lines (&optional count beg end type)
+;;   "Text object describing the block with the same indentation as
+;; the current line and the lines above and below."
+;;   :type line
+;;   (let ((range (evil-indent--same-indent-range)))
+;;     (evil-range (save-excursion
+;;                   (goto-char (cl-first range))
+;;                   (forward-line -1)
+;;                   (point-at-bol))
+;;                 (save-excursion
+;;                   (goto-char (cl-second range))
+;;                   (forward-line 1)
+;;                   (point-at-eol))
+;;                 'line)))
 
-(evil-define-text-object evil-indent-i-indent (&optional count beg end type)
-  "Text object describing the block with the same indentation as
-the current line."
-  :type line
-  (let ((range (evil-indent--same-indent-range)))
-    (evil-range (first range) (second range) 'line)))
+;; (evil-define-text-object evil-indent-i-indent (&optional count beg end type)
+;;   "Text object describing the block with the same indentation as
+;; the current line."
+;;   :type line
+;;   (let ((range (evil-indent--same-indent-range)))
+;;     (evil-range (cl-first range) (cl-second range) 'line)))
 
 ;;;###autoload
-(eval-after-load 'evil
-  '(progn
-     (define-key evil-inner-text-objects-map "i" 'evil-indent-i-indent)
-     (define-key evil-outer-text-objects-map "i" 'evil-indent-a-indent)
-     (define-key evil-outer-text-objects-map "I" 'evil-indent-a-indent-lines)))
+;; (eval-after-load 'evil
+;;   '(progn
+;;      (define-key evil-inner-text-objects-map "i" 'evil-indent-i-indent)
+;;      (define-key evil-outer-text-objects-map "i" 'evil-indent-a-indent)
+;;      (define-key evil-outer-text-objects-map "I" 'evil-indent-a-indent-lines)))

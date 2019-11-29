@@ -4,7 +4,8 @@
 (setf ivy-fixed-height-minibuffer nil)
 
 ;; this format is more confortable
-(setq ivy-count-format "(%d/%d) ")
+(setq ivy-count-format "(%d/%d) "
+      ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-cd-selected)
 
 (setq counsel-grep-base-command
       "rg -i -M 120 --no-heading --line-number --color never %s %s")

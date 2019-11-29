@@ -9,3 +9,7 @@
 ;; (package! evil-snipe :disable t)
 (disable-packages! evil-snipe)
 ;; (package! org-pdfview)
+
+(package! wrap-region)
+
+(package! outline-magic :recipe (:host github :repo "tj64/outline-magic"))

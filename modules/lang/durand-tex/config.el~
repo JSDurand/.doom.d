@@ -1,0 +1,186 @@
+;;; .doom.d/modules/lang/durand-tex/config.el -*- lexical-binding: t; -*-
+
+(require 'tex)
+(require 'ivy)
+(require 'latex)
+(require 'pdf-view)
+
+;;;###autoload
+(defvar tex-root-file-name nil
+  "Root file for tex")
+
+;;;###autoload
+(defvar working-name nil
+  "working file name for tex")
+
+;;;###autoload
+(defvar tex-changed nil
+  "Non-nil if just used `tex'")
+
+;;;###autoload
+(defvar tex-output-bn nil
+  "The name of the buffer used for displaying the output of tex process")
+
+(make-variable-buffer-local 'tex-output-bn)
+(make-variable-buffer-local 'tex-changed)
+
+;;;###autoload
+(defvar tex-heading-list nil
+  "The list of headings used in tex files")
+
+;;;###autoload
+(setq tex-heading-list '("heading"
+                         "imp"
+                         "cep"
+                         "thm"
+                         "sec"
+                         "secc"
+                         "chap"
+                         "tit"
+                         "lem"))
+
+(add-hook 'tex-mode-hook 'olivetti-mode)
+;; oft macros are close to each other, this makes it easy to distinguish them.
+;;(modify-syntax-entry ?\\ "_" plain-tex-mode-syntax-table)
+;;;###autoload
+(defface tex-big-face '((t (:height 1.5 :foreground "orange1")))
+  "Highlight special headings in a big font!")
+
+;; The special fontification should be done by `font-lock-add-keywords' instead.
+(font-lock-add-keywords 'plain-tex-mode `((,(concat
+                                             "^\\\\\\(?:"
+                                             (mapconcat #'identity
+                                                        tex-heading-list
+                                                        "\\|")
+                                             "\\) \\([^\n]+\\)$")
+                                           1 'tex-big-face t))
+                        'append)
+(map! :map plain-tex-mode-map
+      :i [?\§] '(lambda () "remap to type escape key." (interactive) (insert "\\"))
+      :n [f9] #'tex
+      :n [f11] #'tex-display-or-kill-temp-buffer
+      :n [f7] #'tex-set-up-root
+      :n [f8] #'tex-set-up-working
+      :i [?\)] #'end-exit-paren
+      :i [?ç] 'open-back-paren
+      :i [?\(] 'open-paren
+      :i [backspace] 'durand-delete-pair
+      :i [?\{] 'open-curly
+      :i [?\[] 'open-bracket
+      :prefix [?\C-c]
+      :i [?d] 'insert-def
+      :i [?o] 'one-def
+      :i [?t] 'two-def
+      :i [?\C-c] 'durand-general-save-buffer
+      :i [?r] 'read-tex-complete)
+
+(map! :map plain-tex-mode-map
+      :i [?\M-'] 'abbrev-prefix-mark
+      :i [?ù] abbrev-prefix-map
+      :i [tab] 'company-complete-common-or-cycle)
+
+(use-package! olivetti
+  :after tex)
+
+(map! :map latex-mode-map
+      :i [?\§] '(lambda () "remap to type escape key." (interactive) (insert "\\"))
+      :i [f9] #'tex
+      :i [f11] #'tex-display-or-kill-temp-buffer
+      :i [f7] #'tex-set-up-root
+      :i [f8] #'tex-set-up-working
+      :i [?\)] #'end-exit-paren
+      :i [?ç] 'open-back-paren
+      :i [?\(] 'open-paren
+      :i [backspace] 'durand-delete-pair
+      :i [?\{] 'open-curly
+      :i [?\[] 'open-bracket
+      :prefix [?\C-c]
+      :i [?d] 'insert-def
+      :i [?o] 'one-def
+      :i [?t] 'two-def
+      :i [?\C-c] 'durand-general-save-buffer
+      :i [?r] 'read-tex-complete)
+(map! :map latex-mode-map
+      :i [?\M-'] 'abbrev-prefix-mark
+      :i [?ù] abbrev-prefix-map
+      :i [tab] 'company-complete-common-or-cycle)
+
+(setq abbrev-prefix-map (make-sparse-keymap))
+
+(map! :map abbrev-predix-map
+      :ie "a" (lambda () (interactive) (insert "\\alpha"))
+      :ie "$" (lambda () (interactive) (insert "\\(\\)") (backward-char 2))
+      :ie "*" (lambda () (interactive) (insert "\\[\\]") (backward-char 2))
+      :ie "-" (lambda () (interactive) (insert "\\setminus"))
+      :ie ")" (lambda () (interactive) (insert "\\supset"))
+      :ie "(" (lambda () (interactive) (insert "\\subset"))
+      :ie "]" (lambda () (interactive) (insert "\\supseteq"))
+      :ie "[" (lambda () (interactive) (insert "\\subseteq"))
+      :ie "{" (lambda () (interactive) (insert "\\left\\{\\right\\}") (backward-char 8))
+      :ie "I" (lambda () (interactive) (insert "\\infty"))
+      :ie "i" (lambda () (interactive) (insert "\\in"))
+      :ie "A" (lambda () (interactive) (insert "\\forall"))
+      :ie "." (lambda () (interactive) (insert "\\cdot"))
+      :ie "v." (lambda () (interactive) (insert "\\cdots"))
+      :ie "~" (lambda () (interactive) (insert "\\cong"))
+      :ie "=" (lambda () (interactive) (insert "\\equiv"))
+      :ie ">" (lambda () (interactive) (insert "\\geq"))
+      :ie "<" (lambda () (interactive) (insert "\\leq"))
+      :ie "v<" (lambda () (interactive) (insert "\\leftarrow"))
+      :ie "v>" (lambda () (interactive) (insert "\\rightarrow"))
+      :ie "vp" (lambda () (interactive) (insert "\\varpi"))
+      :ie "vf" (lambda () (interactive) (insert "\\varphi"))
+      :ie "ve" (lambda () (interactive) (insert "\\varepsilon"))
+      :ie "W" (lambda () (interactive) (insert "\\Omega"))
+      :ie "Y" (lambda () (interactive) (insert "\\Psi"))
+      :ie "F" (lambda () (interactive) (insert "\\Phi"))
+      :ie "U" (lambda () (interactive) (insert "\\Upsilon"))
+      :ie "S" (lambda () (interactive) (insert "\\Sigma"))
+      :ie "P" (lambda () (interactive) (insert "\\Pi"))
+      :ie "X" (lambda () (interactive) (insert "\\Xi"))
+      :ie "L" (lambda () (interactive) (insert "\\Lambda"))
+      :ie "J" (lambda () (interactive) (insert "\\Theta"))
+      :ie "G" (lambda () (interactive) (insert "\\Gamma"))
+      :ie "D" (lambda () (interactive) (insert "\\Delta"))
+      :ie "w" (lambda () (interactive) (insert "\\omega"))
+      :ie "y" (lambda () (interactive) (insert "\\psi"))
+      :ie "q" (lambda () (interactive) (insert "\\chi"))
+      :ie "f" (lambda () (interactive) (insert "\\phi"))
+      :ie "u" (lambda () (interactive) (insert "\\upsilon"))
+      :ie "t" (lambda () (interactive) (insert "\\tau"))
+      :ie "s" (lambda () (interactive) (insert "\\sigma"))
+      :ie "r" (lambda () (interactive) (insert "\\rho"))
+      :ie "p" (lambda () (interactive) (insert "\\pi"))
+      :ie "x" (lambda () (interactive) (insert "\\xi"))
+      :ie "n" (lambda () (interactive) (insert "\\nu"))
+      :ie "m" (lambda () (interactive) (insert "\\mu"))
+      :ie "l" (lambda () (interactive) (insert "\\lambda"))
+      :ie "k" (lambda () (interactive) (insert "\\kappa"))
+      :ie "j" (lambda () (interactive) (insert "\\theta"))
+      :ie "h" (lambda () (interactive) (insert "\\eta"))
+      :ie "z" (lambda () (interactive) (insert "\\zeta"))
+      :ie "e" (lambda () (interactive) (insert "\\epsilon"))
+      :ie "E" (lambda () (interactive) (insert "\\exists"))
+      :ie "D" (lambda () (interactive) (insert "\\Delta"))
+      :ie "d" (lambda () (interactive) (insert "\\delta"))
+      :ie "g" (lambda () (interactive) (insert "\\gamma"))
+      :ie "b" (lambda () (interactive) (insert "\\beta"))
+      :ie "+" (lambda () (interactive) (insert "\\sum"))
+      :ie "0" (lambda () (interactive) (insert "\\circ"))
+      :ie "c" 'read-tex-complete
+      :ie (kbd "<return>") (lambda () (interactive) (insert "\n\\item{}\n")))
+
+(setq tex-def-map (make-sparse-keymap))
+(define-key tex-def-map [?\C-c ?f] #'tex-toggle-follow)
+
+;;;###autoload
+(defvar tex-follow-up-or-not nil
+  "Variable to determine the tex follow mode")
+
+;;;###autoload
+(defvar tex-def-alist nil
+  "An associative list to store the defs found in a tex file.")
+
+;;;###autoload
+(defvar tex-old-pos 0
+  "The old position to go back to.")

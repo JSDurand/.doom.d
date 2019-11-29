@@ -1,0 +1,50 @@
+#+TITLE:   lang/durand-tex
+#+DATE:    novembre 26, 2019
+#+SINCE:   v2.0.9
+#+STARTUP: inlineimages
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+- [[#configuration][Configuration]]
+- [[#troubleshooting][Troubleshooting]]
+
+* Description
+This module adds some custom TeX commands for use in TeX-mode files. It also
+includes a =compile= command, which is more general than AUCTeX command.
+
++ This module only depends on [[elisp:(info "(auctex) Top")][AUCTeX]], the only reason for the dependency being
+that it is common to use [[elisp:(info "(auctex) Top")][AUCTeX]], which when enabled blocks vanilla Emacs maps.
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
+
++ [[elisp:(info "(auctex) Top")][AUCTeX]]
+
+** Hacks
++ Type =§= to insert an escape character =\.=
++ The key =ù= functions as a prefix for entering different symbols and alphabets such as
+  =\alpha and \beta=.
++ [ ] A =compile= command to compile the current buffer; by default it uses =XeTeX= and =XeLaTeX=.
++ [ ] A =go to pdf= command which jumps to the associated /pdf/ file of the buffer.
+* Prerequisites
+This module has no prerequisites.
+
+* Features
++ Type =§= to insert an escape character =\.=
++ The key =ù= functions as a prefix for entering different symbols and alphabets such as
+  =\alpha and \beta=.
++ [ ] A =compile= command to compile the current buffer; by default it uses =XeTeX= and =XeLaTeX=.
++ [ ] A =go to pdf= command which jumps to the associated /pdf/ file of the buffer.
+
+* TODO Configuration
+TO-DO
+
+* TODO Troubleshooting
+TO-DO

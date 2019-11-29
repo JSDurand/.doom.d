@@ -8,6 +8,8 @@
                 `("open" "-a" "terminal" ,(file-relative-name default-directory))
                 :buffer nil))
 
+(setf +doom-dashboard-pwd-policy doom-private-dir)
+
 (setf +doom-dashboard-menu-sections
       '(("Open articles"
          :icon (all-the-icons-octicon "book" :face 'font-lock-keyword-face)
@@ -21,16 +23,16 @@
          :icon (all-the-icons-octicon "calendar" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-agenda)
          :action durand-agenda)
-        ("Recently opened files"
-         :icon (all-the-icons-octicon "file-text" :face 'font-lock-keyword-face)
-         :action recentf-open-files)
-        ("Jump to bookmark"
-         :icon (all-the-icons-octicon "bookmark" :face 'font-lock-keyword-face)
-         :action durand-bookmark-jump-headlong)
-        ("Open private configuration"
-         :icon (all-the-icons-octicon "tools" :face 'font-lock-keyword-face)
-         :when (file-directory-p doom-private-dir)
-         :action doom/open-private-config)
+        ;; ("Recently opened files"
+        ;;  :icon (all-the-icons-octicon "file-text" :face 'font-lock-keyword-face)
+        ;;  :action recentf-open-files)
+        ;; ("Jump to bookmark"
+        ;;  :icon (all-the-icons-octicon "bookmark" :face 'font-lock-keyword-face)
+        ;;  :action durand-bookmark-jump-headlong)
+        ;; ("Open private configuration"
+        ;;  :icon (all-the-icons-octicon "tools" :face 'font-lock-keyword-face)
+        ;;  :when (file-directory-p doom-private-dir)
+        ;;  :action doom/open-private-config)
         ("Open Safari"
          :icon (all-the-icons-material "open_in_browser" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-browser)
