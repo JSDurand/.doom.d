@@ -11,14 +11,14 @@
 (setf +doom-dashboard-pwd-policy doom-private-dir)
 
 (setf +doom-dashboard-menu-sections
-      '(("Open articles"
-         :icon (all-the-icons-octicon "book" :face 'font-lock-keyword-face)
-         :when (fboundp 'org-open-articles)
-         :action org-open-articles)
-        ("Open Web Links"
-         :icon (all-the-icons-octicon "browser" :face 'font-lock-keyword-face)
-         :when (fboundp 'org-open-weblink)
-         :action org-open-weblink)
+      '(;; ("Open articles"
+        ;;  :icon (all-the-icons-octicon "book" :face 'font-lock-keyword-face)
+        ;;  :when (fboundp 'org-open-articles)
+        ;;  :action org-open-articles)
+        ;; ("Open Web Links"
+        ;;  :icon (all-the-icons-octicon "browser" :face 'font-lock-keyword-face)
+        ;;  :when (fboundp 'org-open-weblink)
+        ;;  :action org-open-weblink)
         ("Open org-agenda"
          :icon (all-the-icons-octicon "calendar" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-agenda)

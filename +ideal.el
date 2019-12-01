@@ -118,7 +118,9 @@ The buffer is considered meta if it is a live buffer and one of the following co
 
 ;;;###autoload
 (defun durand-show-current-time ()
-  "Show the current time. With prefix arg, show in a separate window."
+  "Show the current time.
+Invoke the command again to disable it.
+With prefix arg, show in a separate window."
   (interactive)
   (let ((time-string (format-time-string "%A %e %B %H:%M:%S")))
     (if current-prefix-arg
@@ -126,7 +128,14 @@ The buffer is considered meta if it is a live buffer and one of the following co
          "*current time*" nil nil
          (prin1 time-string)
          (helpful-mode))
-      (message time-string))))
+      ;; (message time-string)
+      (display-time-mode (cond
+                          (display-time-mode
+                           -1)
+                          (t
+                           1))))))
+
+(map! :map doom-leader-toggle-map [?t] #'durand-show-current-time)
 
 ;; add a custom keymap
 (define-prefix-command 'durand-switch-buffer-map)
@@ -2469,17 +2478,17 @@ If ARG is non-nil, then turn off mu4e as well if necessary."
 
 ;; (hydra-set-property 'iy-hydra :verbosity 0)
 
-(defhydra zoom-hydra (global-map "<f2>"
-				                         :pre (progn
-					                              (set-face-attribute 'durand-custom-mode-face nil :foreground "#bf8264")
-					                              (setq durand-custom-modeline "Z "))
-				                         :post (progn
-					                               (set-face-attribute 'durand-custom-mode-face nil :foreground "#39bf4c")
-					                               (setq durand-custom-modeline "I ")))
-  "zoom"
-  ("g" text-scale-increase "+")
-  ("l" text-scale-decrease "-")
-  ("q" nil "exit"))
+;; (defhydra zoom-hydra (global-map "<f2>"
+;; 				                         :pre (progn
+;; 					                              (set-face-attribute 'durand-custom-mode-face nil :foreground "#bf8264")
+;; 					                              (setq durand-custom-modeline "Z "))
+;; 				                         :post (progn
+;; 					                               (set-face-attribute 'durand-custom-mode-face nil :foreground "#39bf4c")
+;; 					                               (setq durand-custom-modeline "I ")))
+;;   "zoom"
+;;   ("g" text-scale-increase "+")
+;;   ("l" text-scale-decrease "-")
+;;   ("q" nil "exit"))
 
 (provide 'ideal)
 

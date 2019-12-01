@@ -223,7 +223,9 @@ If ARG is non-nil, delete the buffer BN"
   (let ((ch (char-after nil))
         (ch-list '(?\) ?\} ?\] ?\$)))
     (cond ((memq ch ch-list) (forward-char))
-          (t (insert ")")))))
+          ((looking-at-p "\\(\\\\)\\|\\\\]\\|\\\\}\\)")
+           (forward-char 2))
+          (t (self-insert-command 1)))))
 
 ;;;###autoload
 (defun open-back-paren ()
@@ -231,7 +233,9 @@ If ARG is non-nil, delete the buffer BN"
   (interactive)
   (let ((ch (char-before nil))
         (ch-list '(?\) ?\} ?\] ?\$)))
-    (cond ((memq ch ch-list) (backward-char))
+    (cond ((looking-back "\\(\\\\)\\|\\\\]\\|\\\\}\\)" (- (point) 2))
+           (forward-char -2))
+          ((memq ch ch-list) (backward-char))
           (t (insert "ç")))))
 
 ;;;###autoload

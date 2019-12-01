@@ -212,19 +212,69 @@
       "C-c C-v" 'TeX-view)
 
 ;; hack the original function
-(after! pdf-tools
-  (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
+(after! pdf-sync
+  ;; (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
   (set-popup-rule! "^\\*Outline*"
     :side 'bottom
     :size '+popup-shrink-to-fit))
+(setq pdf-sync-forward-display-action '((display-buffer-same-window))
+      pdf-sync-backward-display-action '((display-buffer-same-window)))
+
+(defadvice! use-same-window-a (orig-fn)
+  :around #'TeX-pdf-tools-sync-view
+  (cl-letf (((symbol-function #'pop-to-buffer)
+             (symbol-function #'switch-to-buffer)))
+    (funcall orig-fn)))
 
 ;; clear `org-capture-plist' after each capture
 (add-hook! 'org-capture-after-finalize-hook (setq org-capture-plist nil))
 
 ;; electric math
 (add-hook! 'plain-TeX-mode-hook
-	  (set (make-local-variable 'TeX-electric-math)
-         (cons "$" "$")))
+  (set (make-local-variable 'TeX-electric-math)
+       (cons "$" "$")))
 (add-hook! 'LaTeX-mode-hook
-	  (set (make-local-variable 'TeX-electric-math)
-         (cons "\\(" "\\)")))
+  (set (make-local-variable 'TeX-electric-math)
+       (cons "\\(" "\\)")))
+
+;; insert display equation symbols
+
+;;;###autoload
+(defun durand-insert-display-equation ()
+  "Insert display equation symbols."
+  (interactive)
+  (insert "\\[\\]")
+  (goto-char (- (point) 2)))
+
+(add-hook! 'LaTeX-mode-hook
+           'LaTeX-math-mode)
+
+(setq! LaTeX-math-list '((?$ durand-insert-display-equation)))
+
+;; solve yasnippet and company conflicts
+;;;###autoload
+(defun company-yasnippet-or-completion ()
+  "Solve company yasnippet conflicts."
+  (interactive)
+  (let ((yas-fallback-behavior
+         (apply 'company-complete-common-or-cycle nil)))
+    (yas-expand)))
+
+(map! :map LaTeX-mode-map
+      :i
+      [remap company-complete-common-or-cycle]
+      'company-yasnippet-or-completion)
+
+
+
+;; ARCHIVE
+
+;; (add-hook 'company-mode-hook
+;;           (lambda ()
+;;             (define-key TeX-mode-map [remap 'company-complete-common]
+;;               'company-yasnippet-or-completion)
+;;             ;; (substitute-key-definition
+;;             ;;  'company-complete-common
+;;             ;;  'company-yasnippet-or-completion
+;;             ;;  TeX-mode-map)
+;;             ))

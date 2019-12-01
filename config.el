@@ -106,7 +106,7 @@
   (interactive)
   (load! "config.el" doom-private-dir)
   (display-battery-mode)
-  (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
+  ;; (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
   (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand)))))
 
@@ -281,10 +281,15 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
     ;; process
     vcs
     checker))
+  
+(doom-modeline-mode 1)
+(display-battery-mode 1)
 
-(doom-modeline-set-modeline-durand 'durand t)
-(setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
-(setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
+;; (doom-modeline-set-modeline-durand 'durand t)
+(after! doom-modeline
+  (add-hook! 'doom-modeline-mode-hook :append
+    (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))))
+;; (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 
 ;;* pdf view scrolling
 
@@ -347,7 +352,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 (map! :leader :n :desc "narrow do what I mean" [?'] #'durand-narrow-dwim)
 
 ;;* ivy configurations
-(load! "+ivy.el" doom-private-dir)
+;; (load! "+ivy.el" doom-private-dir)
 
 ;;* I don't like which-key-mode, as it slows down emacs a lot...
 (which-key-mode -1)

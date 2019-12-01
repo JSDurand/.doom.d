@@ -1865,7 +1865,8 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
 (defun org-open-novels (&optional arg)
   "Choose novel to open. By default, filter out qidian links.
 With \\[universal-argument], update novels;
-With \\[universal-argument]\\[universal-argument], show all links."
+With \\[universal-argument]\\[universal-argument], show all links.
+With \\[universal-argument]\\[universal-argument]\\[universal-argument], visit every qidian link."
   (interactive "P")
   (cond
    ((null arg)
@@ -1884,6 +1885,8 @@ With \\[universal-argument]\\[universal-argument], show all links."
                                       (assoc-default ele cands))
                                      t "Chois un lien: " nil t)))))))
         (mapc #'browse-url liste-de-choix))))
+   ((equal arg '(4))
+    (org-update-novels))
    ((equal arg '(16))
     (let* (cands)
       (with-current-file "/Users/durand/org/notes.org" nil
@@ -1897,8 +1900,18 @@ With \\[universal-argument]\\[universal-argument], show all links."
                                      (assoc-default ele cands)
                                      t "Chois un lien: " nil t)))))))
         (mapc #'browse-url liste-de-choix))))
-   (t
-    (org-update-novels))))
+   ((equal arg '(64))
+    (message "Opening novels' qidian pages...")
+    (let* (cands)
+      (with-current-file "/Users/durand/org/notes.org" nil
+        (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
+      (let* ((liste-de-choix
+              (mapcar (lambda (ls)
+                        (caar (-filter (lambda (x) (string= "qidian" (cadr x)))
+                                       (cdr ls))))
+                      cands)))
+        (mapc #'browse-url liste-de-choix)))
+    (message "Opening novels' qidian pages...DONE"))))
 
 ;;;###autoload
 (defun org-update-novels ()

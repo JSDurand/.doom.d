@@ -20,6 +20,7 @@
        ;;ido               ; the other *other* search engine...
        (ivy
         +fuzzy)               ; a search engine for love and life
+       durand-ivy
 
        :ui
        ;;deft              ; notational velocity for Emacs
@@ -171,6 +172,7 @@
        calendar
        ;;irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
+       ;;durand-rss        ; my elfeed configs
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;write             ; emacs for writers (fiction, notes, papers, etc.)
 

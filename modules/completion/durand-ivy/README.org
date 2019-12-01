@@ -1,0 +1,18 @@
+#+TITLE:   completion/durand-ivy
+#+DATE:    décembre 1, 2019
+#+STARTUP: inlineimages
+
+* Description
+My ivy configurations.
+
++ My format function which uses a unicode to show the current match.
++ Customized some =ivy-rich= settings.
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
+{A list of linked plugins}
+
+** Hacks
+{A list of internal modifications to included packages}

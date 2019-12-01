@@ -36,7 +36,7 @@
 
 (setf evil-overriding-maps (delete '(grep-mode-map) evil-overriding-maps))
 
-(evil-set-initial-state 'dired-mode 'motion)
+;; (evil-set-initial-state 'dired-mode 'motion)
 
 (define-key dired-mode-map [?\d] nil)
 (define-key dired-mode-map [32] nil)

@@ -1,338 +1,338 @@
 ;; elfeed
 ;;;###autoload
-(defun durand-lighten-name (name percent &optional digit)
-  "Lighten color NAME by PERCENT.
-     The defualt function gives four digits spec, not useful.
-     So you can specify digits per component by DIGIT."
-  (let ((digit (or digit 2)))
-    (apply 'color-rgb-to-hex
-	   (append
-	    (apply 'color-hsl-to-rgb
-		   (apply 'color-lighten-hsl
-			  (append
-			   (apply 'color-rgb-to-hsl
-				  (color-name-to-rgb name))
-			   (list percent))))
-	    (list digit)))))
+;; (defun durand-lighten-name (name percent &optional digit)
+;;   "Lighten color NAME by PERCENT.
+;;      The defualt function gives four digits spec, not useful.
+;;      So you can specify digits per component by DIGIT."
+;;   (let ((digit (or digit 2)))
+;;     (apply 'color-rgb-to-hex
+;; 	   (append
+;; 	    (apply 'color-hsl-to-rgb
+;; 		   (apply 'color-lighten-hsl
+;; 			  (append
+;; 			   (apply 'color-rgb-to-hsl
+;; 				  (color-name-to-rgb name))
+;; 			   (list percent))))
+;; 	    (list digit)))))
 
-(use-package! elfeed
-  :ensure t
-  :config
-  (define-key ctl-x-map [?w] #'elfeed))
+;; (use-package! elfeed
+;;   :ensure t
+;;   :config
+;;   (define-key ctl-x-map [?w] #'elfeed))
 
 ;; Sometimes elfeed crashes emacs, and I cannot find the reason.
-(setq elfeed-feeds
-      '(;; ("http://nullprogram.com/feed/"
-	;;  program)
-	;; ("http://planet.emacsen.org/atom.xml"
-	;;  emacs
-	;;  blog)
-	("https://lukesmith.xyz/rss.xml"
-	 luke
-	 blog)
-	("http://notrelated.libsyn.com/rss"
-	 luke
-	 relevant
-	 podcast)
-	;; ("https://stackexchange.com/feeds/tagsets/347224/favorite-tags?sort=active"
-	;;  stackexchange
-	;;  favorite)
-	;; ("https://stackexchange.com/feeds/tagsets/347226/real-love?sort=active"
-	;;  real-love
-	;;  interests)
-	("https://www.reddit.com/r/emacs/.rss"
-	 emacs
-	 reddit)
-	("https://math.stackexchange.com/feeds/tag?tagnames=number-theory&sort=newest"
-	 interests
-	 favorite)
-	("https://mattbaker.blog/feed/"
-	 interests
-	 mattbaker
-	 blog)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTfRwznpxtbjQQQJ_15Fk2w"
-	;;  youtube
-	;;  3M)
-	("https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw"
-	 youtube
-	 3blue1brown)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyC_4jvPzLiSkJkLIkA7B8g"
-	;;  youtube
-	;;  music
-	;;  lindsey)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCPRWWKG0VkBA0Pqa4Jr5j0Q"
-	;;  youtube
-	;;  joeman)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjhwHd3mgmqm0ONm0bXKmng"
-	;;  youtube
-	;;  anju)
-	("https://www.youtube.com/feeds/videos.xml?channel_id=UCcXhhVwCT6_WqjkEniejRJQ"
-	 wintergarten
-	 youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtR5okwgTMghi_uyWvbloEg"
-         lao_kao
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI4xp8qHD1MDErkqxb1dPbA"
-         innerFrench
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTx8xR4VZ46IAsp5yBgLMzw"
-         endClashRoyale
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8TtAsZE51ekqffnNASo7DA"
-         dacon
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMUnInmOkrWN4gof9KlhNmQ"
-         KaoetMuo
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCwYJs4-yKmaALkLFX1uHFsw"
-         drama
-         youtube)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqripRcC8scod22F5NKvLcQ"
-	;;  julia
-	;;  youtube)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKSiE8dIEWsT-1jQCGrOqtw"
-	;;  youtube
-	;;  little-white)
-	;; ("https://math.stackexchange.com/feeds/question/2883754"
-	;;  math
-	;;  relation
-	;;  important)
-	;; ("https://haskellweekly.news/haskell-weekly.atom"
-	;;  haskell
-	;;  relevant
-	;;  blog)
-	("https://themonadreader.wordpress.com/feed/"
-	 monad-reader
-	 blog
-	 important)
-	;; ("https://www.reddit.com/r/haskell/.rss"
-	;;  haskell
-	;;  reddit)
-	;; ("https://www.archlinux.org/feeds/news/"
-	;;  archlinux
-	;;  relevant)
-	))
-(with-eval-after-load 'elfeed
-  (add-to-list 'elfeed-search-face-alist
-	       '(emacs elfeed-emacs-face))
-  (add-to-list 'elfeed-search-face-alist
-	       '(relevant elfeed-relevant-face))
-  (add-to-list 'elfeed-search-face-alist
-	       '(luke elfeed-relevant-face))
-  (add-to-list 'elfeed-search-face-alist
-	       '(important elfeed-math-face))
-  (add-to-list 'elfeed-search-face-alist
-	       '(youtube elfeed-youtube-face))
-  ;; my primary interests
-  (add-hook 'elfeed-new-entry-hook
-	    (elfeed-make-tagger :feed-url "math.*stackexchange"
-				:feed-title "number\\|class\\|algebraic\\|field\\|elliptic\\|cohomology\\|group"
-				:add '(math important)))
-  ;; don't mark old ones as unread
-  (add-hook 'elfeed-new-entry-hook
-	    (elfeed-make-tagger :before "1 week ago"
-				:remove 'unread))
-  ;; my secondary interests
-  (add-hook 'elfeed-new-entry-hook
-	    (elfeed-make-tagger :feed-url "math.*stackexchange"
-				:feed-title "geometry\\|topology\\|hodge\\|graph"
-				:add '(math relevant)))
-  (define-key elfeed-search-mode-map [?i] 'important-tag-toggler)
-  (define-key elfeed-search-mode-map [?l] 'relevant-tag-toggler)
-  (define-key elfeed-search-mode-map [?e] 'emacs-tag-toggler)
-  (define-key elfeed-search-mode-map [?m] 'math-toggler)
-  (define-key elfeed-search-mode-map [?U] 'unread-tag-toggler)
-  (define-key elfeed-search-mode-map [?y] 'youtube-tag-toggler)
-  (define-key elfeed-search-mode-map [?h] 'haskell-tag-toggler)
-  (define-key elfeed-search-mode-map [?b] 'elfeed-visit-or-play-with-mpv)
-  (define-key elfeed-search-mode-map [?d] 'elfeed-download-youtube)
-  (define-key elfeed-search-mode-map [?n] #'elfeed-next-entry)
-  (define-key elfeed-search-mode-map [?p] #'elfeed-previous-entry)
-  (define-key elfeed-show-mode-map [?b] 'elfeed-visit-or-play-with-mpv))
+;; (setq elfeed-feeds
+;;       '(;; ("http://nullprogram.com/feed/"
+;; 	;;  program)
+;; 	;; ("http://planet.emacsen.org/atom.xml"
+;; 	;;  emacs
+;; 	;;  blog)
+;; 	("https://lukesmith.xyz/rss.xml"
+;; 	 luke
+;; 	 blog)
+;; 	("http://notrelated.libsyn.com/rss"
+;; 	 luke
+;; 	 relevant
+;; 	 podcast)
+;; 	;; ("https://stackexchange.com/feeds/tagsets/347224/favorite-tags?sort=active"
+;; 	;;  stackexchange
+;; 	;;  favorite)
+;; 	;; ("https://stackexchange.com/feeds/tagsets/347226/real-love?sort=active"
+;; 	;;  real-love
+;; 	;;  interests)
+;; 	("https://www.reddit.com/r/emacs/.rss"
+;; 	 emacs
+;; 	 reddit)
+;; 	("https://math.stackexchange.com/feeds/tag?tagnames=number-theory&sort=newest"
+;; 	 interests
+;; 	 favorite)
+;; 	("https://mattbaker.blog/feed/"
+;; 	 interests
+;; 	 mattbaker
+;; 	 blog)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTfRwznpxtbjQQQJ_15Fk2w"
+;; 	;;  youtube
+;; 	;;  3M)
+;; 	("https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw"
+;; 	 youtube
+;; 	 3blue1brown)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyC_4jvPzLiSkJkLIkA7B8g"
+;; 	;;  youtube
+;; 	;;  music
+;; 	;;  lindsey)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCPRWWKG0VkBA0Pqa4Jr5j0Q"
+;; 	;;  youtube
+;; 	;;  joeman)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjhwHd3mgmqm0ONm0bXKmng"
+;; 	;;  youtube
+;; 	;;  anju)
+;; 	("https://www.youtube.com/feeds/videos.xml?channel_id=UCcXhhVwCT6_WqjkEniejRJQ"
+;; 	 wintergarten
+;; 	 youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtR5okwgTMghi_uyWvbloEg"
+;;          lao_kao
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI4xp8qHD1MDErkqxb1dPbA"
+;;          innerFrench
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTx8xR4VZ46IAsp5yBgLMzw"
+;;          endClashRoyale
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8TtAsZE51ekqffnNASo7DA"
+;;          dacon
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMUnInmOkrWN4gof9KlhNmQ"
+;;          KaoetMuo
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCwYJs4-yKmaALkLFX1uHFsw"
+;;          drama
+;;          youtube)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqripRcC8scod22F5NKvLcQ"
+;; 	;;  julia
+;; 	;;  youtube)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKSiE8dIEWsT-1jQCGrOqtw"
+;; 	;;  youtube
+;; 	;;  little-white)
+;; 	;; ("https://math.stackexchange.com/feeds/question/2883754"
+;; 	;;  math
+;; 	;;  relation
+;; 	;;  important)
+;; 	;; ("https://haskellweekly.news/haskell-weekly.atom"
+;; 	;;  haskell
+;; 	;;  relevant
+;; 	;;  blog)
+;; 	("https://themonadreader.wordpress.com/feed/"
+;; 	 monad-reader
+;; 	 blog
+;; 	 important)
+;; 	;; ("https://www.reddit.com/r/haskell/.rss"
+;; 	;;  haskell
+;; 	;;  reddit)
+;; 	;; ("https://www.archlinux.org/feeds/news/"
+;; 	;;  archlinux
+;; 	;;  relevant)
+;; 	))
+;; (with-eval-after-load 'elfeed
+;;   (add-to-list 'elfeed-search-face-alist
+;; 	       '(emacs elfeed-emacs-face))
+;;   (add-to-list 'elfeed-search-face-alist
+;; 	       '(relevant elfeed-relevant-face))
+;;   (add-to-list 'elfeed-search-face-alist
+;; 	       '(luke elfeed-relevant-face))
+;;   (add-to-list 'elfeed-search-face-alist
+;; 	       '(important elfeed-math-face))
+;;   (add-to-list 'elfeed-search-face-alist
+;; 	       '(youtube elfeed-youtube-face))
+;;   ;; my primary interests
+;;   (add-hook 'elfeed-new-entry-hook
+;; 	    (elfeed-make-tagger :feed-url "math.*stackexchange"
+;; 				:feed-title "number\\|class\\|algebraic\\|field\\|elliptic\\|cohomology\\|group"
+;; 				:add '(math important)))
+;;   ;; don't mark old ones as unread
+;;   (add-hook 'elfeed-new-entry-hook
+;; 	    (elfeed-make-tagger :before "1 week ago"
+;; 				:remove 'unread))
+;;   ;; my secondary interests
+;;   (add-hook 'elfeed-new-entry-hook
+;; 	    (elfeed-make-tagger :feed-url "math.*stackexchange"
+;; 				:feed-title "geometry\\|topology\\|hodge\\|graph"
+;; 				:add '(math relevant)))
+;;   (define-key elfeed-search-mode-map [?i] 'important-tag-toggler)
+;;   (define-key elfeed-search-mode-map [?l] 'relevant-tag-toggler)
+;;   (define-key elfeed-search-mode-map [?e] 'emacs-tag-toggler)
+;;   (define-key elfeed-search-mode-map [?m] 'math-toggler)
+;;   (define-key elfeed-search-mode-map [?U] 'unread-tag-toggler)
+;;   (define-key elfeed-search-mode-map [?y] 'youtube-tag-toggler)
+;;   (define-key elfeed-search-mode-map [?h] 'haskell-tag-toggler)
+;;   (define-key elfeed-search-mode-map [?b] 'elfeed-visit-or-play-with-mpv)
+;;   (define-key elfeed-search-mode-map [?d] 'elfeed-download-youtube)
+;;   (define-key elfeed-search-mode-map [?n] #'elfeed-next-entry)
+;;   (define-key elfeed-search-mode-map [?p] #'elfeed-previous-entry)
+;;   (define-key elfeed-show-mode-map [?b] 'elfeed-visit-or-play-with-mpv))
 
 
 ;;;###autoload
-(defun elfeed-next-entry (&optional arg)
-  "Go to the next entry in elfeed search buffer."
-  (interactive "p")
-  (when (looking-at "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}")
-    (forward-char))
-  (re-search-forward "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" nil t arg)
-  (beginning-of-visual-line))
+;; (defun elfeed-next-entry (&optional arg)
+;;   "Go to the next entry in elfeed search buffer."
+;;   (interactive "p")
+;;   (when (looking-at "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}")
+;;     (forward-char))
+;;   (re-search-forward "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" nil t arg)
+;;   (beginning-of-visual-line))
 
 ;;;###autoload
-(defun elfeed-previous-entry (&optional arg)
-  "Go to the previous entry in elfeed search buffer."
-  (interactive "p")
-  (re-search-forward "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" nil t (- arg))
-  (beginning-of-visual-line))
+;; (defun elfeed-previous-entry (&optional arg)
+;;   "Go to the previous entry in elfeed search buffer."
+;;   (interactive "p")
+;;   (re-search-forward "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" nil t (- arg))
+;;   (beginning-of-visual-line))
 
-(setq-default elfeed-search-filter "@1week-ago +unread")
+;; (setq-default elfeed-search-filter "@1week-ago +unread")
 
-(defface elfeed-math-face
-  `((t . (:background "gray10" :foreground "deep sky blue")))
-  "face for math feed")
+;; (defface elfeed-math-face
+;;   `((t . (:background "gray10" :foreground "deep sky blue")))
+;;   "face for math feed")
 
-(defface elfeed-relevant-face
-  `((t . (:background "gray10" :foreground "light blue")))
-  "face for relevant feed")
+;; (defface elfeed-relevant-face
+;;   `((t . (:background "gray10" :foreground "light blue")))
+;;   "face for relevant feed")
 
-(defface elfeed-emacs-face
-  `((t . (:background "gray10" :foreground "orange")))
-  "face for relevant feed")
-(defface elfeed-youtube-face
-  `((t . (:background "gray10" :foreground "yellow")))
-  "face for youtube feed")
+;; (defface elfeed-emacs-face
+;;   `((t . (:background "gray10" :foreground "orange")))
+;;   "face for relevant feed")
+;; (defface elfeed-youtube-face
+;;   `((t . (:background "gray10" :foreground "yellow")))
+;;   "face for youtube feed")
 
-;; play youtube video
-;;;###autoload
-(defun durand-play-with-mpv (quality url)
-  " Play a given URL with mpv."
-  (interactive (list (durand-get-quality-val)
-		     (read-string "Enter URL: ")))
-  (let ((quality-arg "")
-	(quality-val quality)
-	(fit-arg "--autofit=100%x100%"))
-    (setq quality-val (string-to-number quality-val))
-    (message "Opening %s with height ≤ %s with mpv..."
-	     url
-	     quality-val)
-    (when (< 0 quality-val)
-      (setq quality-arg (format "--ytdl-format=[height<=?%s]"
-				quality-val)))
-    (eshell)
-    (insert (format "mpv --no-terminal %s %s %s &"
-		    quality-arg
-		    fit-arg
-		    url))
-    (eshell-send-input)))
+;; ;; play youtube video
+;; ;;;###autoload
+;; (defun durand-play-with-mpv (quality url)
+;;   " Play a given URL with mpv."
+;;   (interactive (list (durand-get-quality-val)
+;; 		     (read-string "Enter URL: ")))
+;;   (let ((quality-arg "")
+;; 	(quality-val quality)
+;; 	(fit-arg "--autofit=100%x100%"))
+;;     (setq quality-val (string-to-number quality-val))
+;;     (message "Opening %s with height ≤ %s with mpv..."
+;; 	     url
+;; 	     quality-val)
+;;     (when (< 0 quality-val)
+;;       (setq quality-arg (format "--ytdl-format=[height<=?%s]"
+;; 				quality-val)))
+;;     (eshell)
+;;     (insert (format "mpv --no-terminal %s %s %s &"
+;; 		    quality-arg
+;; 		    fit-arg
+;; 		    url))
+;;     (eshell-send-input)))
 
-;;;###autoload
-(defun durand-play-with-mpv-in-elfeed (quality)
-  "If currently visiting a youtube feed entry or if the cursor is on a youtube feed entry,
-then play the video with mpv with QUALITY, else just inform this is not a youtube link."
-  (interactive (list (durand-get-quality-val)))
-  (let ((entry (if (eq major-mode 'elfeed-show-mode)
-		   elfeed-show-entry
-		 (elfeed-search-selected t)))
-	(quality-arg "")
-	(quality-val quality)
-	(fit-arg "--autofit=100%x100%"))
-    (setq quality-val (string-to-number quality-val))
-    (message "Opening %s with height ≤ %s with mpv..."
-	     (elfeed-entry-link entry)
-	     quality-val)
-    (when (< 0 quality-val)
-      (setq quality-arg (format "--ytdl-format=[height<=?%s]"
-				quality-val)))
-    ;; (start-process "elfeed-mpv" nil "mpv" quality-arg fit-arg (elfeed-entry-link entry))
-    (eshell)
-    (insert (format "mpv --no-terminal %s %s %s &"
-		    quality-arg
-		    fit-arg
-		    (elfeed-entry-link entry)))
-    (eshell-send-input)))
+;; ;;;###autoload
+;; (defun durand-play-with-mpv-in-elfeed (quality)
+;;   "If currently visiting a youtube feed entry or if the cursor is on a youtube feed entry,
+;; then play the video with mpv with QUALITY, else just inform this is not a youtube link."
+;;   (interactive (list (durand-get-quality-val)))
+;;   (let ((entry (if (eq major-mode 'elfeed-show-mode)
+;; 		   elfeed-show-entry
+;; 		 (elfeed-search-selected t)))
+;; 	(quality-arg "")
+;; 	(quality-val quality)
+;; 	(fit-arg "--autofit=100%x100%"))
+;;     (setq quality-val (string-to-number quality-val))
+;;     (message "Opening %s with height ≤ %s with mpv..."
+;; 	     (elfeed-entry-link entry)
+;; 	     quality-val)
+;;     (when (< 0 quality-val)
+;;       (setq quality-arg (format "--ytdl-format=[height<=?%s]"
+;; 				quality-val)))
+;;     ;; (start-process "elfeed-mpv" nil "mpv" quality-arg fit-arg (elfeed-entry-link entry))
+;;     (eshell)
+;;     (insert (format "mpv --no-terminal %s %s %s &"
+;; 		    quality-arg
+;; 		    fit-arg
+;; 		    (elfeed-entry-link entry)))
+;;     (eshell-send-input)))
 
-(defvar elfeed-mpv-patterns
-  '("youtu\\.?be")
-  "List of regexp to match against elfeed entry link to know
-whether to use mpv to visit the link.
-Default value is \"youtu\\.?be\"")
+;; (defvar elfeed-mpv-patterns
+;;   '("youtu\\.?be")
+;;   "List of regexp to match against elfeed entry link to know
+;; whether to use mpv to visit the link.
+;; Default value is \"youtu\\.?be\"")
 
-;;;###autoload
-(defun elfeed-visit-or-play-with-mpv ()
-  "Play in mpv if entry link matches `elfeed-mpv-patterns'; visit it otherwise.
-See `durand-play-with-mpv' also."
-  (interactive)
-  (let ((entry (if (eq major-mode 'elfeed-show-mode)
-		   elfeed-show-entry
-		 (elfeed-search-selected t)))
-	(patterns elfeed-mpv-patterns))
-    (while (and patterns
-		(not (string-match (car patterns) (elfeed-entry-link entry))))
-      (setq patterns (cdr patterns)))
-    (if patterns
-	(call-interactively 'durand-play-with-mpv-in-elfeed)
-      (if (eq major-mode 'elfeed-search-mode)
-	  (elfeed-search-browse-url)
-	(elfeed-show-visit)))))
+;; ;;;###autoload
+;; (defun elfeed-visit-or-play-with-mpv ()
+;;   "Play in mpv if entry link matches `elfeed-mpv-patterns'; visit it otherwise.
+;; See `durand-play-with-mpv' also."
+;;   (interactive)
+;;   (let ((entry (if (eq major-mode 'elfeed-show-mode)
+;; 		   elfeed-show-entry
+;; 		 (elfeed-search-selected t)))
+;; 	(patterns elfeed-mpv-patterns))
+;;     (while (and patterns
+;; 		(not (string-match (car patterns) (elfeed-entry-link entry))))
+;;       (setq patterns (cdr patterns)))
+;;     (if patterns
+;; 	(call-interactively 'durand-play-with-mpv-in-elfeed)
+;;       (if (eq major-mode 'elfeed-search-mode)
+;; 	  (elfeed-search-browse-url)
+;; 	(elfeed-show-visit)))))
 
-;;;###autoload
-(defun durand-download-youtube (url &optional title)
-  "Download the URL with youtube-dl"
-  (interactive)
-  (let ((current-prefix-arg '(4)))
-    (call-interactively 'eshell))
-  (insert "cd ~/Desktop/Centre/Vidéos")
-  (eshell-send-input)
-  (insert (if (not title)
-              (format "youtube-dl -f 22 \"%s\"" url)
-            (format "youtube-dl -f 22 \"%s\" -o \"%s.mp4\"" url title)))
-  (eshell-send-input)
-  (if title
-      (message "Downloading %s as %s.mp4" url title)
-    (message "Downloading %s" url)))
+;; ;;;###autoload
+;; (defun durand-download-youtube (url &optional title)
+;;   "Download the URL with youtube-dl"
+;;   (interactive)
+;;   (let ((current-prefix-arg '(4)))
+;;     (call-interactively 'eshell))
+;;   (insert "cd ~/Desktop/Centre/Vidéos")
+;;   (eshell-send-input)
+;;   (insert (if (not title)
+;;               (format "youtube-dl -f 22 \"%s\"" url)
+;;             (format "youtube-dl -f 22 \"%s\" -o \"%s.mp4\"" url title)))
+;;   (eshell-send-input)
+;;   (if title
+;;       (message "Downloading %s as %s.mp4" url title)
+;;     (message "Downloading %s" url)))
 
-;;;###autoload
-(defun elfeed-download-youtube ()
-  "
-Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
-  (interactive)
-  (let* ((entry (if (eq major-mode 'elfeed-show-mode)
-		    elfeed-show-entry
-		  (elfeed-search-selected t)))
-	 (link (elfeed-entry-link entry))
-         (title (elfeed-entry-title entry))
-	 (patterns elfeed-mpv-patterns))
-    (while (and patterns
-		(not (string-match (car patterns) (elfeed-entry-link entry))))
-      (setq patterns (cdr patterns)))
-    (when patterns
-      (durand-download-youtube link title))))
+;; ;;;###autoload
+;; (defun elfeed-download-youtube ()
+;;   "
+;; Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
+;;   (interactive)
+;;   (let* ((entry (if (eq major-mode 'elfeed-show-mode)
+;; 		    elfeed-show-entry
+;; 		  (elfeed-search-selected t)))
+;; 	 (link (elfeed-entry-link entry))
+;;          (title (elfeed-entry-title entry))
+;; 	 (patterns elfeed-mpv-patterns))
+;;     (while (and patterns
+;; 		(not (string-match (car patterns) (elfeed-entry-link entry))))
+;;       (setq patterns (cdr patterns)))
+;;     (when patterns
+;;       (durand-download-youtube link title))))
 
-;;;###autoload
-(defun durand-get-quality-val ()
-  "Let the user choose a quality format."
-  (ivy-read "Max height resolution (0 for unlimited): "
-	    '("0" "480" "720")
-	    :caller 'durand-get-quality-val))
+;; ;;;###autoload
+;; (defun durand-get-quality-val ()
+;;   "Let the user choose a quality format."
+;;   (ivy-read "Max height resolution (0 for unlimited): "
+;; 	    '("0" "480" "720")
+;; 	    :caller 'durand-get-quality-val))
 
-;;;###autoload
-(defmacro make-tag-toggler (arg)
-  "
-Make a function that toggles the tag ARG on or off in elfeed search"
-  `(defun ,(intern (format "%s-tag-toggler" arg)) ()
-     ,(format "Toggle %s tag" arg)
-     (interactive)
-     (cond ((string-match (concat " \\+" ,arg) elfeed-search-filter)
-	    (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
-	   ((string-match (concat " -" ,arg) elfeed-search-filter)
-	    (elfeed-search-set-filter (replace-match (concat " +" ,arg) nil nil elfeed-search-filter)))
-	   (t
-	    (elfeed-search-set-filter (concat elfeed-search-filter (concat " -" ,arg)))))
-     (message elfeed-search-filter)))
+;; ;;;###autoload
+;; (defmacro make-tag-toggler (arg)
+;;   "
+;; Make a function that toggles the tag ARG on or off in elfeed search"
+;;   `(defun ,(intern (format "%s-tag-toggler" arg)) ()
+;;      ,(format "Toggle %s tag" arg)
+;;      (interactive)
+;;      (cond ((string-match (concat " \\+" ,arg) elfeed-search-filter)
+;; 	    (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
+;; 	   ((string-match (concat " -" ,arg) elfeed-search-filter)
+;; 	    (elfeed-search-set-filter (replace-match (concat " +" ,arg) nil nil elfeed-search-filter)))
+;; 	   (t
+;; 	    (elfeed-search-set-filter (concat elfeed-search-filter (concat " -" ,arg)))))
+;;      (message elfeed-search-filter)))
 
-;;;###autoload
-(defmacro make-toggler (arg)
-  "
-Make a function that toggles ARG on or off in elfeed search"
-  `(defun ,(intern (format "%s-toggler" arg)) ()
-     ,(format "Toggle %s" arg)
-     (interactive)
-     (cond ((string-match (concat " " ,arg) elfeed-search-filter)
-	    (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
-	   (t
-	    (elfeed-search-set-filter (concat elfeed-search-filter (concat " " ,arg)))))
-     (message elfeed-search-filter)))
+;; ;;;###autoload
+;; (defmacro make-toggler (arg)
+;;   "
+;; Make a function that toggles ARG on or off in elfeed search"
+;;   `(defun ,(intern (format "%s-toggler" arg)) ()
+;;      ,(format "Toggle %s" arg)
+;;      (interactive)
+;;      (cond ((string-match (concat " " ,arg) elfeed-search-filter)
+;; 	    (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
+;; 	   (t
+;; 	    (elfeed-search-set-filter (concat elfeed-search-filter (concat " " ,arg)))))
+;;      (message elfeed-search-filter)))
 
-(make-tag-toggler "youtube")
-(make-tag-toggler "emacs")
-(make-tag-toggler "blog")
-(make-tag-toggler "relevant")
-(make-tag-toggler "important")
-(make-tag-toggler "unread")
-(make-tag-toggler "haskell")
-(make-toggler "math")
+;; (make-tag-toggler "youtube")
+;; (make-tag-toggler "emacs")
+;; (make-tag-toggler "blog")
+;; (make-tag-toggler "relevant")
+;; (make-tag-toggler "important")
+;; (make-tag-toggler "unread")
+;; (make-tag-toggler "haskell")
+;; (make-toggler "math")
 
 ;; The code for clearing up data-base
 ;; when .elfeed gets over 20M, then I would like to clear that directory and start over.
@@ -348,7 +348,7 @@ Make a function that toggles ARG on or off in elfeed search"
 ;; 			       ("cohomology" . 2))
 ;;   "Patterns to match against an elfeed entry in auto-tagging, along with an attached score.")
 
-;; mu4e
+;;* mu4e
 (add-to-list 'load-path "/usr/local/Cellar/mu/1.2.0_1/share/emacs/site-lisp/mu/mu4e/")
 (require 'mu4e)
 (define-key mu4e-main-mode-map (vector ?u) 'mu4e-update-mail-and-index)
