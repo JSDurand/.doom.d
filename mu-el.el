@@ -695,13 +695,13 @@ the query history stack."
 
 (set-evil-initial-state!
   '(mu4e-main-mode
-    mu4e-view-mode
     mu4e-compose-mode
     mu4e~update-mail-mode)
   'normal)
 
 (set-evil-initial-state!
-  '(mu4e-headers-mode)
+  '(mu4e-headers-mode
+    mu4e-view-mode)
   'emacs)
 
 ;; advice update function to log something.

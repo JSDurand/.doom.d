@@ -1,9 +1,16 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+;;* Prevent some `battery-update' problem.
+(fset 'battery-update 'ignore)
+
+;; enable dired details mode
+(after! dired
+  (add-hook 'dired-mode-hook #'dired-hide-details-mode))
+
 ;;* Fonts
 
 (setq doom-font "DejaVu Sans Mono for Powerline 20"
-      doom-variable-pitch-font nil ; inherits `doom-font''s :size
+      doom-variable-pitch-font nil      ; inherits `doom-font''s :size
       doom-unicode-font nil
       doom-big-font nil)
 
@@ -83,7 +90,24 @@
          :description path)))))
 
 (map! :ngvm (kbd "s-w") 'delete-other-windows
-      :map doom-leader-code-map "c" 'clean-up-buffers)
+      :map doom-leader-code-map
+      "b" 'clean-up-buffers
+      "v" #'TeX-view
+      "t" #'TeX-command-run-all)
+
+;; toggle hl-todo-mode
+;;;###autoload
+(defun durand-toggle-hl-todo ()
+  "Toggle `hl-todo-mode'."
+  (interactive)
+  (cond
+   (hl-todo-mode
+    (hl-todo-mode -1))
+   ((not hl-todo-mode)
+    (hl-todo-mode 1))))
+
+(map! :map doom-leader-toggle-map
+      "h" #'durand-toggle-hl-todo)
 
 ;;* transpose word is very important
 (map! :n [?\M-t] #'transpose-words
@@ -111,7 +135,8 @@
   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand)))))
 
 (map! :prefix "g" :m "h" 'evil-goto-line)
-(map! :n (kbd "s-q") 'load-config)
+;; (map! :n (kbd "s-q") 'load-config)
+(map! :n [?\s-q] (lambda! (message "Don't use s-q!")))
 
 ;; (map! :nvm "s" nil)
 ;; (map! :g "c" 'self-insert-command)
@@ -176,6 +201,8 @@
 (setq revert-without-query '(".*"))
 
 ;;* org-agenda and magit should start with emacs state
+
+
 (set-evil-initial-state!
   '(org-agenda-mode magit-status-mode)
   'emacs)
@@ -195,6 +222,23 @@
       doom-modeline-mu4e t)
 (setq inhibit-compacting-font-caches t)
 
+;; when in terminal mode, don't display icons.
+
+;; I need to check for GUI in a hook
+;;;###autoload
+(cl-defun frame-init-behaviour (&optional (frame (selected-frame)))
+  "Disable displaying icons in the mode line when run in a terminal"
+  (with-selected-frame frame
+    (cond
+     ((display-graphic-p nil)
+      (setf doom-modeline-icon t))
+     (t
+      (setf doom-modeline-icon nil)))))
+
+(frame-init-behaviour)
+
+(add-hook 'after-make-frame-functions #'frame-init-behaviour)
+
 ;;*  I want to cut down the buffer name
 
 (require 'doom-modeline)
@@ -203,10 +247,12 @@
 ;;;###autoload
 (defun doom-modeline-segment--buffer-info-durand ()
   "Almost the same as `doom-modeline-segment--buffer-info',
-but it truncates the buffer name within a fixed length."
-  (s-truncate durand-buffer-name-max
-              (format-mode-line (doom-modeline-segment--buffer-info))
-              "..."))
+but it truncates the buffer name within `durand-buffer-name-max'."
+  (concat
+   (doom-modeline--buffer-narrow-icon-durand)
+   (s-truncate durand-buffer-name-max
+               (format-mode-line (doom-modeline-segment--buffer-info))
+               "...")))
 
 ;;* buffer file name style
 (setf doom-modeline-buffer-file-name-style 'buffer-name)
@@ -214,6 +260,82 @@ but it truncates the buffer name within a fixed length."
 (byte-compile 'doom-modeline-segment--buffer-info-durand)
 
 (add-to-list 'doom-modeline-fn-alist (cons 'buffer-info-durand 'doom-modeline-segment--buffer-info-durand))
+
+;; show the narrowing information
+
+;;;###autoload
+(defvar doom-modeline--buffer-narrow-icon nil
+  "Icon for the narrowing state of the buffer.")
+
+;;;###autoload
+(defun doom-modeline-update-buffer-narrow-state-icon (&rest _)
+  "Update the buffer narrowing state in mode-line."
+  (setq doom-modeline--buffer-narrow-icon
+        (when doom-modeline-buffer-state-icon
+          (ignore-errors
+            (cond ((buffer-narrowed-p)
+                   (doom-modeline-buffer-file-state-icon
+                    "vertical_align_center" "↕" "><" 'doom-modeline-warning))
+                  (t ""))))))
+
+(add-hook 'find-file-hook #'doom-modeline-update-buffer-narrow-state-icon)
+;; (add-hook 'after-save-hook #'doom-modeline-update-buffer-narrow-state-icon)
+(add-hook 'clone-indirect-buffer-hook #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'pop-to-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'undo :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'undo-tree-undo-1 :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'undo-tree-redo-1 :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'popup-create :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'popup-delete :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'symbol-overlay-rename :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'narrow-to-region :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'durand-narrow-dwim :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'switch-to-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'kill-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'widen :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'org-narrow-to-block :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'org-narrow-to-element :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'org-narrow-to-subtree :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'org-toggle-narrow-to-subtree :after #'doom-modeline-update-buffer-narrow-state-icon)
+
+;; don't display narrowing state in the original function.
+;;;###autoload
+(defun doom-modeline-update-buffer-file-state-icon (&rest _)
+  "Update the buffer or file state in mode-line. Modified by Durand."
+  (setq doom-modeline--buffer-file-state-icon
+        (when doom-modeline-buffer-state-icon
+          (ignore-errors
+            (cond (buffer-read-only
+                   (doom-modeline-buffer-file-state-icon
+                    "lock" "🔒" "%1*" `(:inherit doom-modeline-warning
+                                                 :weight ,(if doom-modeline-icon
+                                                              'normal
+                                                            'bold))))
+                  ((and buffer-file-name (buffer-modified-p)
+                        doom-modeline-buffer-modification-icon)
+                   (doom-modeline-buffer-file-state-icon
+                    "save" "💾" "%1*" `(:inherit doom-modeline-buffer-modified
+                                                 :weight ,(if doom-modeline-icon
+                                                              'normal
+                                                            'bold))))
+                  ((and buffer-file-name
+                        (not (file-exists-p buffer-file-name)))
+                   (doom-modeline-buffer-file-state-icon
+                    "block" "🚫" "!" 'doom-modeline-urgent))
+                  (t ""))))))
+
+;;;###autoload
+(defsubst doom-modeline--buffer-narrow-icon-durand ()
+  "The icon of the current narrowing state."
+  (when doom-modeline-buffer-state-icon
+    (when-let ((icon (or doom-modeline--buffer-narrow-icon
+                         (doom-modeline-update-buffer-narrow-state-icon))))
+      (concat
+       (if (doom-modeline--active)
+           icon
+         (propertize icon 'face `(:inherit ,(get-text-property 0 'face icon)
+                                           :inherit mode-line-inactive)))
+       (doom-modeline-vspc)))))
 
 ;;;###autoload
 (defun doom-modeline-segment--buffer-position-durand ()
@@ -262,7 +384,8 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
     remote-host
     buffer-position-durand
     ;; parrot
-    selection-info)
+    ;; selection-info
+    )
   '(objed-state
     misc-info
     ;; persp-name
@@ -341,6 +464,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 
 ;;* c++ needs include files
 (setq-default flycheck-clang-include-path '("include"))
+(setq-default flycheck-gcc-include-path '("include"))
 
 ;;* ay-go-to-char
 (map! :leader :n "y" #'evil-avy-goto-char-timer)
@@ -442,3 +566,57 @@ If ARG is non-nil, show the full name of the buffer."
  :n [?a] 'outline-cycle
  :n [?j] 'outline-next-visible-heading
  :n [?k] 'outline-previous-visible-heading)
+
+;; hl-todo for LaTeX
+(add-hook 'LaTeX-mode-hook #'hl-todo-mode t)
+
+;; compile and run in CC mode
+
+(eval-after-load 'cc-mode
+  '(progn
+     (define-key c-mode-map [f8] 'compile-and-run-c)
+     (define-key c++-mode-map [f8] 'compile-and-run-c)))
+
+(defvar c-program-name "./main"
+  "The executable name to run after compilation.")
+
+(make-variable-buffer-local 'c-program-name)
+
+;;;###autoload
+(defun compile-and-run-c (&optional arg)
+  "Compile and run in c-mode"
+  (interactive "P")
+  (if (null arg)
+      (make-process
+       :name "*compilation*"
+       :buffer "*C compilation*"
+       :command '("make" "main")
+       :sentinel (lambda (_process event-string)
+                   (if (string-prefix-p "finished" event-string)
+                       (let ((default-directory (file-name-directory (buffer-file-name))))
+                         (make-process
+                          :name "run"
+                          :buffer "*running*"
+                          :command (list (concat (file-name-as-directory default-directory) c-program-name))))
+                     (user-error "There is a problem!")
+                     (switch-to-buffer "C compilation"))))
+    (make-process
+     :name "*Instruments*"
+     :buffer nil
+     :command '("open" "/Applications/Xcode.app/Contents/Applications/Instruments.app"))))
+
+
+;;* glsl auto mode
+
+(add-to-list 'auto-mode-alist '("\\.fs\\'" . glsl-mode))
+(add-to-list 'auto-mode-alist '("\\.vs\\'" . glsl-mode))
+(add-to-list 'auto-mode-alist '("\\.gs\\'" . glsl-mode))
+
+;; ccls
+
+(after! ccls
+  (setq ccls-initialization-options
+        `(:clang ,(list :extraArgs ["-isystem/Library/Developer/CommandLineTools/usr/include/c++/v1"
+                                    "-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+                                    "-isystem/usr/local/include"]
+                        :resourceDir (string-trim (shell-command-to-string "clang -print-resource-dir"))))))

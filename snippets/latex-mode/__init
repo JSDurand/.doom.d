@@ -19,6 +19,7 @@
 \usepackage{hyperref}
 \usepackage{amsfonts, amsthm}
 \usepackage{enumitem}
+\usepackage{tikz}
 \author{${1:Durand}}
 \date{${2:`(format (format-time-string "%%s %%s, %Y")
                    (capitalize (format-time-string "%B"))

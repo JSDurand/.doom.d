@@ -10,6 +10,17 @@
 
 (setf +doom-dashboard-pwd-policy doom-private-dir)
 
+;; (setf +doom-dashboard-functions '(doom-dashboard-widget-banner
+;;                                   doom-dashboard-widget-shortmenu
+;;                                   doom-dashboard-widget-loaded
+;;                                   doom-dashboard-widget-footer))
+
+
+(setf +doom-dashboard-functions '(doom-dashboard-widget-banner
+                                  doom-dashboard-widget-shortmenu
+                                  doom-dashboard-widget-loaded)
+      +doom-dashboard-banner-padding '(5 . 3))
+
 (setf +doom-dashboard-menu-sections
       '(;; ("Open articles"
         ;;  :icon (all-the-icons-octicon "book" :face 'font-lock-keyword-face)
@@ -37,6 +48,10 @@
          :icon (all-the-icons-material "open_in_browser" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-browser)
          :action durand-open-browser)
+        ("Open Discord"
+         :icon (all-the-icons-material "account_circle" :face 'font-lock-keyword-face)
+         :when (fboundp 'durand-open-discord)
+         :action durand-open-discord)
         ("Open Terminal"
          :icon (all-the-icons-octicon "terminal" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-terminal)
@@ -53,3 +68,19 @@
   (switch-to-buffer (doom-fallback-buffer)))
 
 (map! :leader :n "vd" #'durand-open-dashboard)
+
+;;;###autoload
+(defun durand-open-discord (&optional arg)
+  "Open Discord.
+With ARG \\[universal-argument], close discord."
+  (interactive "P")
+  (let ((browsing-command (cond ((equal arg '(4))
+                                 '("osascript" "-e" "tell application \"Discord\" to quit"))
+                                (t
+                                 '("open" "-a" "Discord")))))
+    (make-process
+     :name "Discord"
+     :command browsing-command
+     :buffer nil))
+  (when (equal arg '(4))
+    (message "Discord closed.")))

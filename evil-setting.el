@@ -53,13 +53,13 @@
 ;;       evil-visual-state-tag   (propertize " VISUAL " 'face '((:foreground "goldenrod1" :background "gray20")))
 ;;       evil-operator-state-tag (propertize " OPERATOR " 'face '((:foreground "pink" :background "gray20"))))
 
-(setq evil-normal-state-tag   (propertize " NORMAL " 'face '((:foreground "gray20" :background "cornflowerblue")))
-      evil-emacs-state-tag    (propertize " EMACS " 'face '((:foreground "gray20" :background "#39bf4c")))
-      evil-insert-state-tag   (propertize " INSERT " 'face '((:foreground "gray20" :background "green")))
-      evil-replace-state-tag  (propertize " REPLACE " 'face '((:foreground "gray20" :background "red")))
-      evil-motion-state-tag   (propertize " MOTION " 'face '((:foreground "gray20" :background "orange")))
-      evil-visual-state-tag   (propertize " VISUAL " 'face '((:foreground "gray20" :background "goldenrod1")))
-      evil-operator-state-tag (propertize " OPERATOR " 'face '((:foreground "gray20" :background "pink"))))
+(setq evil-normal-state-tag   (propertize " N " 'face '((:foreground "gray20" :background "cornflowerblue")))
+      evil-emacs-state-tag    (propertize " E " 'face '((:foreground "gray20" :background "#39bf4c")))
+      evil-insert-state-tag   (propertize " I " 'face '((:foreground "gray20" :background "green")))
+      evil-replace-state-tag  (propertize " R " 'face '((:foreground "gray20" :background "red")))
+      evil-motion-state-tag   (propertize " M " 'face '((:foreground "gray20" :background "orange")))
+      evil-visual-state-tag   (propertize " V " 'face '((:foreground "gray20" :background "goldenrod1")))
+      evil-operator-state-tag (propertize " O " 'face '((:foreground "gray20" :background "pink"))))
 
 (evil-define-key nil evil-insert-state-map
   [home] 'evil-normal-state)
@@ -86,9 +86,9 @@
 
 (evil-define-key nil durand-evil-ret-map
   "\"" 'transpose-chars-back-4
-  [?j] 'jump-to-other-window-link
-  [?P] 'evil-backward-sentence-begin
-  [?p] 'evil-forward-sentence-begin
+  ;; [?j] 'jump-to-other-window-link
+  ;; [?P] 'evil-backward-sentence-begin
+  ;; [?p] 'evil-forward-sentence-begin
   [?s] 'durand-open-browser
   [?,] 'evil-window-top
   [?\r] 'durand-open-link
@@ -96,6 +96,7 @@
   [?:] 'evil-window-bottom
   [?o] 'evil-jump-backward
   [?a] #'durand-agenda
+  [?d] #'durand-open-discord
   [?e] 'durand-eval
   ;; [?t]
   ;; (lambda ()
@@ -221,19 +222,19 @@ articles, bookmarks, youtube links, novels, or weblinks.")
 
 (evil-define-key nil durand-evil-space-map
   [tab] 'yas-expand
-  [?x] ctl-x-map
+  ;; [?x] ctl-x-map
   [?n] 'evil-ex-nohighlight
   [?=] 'evil-align-regexp
-  [?m] 'durand-mu4e
-  [?M] 'mu4e
+  ;; [?m] 'durand-mu4e
+  ;; [?M] 'mu4e
   [?%] 'widen
-  [?u] (lambda ()
-         (interactive)
-         (org-store-link nil t))
+  ;; [?u] (lambda ()
+  ;;        (interactive)
+  ;;        (org-store-link nil t))
   [?v] durand-view-map
   [?é] 'split-window-below
   [?\"] 'split-window-right
-  [?X] 'ace-swap-window
+  ;; [?X] 'ace-swap-window
   [?o] 'durand-new-buffer
   [?O] 'make-blank-space
   [?c] 'clean-up-buffers
@@ -245,7 +246,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
   [?g] 'backward-or-up-sexp
   ;; [?h] 'forward-or-up-sexp
   [?h] help-map
-  [?s] 'durand-cap-word
+  ;; [?s] 'durand-cap-word
   [?-] 'negative-argument
   [?p] evil-projectile-map
   [?\r] durand-evil-spc-ret-map
@@ -256,20 +257,20 @@ articles, bookmarks, youtube links, novels, or weblinks.")
   ;; [?'] 'durand-edit-special
   ;; try the newer function
   [?'] 'durand-narrow-dwim
-  [?w] 'delete-other-windows
-  [?W] 'delete-window
-  [?q] 'quit-other-window
+  ;; [?w] 'delete-other-windows
+  ;; [?W] 'delete-window
+  ;; [?q] 'quit-other-window
   [?z] 'capitalize-region-or-word
-  [?t] 'avy-goto-char-timer
-  [?:] 'evil-commenter
+  ;; [?t] 'avy-goto-char-timer
+  ;; [?:] 'evil-commenter
   ;; [?:] 'durand-comment-dwim
-  [?,] 'evil-goto-first-line
-  [?\;] 'evil-goto-line
-  [?\s-x] (lambda ()
-            (interactive)
-            (setq display-line-numbers
-                  (and (null display-line-numbers)
-                       'relative)))
+  ;; [?,] 'evil-goto-first-line
+  ;; [?\;] 'evil-goto-line
+  ;; [?\s-x] (lambda ()
+  ;;           (interactive)
+  ;;           (setq display-line-numbers
+  ;;                 (and (null display-line-numbers)
+  ;;                      'relative)))
   [?e] 'durand-wrap-region-with)
 
 ;;;###autoload
@@ -331,7 +332,7 @@ With ARG, open the index file even not in `js2-mode'."
   [?$] 'evil-end-of-line
   [?i] 'evil-emacs-state
   [40] 'universal-argument
-  [?x] 'amx
+  ;; [?x] 'amx
   [?\)] 'evil-forward-paragraph
   [?Q] 'durand-quit-window)
 
@@ -339,7 +340,7 @@ With ARG, open the index file even not in `js2-mode'."
 
  (evil-define-key nil evil-normal-state-map
   [home] 'evil-emacs-state
-  [?x] 'amx
+  ;; [?x] 'amx
   [?X] (lambda ()
          (interactive)
          (pcase major-mode
@@ -348,6 +349,7 @@ With ARG, open the index file even not in `js2-mode'."
            (_
             (user-error "Not in mu4e-headers-mode"))))
   [backspace] #'durand-other-buffer
+  [?\d] #'durand-other-buffer
   [32] durand-evil-space-map
   [?\r] durand-evil-ret-map
   ;; [?\)] 'durand-end-of-line-or-block
@@ -411,8 +413,8 @@ With ARG, open the index file even not in `js2-mode'."
             (indent-for-tab-command current-prefix-arg))))
   [?J] 'evil-join
   [?\M-o] 'evil-jump-forward
-  [?\C-a] 'evil-numbers/inc-at-pt
-  [?\C-x] 'evil-numbers/dec-at-pt
+  ;; [?\C-a] 'evil-numbers/inc-at-pt
+  ;; [?\C-x] 'evil-numbers/dec-at-pt
   [?\(] 'universal-argument
   [?\s-x] (lambda ()
             (interactive)

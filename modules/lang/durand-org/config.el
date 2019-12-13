@@ -8,6 +8,7 @@
   (setq org-todo-keywords
         '((sequence "TODO(t)" "START(s)" "WORKING(w)" "HARD-WORKING(h)" "ALMOST(a)" "|" "DONE(d)")
           (sequence "TO-THINK(c)" "PENDING(p)" "HARD(r)" "IMPOSSIBLE(i)" "|" "SOLVED(v)"))
+        org-tags-column -110
         org-special-ctrl-a/e nil))
 (setq org-agenda-files '("~/org/agenda.org" "~/org/notes.org" "~/org/aujourdhui.org"))
 ;; (setq org-log-state-notes-insert-after-drawers nil)
@@ -48,6 +49,7 @@
 (map! :map org-agenda-mode-map
       [?\M-n] 'org-super-agenda-next-group
       [?\M-p] 'org-super-agenda-previous-group
+      [M-return] 'org-agenda-open-link
       [f8] 'durand-org-account-prefix-map
       [?c] 'durand-agenda
       [?V] 'orgy-view
@@ -61,6 +63,7 @@
       [?p] 'org-agenda-previous-item
       [?P] 'org-agenda-previous-line
       "<backspace>" 'org-agenda-first-block
+      [?\d] 'org-agenda-first-block
       "à" 'org-agenda-last-block
       "s-)" 'org-super-agenda-next-group
       "s-(" 'org-super-agenda-previous-group
@@ -369,11 +372,11 @@ This should be setted by the PERIOD-FUNC argument.")
 
 (after! org-fancy-priorities
   (setf org-fancy-priorities-list
-        (list "H"
-              "U"
-              "M"
-              "L"
-              "D")
+        (list "I"
+              "II"
+              "III"
+              "IV"
+              "V")
         ;; (append (-take 3 org-fancy-priorities-list) (list "■" "■" ))
         org-priority-faces
         (append (-take 3 org-priority-faces)

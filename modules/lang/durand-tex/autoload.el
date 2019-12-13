@@ -206,6 +206,13 @@ If ARG is non-nil, delete the buffer BN"
          (View-scroll-page-backward))
         ((region-active-p) ; if the region is active, then do the original thing
          (delete-char 1))
+        ((looking-back "\\\\(" (- (point) 2))
+         (save-excursion
+           (backward-char 1)
+           (ignore-errors
+             (forward-sexp 1)
+             (delete-char -2)))
+         (delete-char -2))
         ((memq (char-before) '(?\( ?\[ ?\{))
          (save-excursion
            (backward-char 1)

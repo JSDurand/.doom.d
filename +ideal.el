@@ -1656,12 +1656,12 @@ With ARG \\[universal-argument]\\[universal-argument], close safari."
 
 (defun durand-narrow-dwim (arg)
   "Widen when narrowed, unless ARG is non-nil.
-     Quit org-edit-src, unless ARG is non-nil.
-     When region is active, narrow to that region.
-     In org-mode, if ARG is '(16), then execute `org-edit-special';
-     else try `org-edit-src-code', `org-narrow-to-block',
-     `org-narrow-to-subtree', and `org-edit-special' in this order.
-     Otherwise execute `narrow-to-defun'."
+Quit org-edit-src, unless ARG is non-nil.
+When region is active, narrow to that region.
+In org-mode, if ARG is '(16), then execute `org-edit-special';
+else try `org-edit-src-code', `org-narrow-to-block',
+`org-narrow-to-subtree', and `org-edit-special' in this order.
+Otherwise execute `narrow-to-defun'."
   (interactive "P")
   (cond
    ((and (buffer-narrowed-p) (not arg)) (widen))

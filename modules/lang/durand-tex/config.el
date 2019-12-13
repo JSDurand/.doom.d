@@ -265,6 +265,9 @@
       [remap company-complete-common-or-cycle]
       'company-yasnippet-or-completion)
 
+;; LaTeX section height
+(setq! font-latex-fontify-sectioning 1.3)
+
 
 
 ;; ARCHIVE

@@ -230,7 +230,7 @@ Don't bind it to a key in `general-hydra/heads'"
      ((or
        (string-match "https?://math.stackexchange.com" link)
        (string-match "https?://mathoverflow.net/" link))
-      ":stack:")
+      ":stack:web_link:")
      ((string-match "https?://www.uukanshu.com" link)
       ":roman:")
      (t
@@ -246,6 +246,60 @@ Don't bind it to a key in `general-hydra/heads'"
       (org-update-account)
       (ignore-errors (save-buffer 0))
       (durand-show-account-report))))
+
+;;;###autoload
+(defun durand-collect-shop-infos ()
+  "Return relevant information from the heading."
+  (when (= (car (org-heading-components)) 4)
+    ;; It is possible to be called inside `org-map-entries'.
+    (let* ((date-string (if (save-excursion
+                              (outline-up-heading 1)
+                              (re-search-forward org-date-tree-headline-regexp (line-end-position) t))
+                            (match-string-no-properties 1)
+                          (user-error "No matching date found!")))
+           (title
+            (save-excursion
+              (org-end-of-meta-data)
+              (org-skip-whitespace)
+              (buffer-substring-no-properties (point) (line-end-position))))
+           (cost (org-entry-get (point) "cost"))
+           (from-string (org-entry-get (point) "from"))
+           (from (when from-string
+                   (let ((ori (split-string from-string "\\( \\|:\\)"))
+                         res)
+                     (dolist (ele ori)
+                       (unless (numberp (read ele))
+                         (push ele res)))
+                     (setf res (nreverse res))
+                     (dotimes (i (length ori) res)
+                       (when (numberp (read (nth i ori)))
+                         (if (= i 0)
+                             (user-error "The first element of FROM cannot be a number!")
+                           (setf res (remove (nth (1- i) ori) res)
+                                 res (append res
+                                             (list (cons (nth (1- i) ori)
+                                                         (read (nth i ori))))))))))))
+           (balanced-from (when from-string
+                            (let (temp ave (cur 0))
+                              (dolist (ele from)
+                                (cond
+                                 ((consp ele)
+                                  (setf cur (+ cur (cdr ele))))
+                                 ((stringp ele)
+                                  (push ele temp))
+                                 (t
+                                  (user-error "ELE is strange: %s" ele))))
+                              (setf ave (/ (- (read cost) cur) (float (length temp))))
+                              (dolist (ele temp from)
+                                (setf from (remove ele from)
+                                      from (append from
+                                                   (list (cons ele ave)))))))))
+      (dolist (ele balanced-from balanced-from)
+        (setf balanced-from (remove ele balanced-from)
+              balanced-from (push (cons (car ele)
+                                        (- (cdr ele)))
+                                  balanced-from)))
+      (list date-string title cost balanced-from))))
 
 ;;;###autoload
 (defun durand-show-account-report (&optional period-func report-mode sum-type exclude-type)
@@ -371,7 +425,7 @@ or a custom specifier of time period."
           (str-month (nth 4 str-list))
           (str-day (nth 3 str-list)))
      ;; Ensure that the time being matched is less than or equal to the last day
-     (assert (or (time-less-p str-time last-time)
+     (cl-assert (or (time-less-p str-time last-time)
                  (and (= last-day str-day)
                       (= last-month str-month)
                       (= last-year str-year))))
@@ -592,57 +646,59 @@ Press \\[durand-view-last-day] to view the last day;
 If there is only one link, return it.
 If NTH is an integer, return the NTH link found.
 If ZERO is a string, check also this string for a link, and if
-there is one, return it."
+there is one, return it.
+
+Modified by Durand"
   (with-current-buffer buffer
     (org-with-wide-buffer
      (goto-char marker)
      (let ((cnt ?0)
-	   have-zero end links link c)
-       (when (and (stringp zero) (string-match org-link-bracket-regexp zero))
-	 (push (match-string 0 zero) links)
-	 (setq cnt (1- cnt) have-zero t))
+           have-zero end links link c)
+       (when (and (stringp zero) (string-match org-link-bracket-re zero))
+         (push (match-string 0 zero) links)
+         (setq cnt (1- cnt) have-zero t))
        (save-excursion
-	 (org-back-to-heading t)
-	 (setq end (save-excursion (outline-next-heading) (point)))
-	 (while (re-search-forward org-link-any-re end t)
-	   (push (match-string 0) links))
-	 (setq links (org-uniquify (reverse links))))
+         (org-back-to-heading t)
+         (setq end (save-excursion (outline-next-heading) (point)))
+         (while (re-search-forward org-link-any-re end t)
+           (push (match-string 0) links))
+         (setq links (org-uniquify (reverse links))))
        (cond
-	((null links)
-	 (message "No links"))
-	((and (integerp nth) (< nth 0))
+        ((null links)
+         (message "No links"))
+        ((and (integerp nth) (< nth 0))
          (setq link links))
-	((equal (length links) 1)
-	 (setq link (car links)))
+        ((equal (length links) 1)
+         (setq link (car links)))
         ((and (integerp nth) (>= nth 0) (>= (length links) (if have-zero (1+ nth) nth)))
-	 (setq link (nth (if have-zero nth (1- nth)) links)))
-	(t				; we have to select a link
-	 (save-excursion
-	   (save-window-excursion
-	     (delete-other-windows)
-	     (with-output-to-temp-buffer "*Select Link*"
-	       (dolist (l links)
-		 (cond
-		  ((not (string-match org-link-bracket-regexp l))
-		   (princ (format "[%c]  %s\n" (cl-incf cnt)
-				  (org-unbracket-string "<" ">" l))))
-		  ((match-end 3)
-		   (princ (format "[%c]  %s (%s)\n" (cl-incf cnt)
-				  (match-string 3 l) (match-string 1 l))))
-		  (t (princ (format "[%c]  %s\n" (cl-incf cnt)
-				    (match-string 1 l)))))))
-	     (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
-	     (message "Select link to open, RET to open all:")
-	     (setq c (read-char-exclusive))
-	     (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
-	 (when (equal c ?q) (user-error "Abort"))
-	 (if (equal c ?\C-m)
-	     (setq link links)
-	   (setq nth (- c ?0))
-	   (when have-zero (setq nth (1+ nth)))
-	   (unless (and (integerp nth) (>= (length links) nth))
-	     (user-error "Invalid link selection"))
-	   (setq link (nth (1- nth) links)))))
+         (setq link (nth (if have-zero nth (1- nth)) links)))
+        (t                              ; we have to select a link
+         (save-excursion
+           (save-window-excursion
+             (delete-other-windows)
+             (with-output-to-temp-buffer "*Select Link*"
+               (dolist (l links)
+                 (cond
+                  ((not (string-match org-link-bracket-regexp l))
+                   (princ (format "[%c]  %s\n" (cl-incf cnt)
+                                  (org-unbracket-string "<" ">" l))))
+                  ((match-end 3)
+                   (princ (format "[%c]  %s (%s)\n" (cl-incf cnt)
+                                  (match-string 3 l) (match-string 1 l))))
+                  (t (princ (format "[%c]  %s\n" (cl-incf cnt)
+                                    (match-string 1 l)))))))
+             (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
+             (message "Select link to open, RET to open all:")
+             (setq c (read-char-exclusive))
+             (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
+         (when (equal c ?q) (user-error "Abort"))
+         (if (equal c ?\C-m)
+             (setq link links)
+           (setq nth (- c ?0))
+           (when have-zero (setq nth (1+ nth)))
+           (unless (and (integerp nth) (>= (length links) nth))
+             (user-error "Invalid link selection"))
+           (setq link (nth (1- nth) links)))))
        (cons link end)))))
 
 ;;;###autoload
@@ -650,12 +706,12 @@ there is one, return it."
   "Go to the next group in org super agenda buffer"
   (interactive)
   (if (save-match-data
-	(save-excursion
-	  (beginning-of-line)
-	  (looking-at "^\\s-\\S-")))
+        (save-excursion
+          (beginning-of-line)
+          (looking-at "^\\s-\\S-")))
       (progn
-	(end-of-line)
-	(re-search-forward "^\\s-\\S-" nil 'go))
+        (end-of-line)
+        (re-search-forward "^\\s-\\S-" nil 'go))
     (re-search-forward "^\\s-\\S-" nil 'go))
   (when (= (point) (point-max))
     (org-agenda-next-block))
@@ -696,8 +752,8 @@ there is one, return it."
 (advice-add 'org-agenda-next-item :around 'org-agenda-move-item-advice)
 (advice-add 'org-agenda-previous-item :around 'org-agenda-move-item-advice)
 
-;; The original function uses the point (1+ (point-at-eol)), which will throw an error if that is bigger than
-;; (point-max), so fix it.
+;; The original function uses the point (1+ (point-at-eol)), which will throw an
+;; error if that is bigger than (point-max), so fix it.
 ;;;###autoload
 (defun org-remove-subtree-entries-from-agenda (&optional buf beg end)
   "Remove all lines in the agenda that correspond to a given subtree.
@@ -706,23 +762,23 @@ If this information is not given, the function uses the tree at point."
   (let ((buf (or buf (current-buffer))) m p)
     (save-excursion
       (unless (and beg end)
-	(org-back-to-heading t)
-	(setq beg (point))
-	(org-end-of-subtree t)
-	(setq end (point)))
+        (org-back-to-heading t)
+        (setq beg (point))
+        (org-end-of-subtree t)
+        (setq end (point)))
       (set-buffer (get-buffer org-agenda-buffer-name))
       (save-excursion
-	(goto-char (point-max))
-	(beginning-of-line 1)
-	(while (not (bobp))
-	  (when (and (setq m (org-get-at-bol 'org-marker))
-		     (equal buf (marker-buffer m))
-		     (setq p (marker-position m))
-		     (>= p beg)
-		     (< p end))
-	    (let ((inhibit-read-only t))
-	      (delete-region (point-at-bol) (min (point-max) (1+ (point-at-eol))))))
-	  (beginning-of-line 0))))))
+        (goto-char (point-max))
+        (beginning-of-line 1)
+        (while (not (bobp))
+          (when (and (setq m (org-get-at-bol 'org-marker))
+                     (equal buf (marker-buffer m))
+                     (setq p (marker-position m))
+                     (>= p beg)
+                     (< p end))
+            (let ((inhibit-read-only t))
+              (delete-region (point-at-bol) (min (point-max) (1+ (point-at-eol))))))
+          (beginning-of-line 0))))))
 
 ;;;###autoload
 (cl-defun org-agenda-next-block (&optional (n 1))
@@ -764,7 +820,7 @@ If this information is not given, the function uses the tree at point."
                (res (list (point-min)))
                fin)
           (while (not fin)
-            (let ((pos (next-single-property-change (line-end-position) 'org-agenda-structural-header)))
+            (let ((pos (next-single-property-change (line-end-position) 'durand-agenda-regular-header)))
               (if pos
                   (progn
                     (setf num (1+ num)
@@ -780,20 +836,20 @@ If this information is not given, the function uses the tree at point."
   "Show the current position"
   (let ((num (length (-filter (lambda (x) (>= (point) x)) org-agenda-block-seps))))
     (and num (format " %d/%d" num (if org-agenda-total-blocks
-                                     org-agenda-total-blocks
-                                   0)))))
+                                      org-agenda-total-blocks
+                                    0)))))
 
 ;;;###autoload
 (defun org-super-agenda-previous-group ()
   "Go to the next group in org super agenda buffer"
   (interactive)
   (if (save-match-data
-	(save-excursion
-	  (beginning-of-line)
-	  (looking-at "^\\s-\\S-")))
+        (save-excursion
+          (beginning-of-line)
+          (looking-at "^\\s-\\S-")))
       (progn
-	(beginning-of-line)
-	(re-search-forward "^\\s-\\S-" nil 'go -1))
+        (beginning-of-line)
+        (re-search-forward "^\\s-\\S-" nil 'go -1))
     (re-search-forward "^\\s-\\S-" nil 'go -1))
   (when (= (point) (point-min))
     (org-agenda-previous-block)
@@ -824,21 +880,49 @@ If this information is not given, the function uses the tree at point."
   (interactive)
   (widen)
   (let* ((end (or
-               (let ((chois (next-single-property-change (line-end-position) 'org-agenda-structural-header)))
+               (let ((chois (next-single-property-change (line-end-position) 'durand-agenda-regular-header)))
                  (when chois
                    (1- chois)))
                (point-max)))
          (start (save-excursion
                   (goto-char
                    (or
-                    (previous-single-property-change (line-end-position) 'org-agenda-structural-header)
+                    (previous-single-property-change (line-end-position) 'durand-agenda-regular-header)
                     (point-min)))
                   (line-beginning-position))))
     (narrow-to-region start end)
     (goto-char (point-min))))
 
-(add-hook 'org-agenda-finalize-hook 'org-agenda-narrow-block)
-(add-hook 'org-agenda-finalize-hook 'org-agenda-count-blocks)
+;; After an update, the property `org-agenda-structural-header' does not suffice
+;; any more to distinguish a super agenda header from a regular agenda header,
+;; per change by some /fix/ of the package. So I have to prepare the agenda
+;; buffer by giving new text properties at the suitable places.
+
+;;;###autoload
+(defun durand-prepare-agenda ()
+  "Prepare the agenda buffer to be used by custom functions."
+  (interactive)
+  (save-restriction
+    (widen)
+    (save-excursion
+      (goto-char (point-min))
+      (add-text-properties (line-beginning-position)
+                           (line-end-position)
+                           '(durand-agenda-regular-header t))
+      (forward-line 1)
+      (forward-char 1)
+      (while (re-search-forward "^\\S-" nil t)
+        (add-text-properties (line-beginning-position)
+                             (line-end-position)
+                             '(durand-agenda-regular-header t))))))
+
+(add-hook! 'org-agenda-finalize-hook
+           'durand-prepare-agenda
+           'org-agenda-count-blocks
+           'org-agenda-first-block)
+;; (add-hook 'org-agenda-finalize-hook 'org-agenda-first-block)
+;; (add-hook 'org-agenda-finalize-hook 'org-agenda-count-blocks)
+;; (add-hook 'org-agenda-finalize-hook 'durand-prepare-agenda)
 ;; (remove-hook 'org-agenda-finalize-hook 'durand-agenda-mode)
 
 ;; (define-derived-mode durand-agenda-mode org-agenda-mode "Durand-Agenda"
@@ -852,33 +936,33 @@ If this information is not given, the function uses the tree at point."
   ;; use derived-mode-p instead of requiring strictly to be in org-agenda-mode
   (or (derived-mode-p 'org-agenda-mode) (error "Not in agenda"))
   (let* ((bufname-orig (buffer-name))
-	 (marker (or (org-get-at-bol 'org-marker)
-		     (org-agenda-error)))
-	 (buffer (marker-buffer marker))
-	 (pos (marker-position marker))
-	 (type (org-get-at-bol 'type))
-	 dbeg dend (n 0) conf)
+         (marker (or (org-get-at-bol 'org-marker)
+                     (org-agenda-error)))
+         (buffer (marker-buffer marker))
+         (pos (marker-position marker))
+         (type (org-get-at-bol 'type))
+         dbeg dend (n 0) conf)
     (org-with-remote-undo buffer
       (with-current-buffer buffer
-	(save-excursion
-	  (goto-char pos)
-	  (if (and (derived-mode-p 'org-mode) (not (member type '("sexp"))))
-	      (setq dbeg (progn (org-back-to-heading t) (point))
-		    dend (org-end-of-subtree t t))
-	    (setq dbeg (point-at-bol)
-		  dend (min (point-max) (1+ (point-at-eol)))))
-	  (goto-char dbeg)
-	  (while (re-search-forward "^[ \t]*\\S-" dend t) (setq n (1+ n)))))
+        (save-excursion
+          (goto-char pos)
+          (if (and (derived-mode-p 'org-mode) (not (member type '("sexp"))))
+              (setq dbeg (progn (org-back-to-heading t) (point))
+                    dend (org-end-of-subtree t t))
+            (setq dbeg (point-at-bol)
+                  dend (min (point-max) (1+ (point-at-eol)))))
+          (goto-char dbeg)
+          (while (re-search-forward "^[ \t]*\\S-" dend t) (setq n (1+ n)))))
       (setq conf (or (eq t org-agenda-confirm-kill)
-		     (and (numberp org-agenda-confirm-kill)
-			  (> n org-agenda-confirm-kill))))
+                     (and (numberp org-agenda-confirm-kill)
+                          (> n org-agenda-confirm-kill))))
       (and conf
-	   (not (y-or-n-p
-		 (format "Delete entry with %d lines in buffer \"%s\"? "
-			 n (buffer-name buffer))))
-	   (error "Abort"))
+           (not (y-or-n-p
+                 (format "Delete entry with %d lines in buffer \"%s\"? "
+                         n (buffer-name buffer))))
+           (error "Abort"))
       (let ((org-agenda-buffer-name bufname-orig))
-	(org-remove-subtree-entries-from-agenda buffer dbeg dend))
+        (org-remove-subtree-entries-from-agenda buffer dbeg dend))
       (with-current-buffer buffer (delete-region dbeg dend))
       (message "Agenda item and source killed"))))
 
@@ -895,9 +979,9 @@ If this information is not given, the function uses the tree at point."
   "Go to the entry at point in the corresponding Org file."
   (interactive)
   (let* ((marker (or (org-get-at-bol 'org-marker)
-		     (org-agenda-error)))
-	 (buffer (marker-buffer marker))
-	 (pos (marker-position marker)))
+                     (org-agenda-error)))
+         (buffer (marker-buffer marker))
+         (pos (marker-position marker)))
     (switch-to-buffer-other-window buffer)
     (widen)
     (push-mark)
@@ -907,8 +991,8 @@ If this information is not given, the function uses the tree at point."
       (recenter 1)			; The change with the default function
       (org-back-to-heading t)
       (let ((case-fold-search nil))
-	(when (re-search-forward org-complex-heading-regexp nil t)
-	  (goto-char (match-beginning 4)))))
+        (when (re-search-forward org-complex-heading-regexp nil t)
+          (goto-char (match-beginning 4)))))
     (run-hooks 'org-agenda-after-show-hook)
     (and highlight (org-highlight (point-at-bol) (point-at-eol)))))
 
@@ -919,20 +1003,20 @@ If this information is not given, the function uses the tree at point."
   (interactive)
   (save-window-excursion
     (let* ((marker (or (org-get-at-bol 'org-marker)
-		       (org-agenda-error)))
-	   (buffer (marker-buffer marker))
-	   (pos (marker-position marker)))
+                       (org-agenda-error)))
+           (buffer (marker-buffer marker))
+           (pos (marker-position marker)))
       (switch-to-buffer-other-window buffer)
       (widen)
       (push-mark)
       (goto-char pos)
       (when (derived-mode-p 'org-mode)
-	(org-show-context 'agenda)
-	(recenter 1)
-	(org-back-to-heading t)
-	(let ((case-fold-search nil))
-	  (when (re-search-forward org-complex-heading-regexp nil t)
-	    (goto-char (match-beginning 4)))))
+        (org-show-context 'agenda)
+        (recenter 1)
+        (org-back-to-heading t)
+        (let ((case-fold-search nil))
+          (when (re-search-forward org-complex-heading-regexp nil t)
+            (goto-char (match-beginning 4)))))
       (funcall fun))))
 
 ;; It turns out I do not need these functions now, as I directly go to the account file.
@@ -996,13 +1080,13 @@ If this information is not given, the function uses the tree at point."
                                                          ;; (swiper--cleanup)
                                                          (setf durand-before-obj nil)))))
                          (car (cl-find choice current
-                                    :test (lambda (x y)
-                                            (string=
-                                             x
-                                             (concat
-                                              (substring-no-properties (cadr y))
-                                              " - "
-                                              (substring-no-properties (car y))))))))))))
+                                       :test (lambda (x y)
+                                               (string=
+                                                x
+                                                (concat
+                                                 (substring-no-properties (cadr y))
+                                                 " - "
+                                                 (substring-no-properties (car y))))))))))))
          (lien-courant (when (not (string= num_link ""))
                          (assoc num_link (mapcar (lambda (x)
                                                    (cons (car x) (cddr x)))
@@ -1046,8 +1130,8 @@ If this information is not given, the function uses the tree at point."
   (interactive)
   (outline-next-heading)
   (let ((beg (point))
-	(text (read-string "Text: "))
-	(fill-column 80))
+        (text (read-string "Text: "))
+        (fill-column 80))
     (insert (concat "\n" text "\n\n"))
     (indent-region beg (point))
     (fill-region beg (point))))
@@ -1067,34 +1151,34 @@ and whose `caddr' is a list of strings, the content of the note."
   (save-restriction
     (save-excursion
       (save-match-data
-	(widen)
-	(unless (looking-at org-heading-regexp)
-	  (outline-back-to-heading t))
-	(let ((limit (save-excursion (outline-next-heading) (point)))
-	      res-list)
-	  (while (re-search-forward org-note-regexp limit t)
-	    (let ((indent-string (match-string 1))
-		  (time-string (match-string 2))
-		  (beg (1+ (point)))
-		  res)
-	      (forward-line)
-	      (while (looking-at (concat "^" indent-string "\\s-\\{2\\}"))
-		(push (buffer-substring-no-properties
-		       (match-end 0)
-		       (line-end-position))
-		      res)
-		(forward-line))
-	      (push (list
-		     (substring-no-properties time-string)
-		     (list beg (1- (point)))
-		     (mapconcat #'identity (nreverse res) "\n"))
-		    res-list)))
-	  (nreverse res-list))))))
+        (widen)
+        (unless (looking-at org-heading-regexp)
+          (outline-back-to-heading t))
+        (let ((limit (save-excursion (outline-next-heading) (point)))
+              res-list)
+          (while (re-search-forward org-note-regexp limit t)
+            (let ((indent-string (match-string 1))
+                  (time-string (match-string 2))
+                  (beg (1+ (point)))
+                  res)
+              (forward-line)
+              (while (looking-at (concat "^" indent-string "\\s-\\{2\\}"))
+                (push (buffer-substring-no-properties
+                       (match-end 0)
+                       (line-end-position))
+                      res)
+                (forward-line))
+              (push (list
+                     (substring-no-properties time-string)
+                     (list beg (1- (point)))
+                     (mapconcat #'identity (nreverse res) "\n"))
+                    res-list)))
+          (nreverse res-list))))))
 
 (setq org-note-regexp (concat
-		       "^\\([ \t]+\\)- Note taken on \\("
-		       org-element--timestamp-regexp
-		       "\\).*$"))
+                       "^\\([ \t]+\\)- Note taken on \\("
+                       org-element--timestamp-regexp
+                       "\\).*$"))
 
 ;;;###autoload
 (defun durand-org-get-logs ()
@@ -1505,13 +1589,13 @@ Also give colors to \vert and \ast differently."
                                                        32))
                             (pre-padding (make-string (- (ceiling
                                                           (1- (* (funcall
-                                                                   length-function
-                                                                   (encode-time 0 0 0 1 1 this-year)
-                                                                   'year)
-                                                                  5))
-                                                           2)
+                                                                  length-function
+                                                                  (encode-time 0 0 0 1 1 this-year)
+                                                                  'year)
+                                                                 5))
+                                                          2)
                                                          half-length)
-                                                       32)))
+                                                      32)))
                        (concat separator pre-padding year-string post-padding)))
                    (number-sequence sy cy)))
                  ('month
@@ -1524,23 +1608,23 @@ Also give colors to \vert and \ast differently."
                                            2))
                             (separator "|")
                             (post-padding (make-string (- (/ (1- (* (funcall
-                                                                    length-function
-                                                                    (encode-time 0 0 0 1 month-number this-year)
-                                                                    'month)
-                                                                   5))
+                                                                     length-function
+                                                                     (encode-time 0 0 0 1 month-number this-year)
+                                                                     'month)
+                                                                    5))
                                                              2)
                                                           1)
                                                        32))
                             (pre-padding (make-string
-                                           (- (ceiling
-                                               (1- (* (funcall
-                                                       length-function
-                                                       (encode-time 0 0 0 1 month-number this-year)
-                                                       'month)
-                                                      5))
-                                               2)
-                                              1)
-                                           32)))
+                                          (- (ceiling
+                                              (1- (* (funcall
+                                                      length-function
+                                                      (encode-time 0 0 0 1 month-number this-year)
+                                                      'month)
+                                                     5))
+                                              2)
+                                             1)
+                                          32)))
                        (concat separator pre-padding month-string post-padding)))
                    (list-months-between starting-date ct)))
                  ('day
@@ -1550,8 +1634,8 @@ Also give colors to \vert and \ast differently."
                             ;; (this-month (nth 4 (decode-time this-day)))
                             ;; (this-year (nth 5 (decode-time this-day)))
                             (day-string (pad-string-to
-                                           (number-to-string day-number)
-                                           2))
+                                         (number-to-string day-number)
+                                         2))
                             (separator "|")
                             (pre-padding (make-string 1 32))
                             (post-padding (make-string 1 32)))
@@ -1759,8 +1843,8 @@ The two lists should have the same lengths."
          (nom_du_tampon "notes.org")
          (déjà_ouvert (get-buffer nom_du_tampon))
          (cands (org-ql--query route_du_fichier '(tags "bookmarks")
-                  :action (lambda ()
-                            (org-offer-links-in-entry (buffer-name) (point)))))
+                               :action (lambda ()
+                                         (org-offer-links-in-entry (buffer-name) (point)))))
          (choice (durand-choose-list (mapcar (lambda (x)
                                                (string-match org-link-any-re (format "%s" (car x)))
                                                (list
@@ -1843,17 +1927,19 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                                               (setf det nil))
                                         "continue")
                                        ("e" (lambda (x)
-                                              (setf cands (cl-remove-if
-                                                           (lambda (y)
-                                                             (string= (if (listp y) (car y) y)
-                                                                      (if (stringp x) x (car x))))
-                                                           cands)
-                                                    det nil
+                                              (setf det nil
                                                     ivy--index 0
                                                     exc t))
                                         "exclude"))
                              :preselect ivy--index)))
-          (unless exc (push ele res))))
+          (unless exc (push ele res))
+          (when exc
+            (setf cands
+                  (cl-remove-if
+                   (lambda (y)
+                     (string= (if (listp y) (car y) y)
+                              (if (stringp ele) ele (car ele))))
+                   cands)))))
       (when (member "all" res) (setf res (mapcar #'car (cdr cands))))
       (setf res (cl-remove-duplicates res :test #'equal)
             res (mapcar (lambda (x)
@@ -1910,7 +1996,7 @@ With \\[universal-argument]\\[universal-argument]\\[universal-argument], visit e
                         (caar (-filter (lambda (x) (string= "qidian" (cadr x)))
                                        (cdr ls))))
                       cands)))
-        (mapc #'browse-url liste-de-choix)))
+        (mapc #'browse-url (-filter #'stringp liste-de-choix))))
     (message "Opening novels' qidian pages...DONE"))))
 
 ;;;###autoload
@@ -2324,41 +2410,41 @@ the link comes from the most recently stored link, so choose carefully the targe
 (defun durand-org-modify-note ()
   "Modify the note entry at point."
   (interactive)
-  (assert (get-buffer "*durand-org-view-notes*") nil "No notes buffer alive")
+  (cl-assert (get-buffer "*durand-org-view-notes*") nil "No notes buffer alive")
   (let* ((note-choices
-	  (with-current-buffer "*durand-org-view-notes*"
-	    (org-map-entries (lambda ()
-			       (list (buffer-substring-no-properties
-				      (+ 2 (point))
-				      (line-end-position))
-				     (get-text-property (point) :note-meta))))))
-	 (choice (ivy-read "Which note to modify? " note-choices
-			   :require-match t
-			   :caller 'durand-org-modify-note))
-	 (choice-meta (cadr (assoc choice note-choices))))
+          (with-current-buffer "*durand-org-view-notes*"
+            (org-map-entries (lambda ()
+                               (list (buffer-substring-no-properties
+                                      (+ 2 (point))
+                                      (line-end-position))
+                                     (get-text-property (point) :note-meta))))))
+         (choice (ivy-read "Which note to modify? " note-choices
+                           :require-match t
+                           :caller 'durand-org-modify-note))
+         (choice-meta (cadr (assoc choice note-choices))))
     (goto-char (cadr choice-meta))))
 
 ;;;###autoload
 (defun durand-org-delete-note ()
   "Delete the note entry at point"
   (interactive)
-  (assert (get-buffer "*durand-org-view-notes*") nil "No notes buffer alive")
+  (cl-assert (get-buffer "*durand-org-view-notes*") nil "No notes buffer alive")
   (let* ((note-choices
-	  (with-current-buffer "*durand-org-view-notes*"
-	    (org-map-entries (lambda ()
-			       (list (buffer-substring-no-properties
-				      (+ 2 (point))
-				      (line-end-position))
-				     (get-text-property (point) :note-meta))))))
-	 (choice (ivy-read "Which note to delete? " note-choices
-			   :require-match t
-			   :caller 'durand-org-delete-note))
-	 (choice-meta (cadr (assoc choice note-choices)))
-	 (beg (save-excursion
-		(goto-char (car choice-meta))
-		(forward-line -1)
-		(point)))
-	 (end (1+ (cadr choice-meta))))
+          (with-current-buffer "*durand-org-view-notes*"
+            (org-map-entries (lambda ()
+                               (list (buffer-substring-no-properties
+                                      (+ 2 (point))
+                                      (line-end-position))
+                                     (get-text-property (point) :note-meta))))))
+         (choice (ivy-read "Which note to delete? " note-choices
+                           :require-match t
+                           :caller 'durand-org-delete-note))
+         (choice-meta (cadr (assoc choice note-choices)))
+         (beg (save-excursion
+                (goto-char (car choice-meta))
+                (forward-line -1)
+                (point)))
+         (end (1+ (cadr choice-meta))))
     (kill-region beg end)))
 
 ;;;###autoload
@@ -2385,8 +2471,8 @@ the link comes from the most recently stored link, so choose carefully the targe
     (goto-char (point-min))
     (widen)
     (if (not x)
-	(org-next-visible-heading 1)
-  (org-forward-heading-same-level 1)))
+        (org-next-visible-heading 1)
+      (org-forward-heading-same-level 1)))
   (org-narrow-to-subtree))
 
 ;;;###autoload
@@ -2398,7 +2484,7 @@ the link comes from the most recently stored link, so choose carefully the targe
     (goto-char (point-min))
     (widen)
     (if (not x)
-	(org-previous-visible-heading 1)
+        (org-previous-visible-heading 1)
       (org-backward-heading-same-level 1)))
   (org-narrow-to-subtree))
 
@@ -2408,20 +2494,20 @@ the link comes from the most recently stored link, so choose carefully the targe
 DAY, MONTH, YEAR can be specified to gather previous entries to the given date;
 otherwise, use the current date."
   (let ((day (or day (cadr (calendar-current-date))))
-	(month (or month (car (calendar-current-date))))
-	(year (or year (caddr (calendar-current-date))))
-	(span (if (equal span -1) nil span))
-	res)
+        (month (or month (car (calendar-current-date))))
+        (year (or year (caddr (calendar-current-date))))
+        (span (if (equal span -1) nil span))
+        res)
     (if (or (not (integerp day)) (not (integerp month)) (not (integerp year)))
-	(message "%s %s %s" (integerp day) (integerp month) (integerp year))
+        (message "%s %s %s" (integerp day) (integerp month) (integerp year))
       (dolist (jour (org-find-all-days) (nreverse res))
-	(let ((date-spec (org-date-to-gregorian (car jour))))
-	  (when (and (<= (cadr date-spec) day)
-		     (or (null span) (< (- day (cadr date-spec)) span))
-		     (= (car date-spec) month)
-		     (= (caddr date-spec) year)
-		     (< (- (cadr date-spec) day) 7))
-	    (push jour res)))))))
+        (let ((date-spec (org-date-to-gregorian (car jour))))
+          (when (and (<= (cadr date-spec) day)
+                     (or (null span) (< (- day (cadr date-spec)) span))
+                     (= (car date-spec) month)
+                     (= (caddr date-spec) year)
+                     (< (- (cadr date-spec) day) 7))
+            (push jour res)))))))
 
 ;;;###autoload
 (defun org-calc-account (&optional arg)
@@ -2437,31 +2523,31 @@ If span is not specified or -1, then it calculates all entries in the
 same month before the given date."
   (interactive "P")
   (with-account
-    (let* ((day (and arg (read-number "Day: " (cadr (calendar-current-date)))))
-	   (month (and (equal arg '(16)) (read-number "Month: " (car (calendar-current-date)))))
-	   (year (and (equal arg '(16)) (read-number "Year: " (caddr (calendar-current-date)))))
-	   (span (cond
-		  ((and (integerp arg) (>= arg 0)) arg)
-		  ((equal arg '(16)) (read-number "Span: " -1))
-		  (t nil)))
-	   (entries (org-get-account-entries day month year span))
-	   (days (length entries))
-	   (total (let ((cur 0))
-		    (save-excursion
-		      (dolist (entry entries cur)
-		        (goto-char (cdr entry))
-		        (re-search-forward org-date-tree-headline-regexp)
-		        (setq cur (+ cur (string-to-number
-					  (org-entry-get nil "total"))))))))
-	   (ave (ignore-errors (/ total days))))
-      (message (concat
-	        (number-to-string days)
-	        " days, spent "
-	        (number-to-string total)
-	        " with average "
-	        (or
-		 (ignore-errors (number-to-string ave))
-		 "undefined"))))))
+   (let* ((day (and arg (read-number "Day: " (cadr (calendar-current-date)))))
+          (month (and (equal arg '(16)) (read-number "Month: " (car (calendar-current-date)))))
+          (year (and (equal arg '(16)) (read-number "Year: " (caddr (calendar-current-date)))))
+          (span (cond
+                 ((and (integerp arg) (>= arg 0)) arg)
+                 ((equal arg '(16)) (read-number "Span: " -1))
+                 (t nil)))
+          (entries (org-get-account-entries day month year span))
+          (days (length entries))
+          (total (let ((cur 0))
+                   (save-excursion
+                     (dolist (entry entries cur)
+                       (goto-char (cdr entry))
+                       (re-search-forward org-date-tree-headline-regexp)
+                       (setq cur (+ cur (string-to-number
+                                         (org-entry-get nil "total"))))))))
+          (ave (ignore-errors (/ total days))))
+     (message (concat
+               (number-to-string days)
+               " days, spent "
+               (number-to-string total)
+               " with average "
+               (or
+                (ignore-errors (number-to-string ave))
+                "undefined"))))))
 
 ;;;###autoload
 (defun org-find-all-days ()
@@ -2473,10 +2559,10 @@ same month before the given date."
      (save-excursion
        (goto-char (point-min))
        (save-match-data
-	 (while (re-search-forward org-date-tree-headline-regexp nil t)
-	   (push (cons (match-string-no-properties 1)
-		       (match-beginning 0))
-		 res))))
+         (while (re-search-forward org-date-tree-headline-regexp nil t)
+           (push (cons (match-string-no-properties 1)
+                       (match-beginning 0))
+                 res))))
      (nreverse res))))
 
 (setq org-date-tree-headline-regexp "^\\*+\\s-\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\).*$")
@@ -2501,30 +2587,30 @@ With `C-u' prefix argument, update the chosen account;
 with `C-uC-u' prefix argument, update all accounts."
   (interactive "P")
   (let* ((candidates (org-find-all-days))
-	 (choice
-	  (cond
-	   ((null arg) (last candidates))
-	   ((equal arg '(4)) (list (assoc
-				    (ivy-read "Choose a day to update: " (mapcar #'car candidates)
-					      :require-match t
-					      :caller 'org-update-account)
-				    candidates)))
-	   ((equal arg '(16)) candidates)
-	   (t 'wrong))))
-      (if (eq choice 'wrong)
-	  (message "Only prefix args of the form \"nil\", \"C-u\", or \"C-uC-u\" are allowed")
-	(save-excursion
-	  (dolist (date choice)
-	    (let ((total 0))
-	      (goto-char (cdr date))
-	      (re-search-forward org-date-tree-headline-regexp nil t)
-	      (org-map-tree (lambda ()
-			      (setq total (+ total
-					     (string-to-number
-					      (or (org-entry-get (point) "cost")
-						  "0"))))))
-	      (org-set-property "total" (number-to-string total))
-	      (org-set-property "dashes" (make-string (if (> total 600) 60 (/ total 10)) ?-))))))))
+         (choice
+          (cond
+           ((null arg) (last candidates))
+           ((equal arg '(4)) (list (assoc
+                                    (ivy-read "Choose a day to update: " (mapcar #'car candidates)
+                                              :require-match t
+                                              :caller 'org-update-account)
+                                    candidates)))
+           ((equal arg '(16)) candidates)
+           (t 'wrong))))
+    (if (eq choice 'wrong)
+        (message "Only prefix args of the form \"nil\", \"C-u\", or \"C-uC-u\" are allowed")
+      (save-excursion
+        (dolist (date choice)
+          (let ((total 0))
+            (goto-char (cdr date))
+            (re-search-forward org-date-tree-headline-regexp nil t)
+            (org-map-tree (lambda ()
+                            (setq total (+ total
+                                           (string-to-number
+                                            (or (org-entry-get (point) "cost")
+                                                "0"))))))
+            (org-set-property "total" (number-to-string total))
+            (org-set-property "dashes" (make-string (if (> total 600) 60 (/ total 10)) ?-))))))))
 
 ;;;###autoload
 (defun org-get-account-fields ()
@@ -2535,17 +2621,17 @@ with `C-uC-u' prefix argument, update all accounts."
      (save-match-data
        (beginning-of-line)
        (unless (looking-at org-date-tree-headline-regexp)
-	 (re-search-forward org-date-tree-headline-regexp nil t -1))
+         (re-search-forward org-date-tree-headline-regexp nil t -1))
        (re-search-forward org-date-tree-headline-regexp)
        (let (res pos)
-	 (org-map-tree (lambda ()
-			 (setq pos (point))
-			 (skip-chars-forward "* ")
-			 (push (cons
-				(buffer-substring-no-properties (point) (line-end-position))
-				(list (org-entry-get (point) "cost") pos))
-			       res)))
-	 (cdr (nreverse res)))))))
+         (org-map-tree (lambda ()
+                         (setq pos (point))
+                         (skip-chars-forward "* ")
+                         (push (cons
+                                (buffer-substring-no-properties (point) (line-end-position))
+                                (list (org-entry-get (point) "cost") pos))
+                               res)))
+         (cdr (nreverse res)))))))
 
 ;;;###autoload
 (defun org-modify-account ()
@@ -2553,15 +2639,15 @@ with `C-uC-u' prefix argument, update all accounts."
   (interactive)
   (with-account
    (let* ((account-field-list (org-get-account-fields))
-	  (target-entry (ivy-read "Choose one entry: "
-				  (mapcar #'car account-field-list)
-				  :require-match t
-				  :caller 'org-modify-account))
-	  (target-position (caddr (assoc target-entry account-field-list)))
-	  (target-item (read-string "New item: " target-entry))
-	  (target-price (read-string "New price: "
-				     (cadr (assoc target-entry account-field-list))))
-	  (note-change-p (y-or-n-p "Change note?")))
+          (target-entry (ivy-read "Choose one entry: "
+                                  (mapcar #'car account-field-list)
+                                  :require-match t
+                                  :caller 'org-modify-account))
+          (target-position (caddr (assoc target-entry account-field-list)))
+          (target-item (read-string "New item: " target-entry))
+          (target-price (read-string "New price: "
+                                     (cadr (assoc target-entry account-field-list))))
+          (note-change-p (y-or-n-p "Change note?")))
      (goto-char target-position)
      (skip-chars-forward "* ")
      (re-search-forward ".*$")
@@ -2576,11 +2662,11 @@ with `C-uC-u' prefix argument, update all accounts."
   (interactive)
   (with-account
    (let* ((account-field-list (org-get-account-fields))
-	  (target-entry (ivy-read "Choose one entry: "
-				  (mapcar #'car account-field-list)
-				  :require-match t
-				  :caller 'org-modify-account))
-	  (target-position (caddr (assoc target-entry account-field-list))))
+          (target-entry (ivy-read "Choose one entry: "
+                                  (mapcar #'car account-field-list)
+                                  :require-match t
+                                  :caller 'org-modify-account))
+          (target-position (caddr (assoc target-entry account-field-list))))
      (goto-char target-position)
      (skip-chars-forward "* ")
      (org-mark-subtree)
@@ -2601,10 +2687,10 @@ with `C-uC-u' prefix argument, update all accounts."
        (goto-char (cdr running-day))
        (re-search-forward org-date-tree-headline-regexp nil t)
        (let ((day (cadr (org-date-to-gregorian (car running-day)))))
-	 (org-set-tags-to (cond ((and (<= day date)
-				      (> (+ 7 day) date)) ":account:")
-				(t nil)))
-	 (org-set-tags t t)))))
+         (org-set-tags-to (cond ((and (<= day date)
+                                      (> (+ 7 day) date)) ":account:")
+                                (t nil)))
+         (org-set-tags t t)))))
   (outline-hide-body))
 
 ;;;###autoload
@@ -2615,28 +2701,28 @@ with `C-uC-u' prefix argument, update all accounts."
   when executed in August 2018 becomes
   => \"2018-08-01\""
   (let* ((day-string (pad-string-to (format "%d" day) 2))
-	 (padded-date-string-list (mapcar (lambda (x) (pad-string-to (format "%d" x) 2))
-					  (calendar-current-date)))
-	 (month (or (and month (pad-string-to (format "%d" month) 2))
-		    (car padded-date-string-list)))
-	 (year (or (and year (pad-string-to (format "%d" year) 2))
-		   (caddr padded-date-string-list))))
+         (padded-date-string-list (mapcar (lambda (x) (pad-string-to (format "%d" x) 2))
+                                          (calendar-current-date)))
+         (month (or (and month (pad-string-to (format "%d" month) 2))
+                    (car padded-date-string-list)))
+         (year (or (and year (pad-string-to (format "%d" year) 2))
+                   (caddr padded-date-string-list))))
     (concat year
-	    "-"
-	    month
-	    "-"
-	    day-string)))
+            "-"
+            month
+            "-"
+            day-string)))
 
 ;;;###autoload
 (defun pad-string-to (str num &optional material backp)
   "Pad a string STR to be of length greater than or equal to NUM with 0.
 If INITIAL is set, use that to pad; if BACKP, then pad at the end."
   (cond ((< (length str) num)
-	 (if (null backp)
+         (if (null backp)
              (concat (make-string (- num (length str)) (or material ?0)) str)
            (concat str (make-string (- num (length str)) (or material ?0)))))
-	(t
-	 str)))
+        (t
+         str)))
 
 ;;;###autoload
 (defun org-run-src-block ()
@@ -2650,23 +2736,23 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
 ;;;###autoload
 (defun org-set-item-price-note (item-name item-price item-note)
   (interactive (let ((item (ivy-read "Enter item: "
-				     '("breakfast" "brunch" "brunverage"
-				       "lunch" "dinner" "beverage")
-				     :caller 'org-set-item-price-note))
-		     (price (read-number "Enter price: " 0))
-		     (note (read-string "Enter note: " nil nil "todo")))
-		 (list item price note)))
+                                     '("breakfast" "brunch" "brunverage"
+                                       "lunch" "dinner" "beverage")
+                                     :caller 'org-set-item-price-note))
+                     (price (read-number "Enter price: " 0))
+                     (note (read-string "Enter note: " nil nil "todo")))
+                 (list item price note)))
   (with-account
    (progn (goto-char (point-max))
-	  (outline-show-all)
-	  (re-search-backward "tblfm")
-	  (forward-line -1)
-	  (org-table-insert-row 1)
-	  (org-table-insert-hline)
-	  (org-table-put (org-table-current-line) (org-table-current-column) item-name)
-	  (org-table-put (org-table-current-line) (1+ (org-table-current-column)) (number-to-string item-price))
-	  (org-table-put (org-table-current-line) (+ 2 (org-table-current-column)) item-note t)
-	  (outline-hide-body))))
+          (outline-show-all)
+          (re-search-backward "tblfm")
+          (forward-line -1)
+          (org-table-insert-row 1)
+          (org-table-insert-hline)
+          (org-table-put (org-table-current-line) (org-table-current-column) item-name)
+          (org-table-put (org-table-current-line) (1+ (org-table-current-column)) (number-to-string item-price))
+          (org-table-put (org-table-current-line) (+ 2 (org-table-current-column)) item-note t)
+          (outline-hide-body))))
 
 ;;;###autoload
 (defun org-delete-item-price-note (row-num &optional total-num)
@@ -2694,20 +2780,20 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
 (defun org-account-go-to-day (day &optional no-narrowp)
   "Go to the position of day DAY"
   (interactive (list (ivy-read "DAY: "
-			       (if current-prefix-arg
-				   (org-find-all-days)
-				 (save-restriction
-				   (widen)
-				   (org-find-all-days)))
-			       :re-builder 'ivy--regex-ignore-order)
-		     current-prefix-arg))
+                               (if current-prefix-arg
+                                   (org-find-all-days)
+                                 (save-restriction
+                                   (widen)
+                                   (org-find-all-days)))
+                               :re-builder 'ivy--regex-ignore-order)
+                     current-prefix-arg))
   (with-account
    (if no-narrowp
        (progn
-	 (outline-hide-sublevels 2)
-	 (goto-char (org-find-pos-of-day day))
-	 (outline-show-children)
-	 (recenter-top-bottom 0))
+         (outline-hide-sublevels 2)
+         (goto-char (org-find-pos-of-day day))
+         (outline-show-children)
+         (recenter-top-bottom 0))
      (progn
        (widen)
        (outline-hide-sublevels 2)
@@ -2723,9 +2809,9 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
   (if arg
       (with-account
        (progn
-	 (goto-char (org-find-last-day))
-	 (outline-show-children)
-	 (recenter-top-bottom 0)))
+         (goto-char (org-find-last-day))
+         (outline-show-children)
+         (recenter-top-bottom 0)))
     (with-account
      (progn
        (widen)
@@ -2768,17 +2854,17 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
 ;;;###autoload
 (defun last-week-day-of-month-p (date)
   (let* ((day-of-week (calendar-day-of-week date))
-	 (month (calendar-extract-month date))
-	 (year (calendar-extract-year date))
-	 (last-month-day (calendar-last-day-of-month month year))
-	 (month-day (cadr date)))
+         (month (calendar-extract-month date))
+         (year (calendar-extract-year date))
+         (last-month-day (calendar-last-day-of-month month year))
+         (month-day (cadr date)))
     (or (and (eq month-day last-month-day)
-	     (memq day-of-week '(1 2 3 4 5)))
-	(and (eq day-of-week 5)
-	     (or (eq month-day
-		     (1- last-month-day))
-		 (eq month-day
-		     (- last-month-day 2)))))))
+             (memq day-of-week '(1 2 3 4 5)))
+        (and (eq day-of-week 5)
+             (or (eq month-day
+                     (1- last-month-day))
+                 (eq month-day
+                     (- last-month-day 2)))))))
 
 ;; select week days
 ;;;###autoload
@@ -2786,7 +2872,7 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
   "Return true if the date is in one of the days of week"
   (let ((day-of-week (calendar-day-of-week date)))
     (not (null
-	  (memq day-of-week list-of-days)))))
+          (memq day-of-week list-of-days)))))
 
 ;; durand-capture
 ;;;###autoload
