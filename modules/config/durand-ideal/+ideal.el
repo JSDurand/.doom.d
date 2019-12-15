@@ -141,9 +141,12 @@ With prefix arg, show in a separate window."
 (define-prefix-command 'durand-switch-buffer-map)
 (define-key durand-switch-buffer-map [?\C-c ?q] 'minibuffer-keyboard-quit)
 (define-key durand-switch-buffer-map [?\C-c ?h] 'durand-toggle-headlong)
-(define-key durand-switch-buffer-map [?\C-c ?s] (lambda ()
-						  (interactive)
-						  (message "%s" durand-headlong)))
+(define-key durand-switch-buffer-map [?\C-c ?s]
+  (lambda ()
+    (interactive)
+    (message "%s" (if durand-headlong
+                      "head long activated"
+                    "head long desactivated"))))
 
 (defvar durand-jump-hook-alist nil
   "An alist to store actions that should be performed after `durand-bookmark-jump-headlong' is called")
@@ -1687,38 +1690,44 @@ Otherwise execute `narrow-to-defun'."
 
 ;; clean up buffers
 
-(defun is-not-needed-buffer (buf)
-  "Match some buffers I do not want to keep around"
+(defun is-not-needed-buffer (buf &optional reg)
+  "Match some buffers I do not want to keep around.
+REG is additonal regexp to match as not needed."
   (let ((name (buffer-name buf)))
     (and
-     (or (and (= ?* (aref name 0))
-              (not (string-match "^\\*scratch\\*$" name)))
+     (or (= ?* (aref name 0))
          (string-match "^magit" name)
-         (string-match "^TAGS\\(<.*>\\)?$" name))
+         (string-match "^TAGS\\(<.*>\\)?$" name)
+         (when (stringp reg)
+           (string-match reg name)))
      (null (get-buffer-process name)))))
 
 
 (defun clean-up-buffers (&optional arg)
   "Clean up some buffers that I oft do not need to keep around and kill unnecessary timers;
 If the buffer has a running process, then do not kill it.
-If ARG is non-nil, then turn off mu4e as well if necessary."
+If \\[universal-argument], then ask for additional regexps to match buffers to kill.
+If \\[universal-argument]\\[universal-argument], then turn off mu4e as well if necessary."
   (interactive "P")
   (cl-loop for timer in timer-idle-list
            if (eq (timer--function timer) 'pdf-cache--prefetch-start)
            do (cancel-timer timer))
-  (cl-loop for buffer being the buffers
-           do (and (is-not-needed-buffer buffer)
-                   (kill-buffer (buffer-name buffer))))
+  (let ((reg (when (equal arg '(4))
+               (read-string "Additional regexp: "))))
+    (cl-loop for buffer being the buffers
+             do (and (is-not-needed-buffer buffer reg)
+                     (kill-buffer (buffer-name buffer)))))
   (when (and (boundp 'recentf-list)
              (boundp 'durand-recently-closed-files))
     (setf recentf-list nil
           durand-recently-closed-files nil))
-  (cond
-   ((and arg (or (get-process " *mu4e-proc*")
-                 mu4e~update-timer))
-    (mu4e-quit)
-    (setf mu4e~update-timer nil)
-    (message "mu4e is turned off now."))))
+  ;; (cond
+  ;;  ((and arg (or (get-process " *mu4e-proc*")
+  ;;                mu4e~update-timer))
+  ;;   (mu4e-quit)
+  ;;   (setf mu4e~update-timer nil)
+  ;;   (message "mu4e is turned off now.")))
+  )
 
 
 ;; org-edit-special

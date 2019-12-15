@@ -1839,31 +1839,15 @@ The two lists should have the same lengths."
 (defun org-open-bookmarks ()
   "Choose bookmarks to open."
   (interactive)
-  (let* ((route_du_fichier "~/org/notes.org")
-         (nom_du_tampon "notes.org")
-         (déjà_ouvert (get-buffer nom_du_tampon))
-         (cands (org-ql--query route_du_fichier '(tags "bookmarks")
-                               :action (lambda ()
-                                         (org-offer-links-in-entry (buffer-name) (point)))))
-         (choice (durand-choose-list (mapcar (lambda (x)
-                                               (string-match org-link-any-re (format "%s" (car x)))
-                                               (list
-                                                (substring-no-properties
-                                                 (match-string 3 (format "%s" (car x)))
-                                                 1 -1)
-                                                "rien"))
-                                             cands)
-                                     nil "Choose bookmarks: ")))
-    (unwind-protect
-        (mapc (lambda (x)
-                (org-open-link-from-string
-                 (substring-no-properties
-                  (car (assoc* x cands
-                               :test #'string-match)))))
-              choice)
-      (when (and (not déjà_ouvert) (get-buffer nom_du_tampon))
-        (kill-buffer nom_du_tampon))
-      (delete-other-windows))))
+  (let* ((cands (with-current-file "/Users/durand/org/notes.org" nil
+                  (org-map-entries #'durand-org-link-info "bookmarks")))
+         (choice (durand-choose-list cands nil "Chois un lien: ")))
+    (mapcar
+     (lambda (x)
+       (mapc #'durand-org-open-link
+             (assoc-default x cands #'string-match)))
+     choice)
+    (assoc-default (car choice) cands #'string-match)))
 
 ;;;###autoload
 (defun durand-org-link-info (&optional arg)
@@ -1931,7 +1915,8 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                                                     ivy--index 0
                                                     exc t))
                                         "exclude"))
-                             :preselect ivy--index)))
+                             :preselect ivy--index
+                             :caller 'durand-choose-list)))
           (unless exc (push ele res))
           (when exc
             (setf cands

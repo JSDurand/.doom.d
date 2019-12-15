@@ -271,7 +271,8 @@ articles, bookmarks, youtube links, novels, or weblinks.")
   ;;           (setq display-line-numbers
   ;;                 (and (null display-line-numbers)
   ;;                      'relative)))
-  [?e] 'durand-wrap-region-with)
+  ;; [?e] 'durand-wrap-region-with
+  )
 
 ;;;###autoload
 (defun durand-open-index (&optional arg)
@@ -387,7 +388,7 @@ With ARG, open the index file even not in `js2-mode'."
   [?p] 'evil-paste-after
   [?\s-m] 'durand-toggle-mode-line
   [?ù] 'evil-goto-mark
-  [?S] 'cycle-spacing
+  ;; [?S] 'cycle-spacing
   ;; [?z] 'downcase-region-or-word
   ;; [?Z] 'upcase-region-or-word
   [?z] durand-evil-dollar-map
@@ -465,6 +466,41 @@ next VCOUNT - 1 lines below the current one."
                    vcount)))
   (evil-insert-state 1))
 
+;; align operator
+
+;;;###autoload
+(evil-define-operator evil-align-regexp (beg end type &optional arg)
+  "Align regions by `align-regexp'.
+Treat block selections as selecting lines.
+And ARG behaves like in `align-regexp'."
+  :move-point nil
+  (interactive "<R>P")
+  (let ((beg (save-excursion
+               (goto-char beg)
+               (line-beginning-position)))
+        (end (save-excursion
+               (goto-char end)
+               (line-end-position)))
+        (arguments (if arg
+                       (list (read-string "Complex align using regexp: "
+                                          "\\(\\s-*\\)" 'align-regexp-history)
+                             (string-to-number
+                              (read-string
+                               "Parenthesis group to modify (justify if negative): " "1"))
+                             (string-to-number
+                              (read-string "Amount of spacing (or column if negative): "
+                                           (number-to-string align-default-spacing)))
+                             (y-or-n-p "Repeat throughout line? "))
+                     (list (concat "\\(\\s-*\\)"
+                                   (read-string "Align regexp: "))
+                           1 align-default-spacing nil))))
+    (save-excursion
+      (align-regexp beg end
+                    (nth 0 arguments)
+                    (nth 1 arguments)
+                    (nth 2 arguments)
+                    (nth 3 arguments)))))
+
 ;; text objects
 
 ;; From https://stackoverflow.com/questions/18102004/
@@ -505,7 +541,7 @@ next VCOUNT - 1 lines below the current one."
 (define-and-bind-text-object "environment" "e" "\\\\begin{[^{}]+}$" "\\\\end{[^{}]+}")
 
 ;; for indentation
-;; Now doom-emac comes equipped with default bindings for indentation text
+;; Now doom-emacs comes equipped with default bindings for indentation text
 ;; objects.
 ;; (defun evil-indent--current-indentation ()
 ;;   "Return the indentation of the current line. Moves point."

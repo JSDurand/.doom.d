@@ -401,7 +401,7 @@
         ("/drafts" . ?d)))
 
 (define-key mu4e-view-mode-map [?o] 'mu4e-view-attach-emacs)
-(define-key mu4e-view-mode-map (kbd "<home>") 'general-hydra/body)
+(define-key mu4e-view-mode-map (kbd "<home>") 'evil-escape)
 
 (add-to-list 'mu4e-view-actions
 	     '("Browse this mail" . mu4e-action-view-in-browser))
@@ -491,7 +491,7 @@
 ;; don't hurry to delete this package.
 (setf mu4e-mu-binary "/usr/local/bin/mu")
 (use-package! mu4e-alert
-  :ensure t
+  ;; :ensure t
   :after mu4e
   :config
   (setf mu4e-alert-interesting-mail-query

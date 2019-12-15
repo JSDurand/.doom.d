@@ -18,6 +18,7 @@
        company ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
+       ;; ivy
        (ivy
         +fuzzy)                         ; a search engine for love and life
        durand-ivy
@@ -179,7 +180,7 @@
        :config
        ;;literate
        (default +bindings +smartparens)
-       ;; durand-ideal
+       durand-ideal
        )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

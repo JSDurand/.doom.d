@@ -31,7 +31,7 @@
 (setq mac-right-option-modifier nil)
 
 ;;* ideal.el
-(load! "+ideal.el" doom-private-dir)
+;; (load! "+ideal.el" doom-private-dir)
 
 (setq package-enable-at-startup nil)
 (setq package-archives '(("org" . "http://orgmode.org/elpa/")
@@ -56,7 +56,7 @@
 ;;* use home key
 (map! :meorgvi [home] #'evil-force-normal-state
       :mov "à" #'durand-beginning-of-line-or-block
-      :n (kbd "<backspace>") #'evil-switch-to-windows-last-buffer)
+      :n (kbd "<backspace>") #'durand-other-buffer)
 
 ;;* some custom mappings
 (use-package! org-pdfview
@@ -379,17 +379,17 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
     ;; workspace-name
     ;; window-number
     modals
-    matches
     buffer-info-durand
     remote-host
     buffer-position-durand
+    matches
     ;; parrot
     ;; selection-info
     )
-  '(objed-state
+  '(;; objed-state
     misc-info
     ;; persp-name
-    battery
+    ;; battery
     ;; grip
     ;; irc
     mu4e
@@ -406,7 +406,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
     checker))
   
 (doom-modeline-mode 1)
-(display-battery-mode 1)
+;; (display-battery-mode 1)
 
 ;; (doom-modeline-set-modeline-durand 'durand t)
 (after! doom-modeline
@@ -620,3 +620,10 @@ If ARG is non-nil, show the full name of the buffer."
                                     "-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
                                     "-isystem/usr/local/include"]
                         :resourceDir (string-trim (shell-command-to-string "clang -print-resource-dir"))))))
+
+;; delete other windows
+(map! :leader :n "wc" #'delete-other-windows)
+
+;; don't watch files since I sometimes have large projects.
+
+(setf lsp-enable-file-watchers nil)

@@ -19,13 +19,14 @@
           (swiper-multi . swiper--all-format-function)
           (t . durand-ivy-format-function-arrow)))
 
-  (when (boundp 'ivy-re-builders-alist)
-    (setq ivy-re-builders-alist
-          '((swiper . ivy--regex-ignore-order)
-            (swiper-multi . ivy--regex-ignore-order)
-            (counsel-rg . ivy--regex-ignore-order)
-            (swiper-isearch . ivy--regex-ignore-order)
-            (t . ivy--regex-fuzzy)))))
+  ;; (when (boundp 'ivy-re-builders-alist)
+  ;;   (setq ivy-re-builders-alist
+  ;;         '((swiper . ivy--regex-ignore-order)
+  ;;           (swiper-multi . ivy--regex-ignore-order)
+  ;;           (counsel-rg . ivy--regex-ignore-order)
+  ;;           (swiper-isearch . ivy--regex-ignore-order)
+  ;;           (t . ivy--regex-fuzzy))))
+  )
 
 ;; amx showing keybindings might be too slow
 (setq amx-show-key-bindings nil)
@@ -34,6 +35,15 @@
 (setq avy-keys (nconc
                 (number-sequence ?a ?z)
                 (number-sequence ?A ?Z)))
+;; (after! ivy-prescient
+;;   (setf
+;;    ivy-prescient-sort-commands
+;;    (append
+;;     ivy-prescient-sort-commands
+;;     (list
+;;      'durand-bookmark-jump-headlong
+;;      'counsel-minibuffer-history
+;;      'durand-choose-list))))
 
 ;; explicitly set the completing read function for magit
 ;; (setq magit-completing-read-function 'ivy-completing-read)
