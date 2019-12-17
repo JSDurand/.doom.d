@@ -44,7 +44,7 @@
         ;;  :when (file-directory-p doom-private-dir)
         ;;  :action doom/open-private-config)
         ("Open Safari"
-         :icon (all-the-icons-material "open_in_browser" :face 'font-lock-keyword-face)
+         :icon (all-the-icons-octicon "browser" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-browser)
          :action durand-open-browser)
         ("Open Discord"

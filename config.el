@@ -3,6 +3,9 @@
 ;;* don't keep screen position
 (setf scroll-preserve-screen-position nil)
 
+;;* avy all windows
+(setf avy-all-windows 'all-frames)
+
 ;;* Prevent some `battery-update' problem.
 (fset 'battery-update 'ignore)
 
@@ -207,7 +210,8 @@
      ((display-graphic-p nil)
       (setf doom-modeline-icon t))
      (t
-      (setf doom-modeline-icon nil)))))
+      (setf doom-modeline-icon nil)
+      (set-frame-parameter nil 'menu-bar-lines 0)))))
 
 (frame-init-behaviour)
 
