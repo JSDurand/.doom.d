@@ -1,0 +1,12 @@
+#+TITLE:   My doom emacs configuration
+#+DATE:    décembre 17, 2019
+#+SINCE:   v2.0.9 doom
+
+* Description
+This is my doom emacs configuration.
+
+Since I didn't lazy load some packages (by accident or by ignorance), the startup time is
+not very impressive, but I find it satisfying enough.
+
+* Prerequisites
+This has no prereqisites.
