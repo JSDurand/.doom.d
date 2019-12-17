@@ -19,13 +19,13 @@
           (swiper-multi . swiper--all-format-function)
           (t . durand-ivy-format-function-arrow)))
 
-  ;; (when (boundp 'ivy-re-builders-alist)
-  ;;   (setq ivy-re-builders-alist
-  ;;         '((swiper . ivy--regex-ignore-order)
-  ;;           (swiper-multi . ivy--regex-ignore-order)
-  ;;           (counsel-rg . ivy--regex-ignore-order)
-  ;;           (swiper-isearch . ivy--regex-ignore-order)
-  ;;           (t . ivy--regex-fuzzy))))
+  (when (boundp 'ivy-re-builders-alist)
+    (setq ivy-re-builders-alist
+          '((swiper . ivy--regex-ignore-order)
+            (swiper-multi . ivy--regex-ignore-order)
+            (counsel-rg . ivy--regex-ignore-order)
+            (swiper-isearch . ivy--regex-ignore-order)
+            (t . ivy--regex-fuzzy))))
   )
 
 ;; amx showing keybindings might be too slow

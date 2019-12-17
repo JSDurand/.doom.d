@@ -380,8 +380,8 @@ With ARG, open the index file even not in `js2-mode'."
   ;; [??] (lambda () (interactive) (durand-buffer-scroll 'up 1))
   ;; [32 ?.] (lambda () (interactive) (durand-buffer-scroll 'down 1)) ; I like the repeat operator after all.
   [?.] 'evil-repeat
-  [?§] (lambda () (interactive) (evil-scroll-down 0))
-  [?è] (lambda () (interactive) (evil-scroll-up 0))
+  [?§] (lambda () (interactive) (evil-scroll-line-down (/ (window-body-height) 2)))
+  [?è] (lambda () (interactive) (evil-scroll-line-up (/ (window-body-height) 2)))
   [?!] (lambda () (interactive) (evil-scroll-line-down 1))
   [?ç] (lambda () (interactive) (evil-scroll-line-up 1))
   [?Q] 'durand-quit-window

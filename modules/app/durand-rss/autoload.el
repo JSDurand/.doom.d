@@ -5,22 +5,22 @@
 (defun durand-play-with-mpv (quality url)
   " Play a given URL with mpv."
   (interactive (list (durand-get-quality-val)
-		     (read-string "Enter URL: ")))
+                     (read-string "Enter URL: ")))
   (let ((quality-arg "")
-	(quality-val quality)
-	(fit-arg "--autofit=100%x100%"))
+        (quality-val quality)
+        (fit-arg "--autofit=100%x100%"))
     (setq quality-val (string-to-number quality-val))
     (message "Opening %s with height ≤ %s with mpv..."
-	     url
-	     quality-val)
+             url
+             quality-val)
     (when (< 0 quality-val)
       (setq quality-arg (format "--ytdl-format=[height<=?%s]"
-				quality-val)))
+                                quality-val)))
     (eshell)
     (insert (format "mpv --no-terminal %s %s %s &"
-		    quality-arg
-		    fit-arg
-		    url))
+                    quality-arg
+                    fit-arg
+                    url))
     (eshell-send-input)))
 
 ;;;###autoload
@@ -29,24 +29,24 @@
 then play the video with mpv with QUALITY, else just inform this is not a youtube link."
   (interactive (list (durand-get-quality-val)))
   (let ((entry (if (eq major-mode 'elfeed-show-mode)
-		   elfeed-show-entry
-		 (elfeed-search-selected t)))
-	(quality-arg "")
-	(quality-val quality)
-	(fit-arg "--autofit=100%x100%"))
+                   elfeed-show-entry
+                 (elfeed-search-selected t)))
+        (quality-arg "")
+        (quality-val quality)
+        (fit-arg "--autofit=100%x100%"))
     (setq quality-val (string-to-number quality-val))
     (message "Opening %s with height ≤ %s with mpv..."
-	     (elfeed-entry-link entry)
-	     quality-val)
+             (elfeed-entry-link entry)
+             quality-val)
     (when (< 0 quality-val)
       (setq quality-arg (format "--ytdl-format=[height<=?%s]"
-				quality-val)))
+                                quality-val)))
     ;; (start-process "elfeed-mpv" nil "mpv" quality-arg fit-arg (elfeed-entry-link entry))
     (eshell)
     (insert (format "mpv --no-terminal %s %s %s &"
-		    quality-arg
-		    fit-arg
-		    (elfeed-entry-link entry)))
+                    quality-arg
+                    fit-arg
+                    (elfeed-entry-link entry)))
     (eshell-send-input)))
 
 ;;;###autoload
@@ -62,17 +62,17 @@ Default value is \"youtu\\.?be\"")
 See `durand-play-with-mpv' also."
   (interactive)
   (let ((entry (if (eq major-mode 'elfeed-show-mode)
-		   elfeed-show-entry
-		 (elfeed-search-selected t)))
-	(patterns elfeed-mpv-patterns))
+                   elfeed-show-entry
+                 (elfeed-search-selected t)))
+        (patterns elfeed-mpv-patterns))
     (while (and patterns
-		(not (string-match (car patterns) (elfeed-entry-link entry))))
+                (not (string-match (car patterns) (elfeed-entry-link entry))))
       (setq patterns (cdr patterns)))
     (if patterns
-	(call-interactively 'durand-play-with-mpv-in-elfeed)
+        (call-interactively 'durand-play-with-mpv-in-elfeed)
       (if (eq major-mode 'elfeed-search-mode)
-	  (elfeed-search-browse-url)
-	(elfeed-show-visit)))))
+          (elfeed-search-browse-url)
+        (elfeed-show-visit)))))
 
 ;;;###autoload
 (defun durand-download-youtube (url &optional title)
@@ -96,50 +96,49 @@ See `durand-play-with-mpv' also."
 Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
   (interactive)
   (let* ((entry (if (eq major-mode 'elfeed-show-mode)
-		    elfeed-show-entry
-		  (elfeed-search-selected t)))
-	 (link (elfeed-entry-link entry))
+                    elfeed-show-entry
+                  (elfeed-search-selected t)))
+         (link (elfeed-entry-link entry))
          (title (elfeed-entry-title entry))
-	 (patterns elfeed-mpv-patterns))
+         (patterns elfeed-mpv-patterns))
     (while (and patterns
-		(not (string-match (car patterns) (elfeed-entry-link entry))))
+                (not (string-match (car patterns) (elfeed-entry-link entry))))
       (setq patterns (cdr patterns)))
     (when patterns
       (durand-download-youtube link title))))
 
+(after! ivy
 ;;;###autoload
-(defun durand-get-quality-val ()
-  "Let the user choose a quality format."
-  (ivy-read "Max height resolution (0 for unlimited): "
-	    '("0" "480" "720")
-	    :caller 'durand-get-quality-val))
+  (defun durand-get-quality-val ()
+    "Let the user choose a quality format."
+    (ivy-read "Max height resolution (0 for unlimited): "
+              '("0" "480" "720")
+              :caller 'durand-get-quality-val)))
 
 ;;;###autoload
 (defmacro make-tag-toggler (arg)
-  "
-Make a function that toggles the tag ARG on or off in elfeed search"
+  "Make a function that toggles the tag ARG on or off in elfeed search"
   `(defun ,(intern (format "%s-tag-toggler" arg)) ()
      ,(format "Toggle %s tag" arg)
      (interactive)
      (cond ((string-match (concat " \\+" ,arg) elfeed-search-filter)
-	    (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
-	   ((string-match (concat " -" ,arg) elfeed-search-filter)
-	    (elfeed-search-set-filter (replace-match (concat " +" ,arg) nil nil elfeed-search-filter)))
-	   (t
-	    (elfeed-search-set-filter (concat elfeed-search-filter (concat " -" ,arg)))))
+            (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
+           ((string-match (concat " -" ,arg) elfeed-search-filter)
+            (elfeed-search-set-filter (replace-match (concat " +" ,arg) nil nil elfeed-search-filter)))
+           (t
+            (elfeed-search-set-filter (concat elfeed-search-filter (concat " -" ,arg)))))
      (message elfeed-search-filter)))
 
 ;;;###autoload
 (defmacro make-toggler (arg)
-  "
-Make a function that toggles ARG on or off in elfeed search"
+  "Make a function that toggles ARG on or off in elfeed search"
   `(defun ,(intern (format "%s-toggler" arg)) ()
      ,(format "Toggle %s" arg)
      (interactive)
      (cond ((string-match (concat " " ,arg) elfeed-search-filter)
-	    (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
-	   (t
-	    (elfeed-search-set-filter (concat elfeed-search-filter (concat " " ,arg)))))
+            (elfeed-search-set-filter (replace-match "" nil nil elfeed-search-filter)))
+           (t
+            (elfeed-search-set-filter (concat elfeed-search-filter (concat " " ,arg)))))
      (message elfeed-search-filter)))
 
 ;;;###autoload

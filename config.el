@@ -1,5 +1,8 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+;;* don't keep screen position
+(setf scroll-preserve-screen-position nil)
+
 ;;* Prevent some `battery-update' problem.
 (fset 'battery-update 'ignore)
 
@@ -59,35 +62,6 @@
       :n (kbd "<backspace>") #'durand-other-buffer)
 
 ;;* some custom mappings
-(use-package! org-pdfview
-  ;; :ensure t
-  ;; :demand
-  :config
-  ;; custom store link function to store the height as well
-  (defun org-pdfview-store-link ()
-    "Store a link to a pdfview buffer."
-    (when (eq major-mode 'pdf-view-mode)
-      ;; This buffer is in pdf-view-mode
-      (let* ((path buffer-file-name)
-             (page (pdf-view-current-page))
-             (height (let ((ori (substring-no-properties (pdf-misc-size-indication) 1)))
-                       (cond
-                        ((string= ori "Bot")
-                         "55")
-                        ((string= ori "Top")
-                         nil)
-                        (t
-                         (if (string-match "%%" ori)
-                             (replace-match "" nil nil ori)
-                           ori)))))
-             (real-height (when height
-                            (number-to-string (/ (string-to-number height) 100.0))))
-             (link (concat "pdfview:" path "::" (number-to-string page)
-                           (when height (concat "++" real-height)))))
-        (org-store-link-props
-         :type "pdfview"
-         :link link
-         :description path)))))
 
 (map! :ngvm (kbd "s-w") 'delete-other-windows
       :map doom-leader-code-map
@@ -125,16 +99,16 @@
       org-pretty-entities t)
 
 ;;;###autoload
-(defun load-config ()
-  "Load the configuration again."
-  (interactive)
-  (load! "config.el" doom-private-dir)
-  (display-battery-mode)
-  ;; (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
-  (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
-  (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand)))))
+;; (defun load-config ()
+;;   "Load the configuration again."
+;;   (interactive)
+;;   (load! "config.el" doom-private-dir)
+;;   (display-battery-mode)
+;;   ;; (fset 'pdf-sync-forward-search 'durand-pdf-sync-forward-search)
+;;   (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
+;;   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand)))))
 
-(map! :prefix "g" :m "h" 'evil-goto-line)
+(map! :prefix "g" :m "t" 'evil-goto-line)
 ;; (map! :n (kbd "s-q") 'load-config)
 (map! :n [?\s-q] (lambda! (message "Don't use s-q!")))
 
@@ -267,62 +241,81 @@ but it truncates the buffer name within `durand-buffer-name-max'."
 (defvar doom-modeline--buffer-narrow-icon nil
   "Icon for the narrowing state of the buffer.")
 
+;; This is not used anymore.
 ;;;###autoload
-(defun doom-modeline-update-buffer-narrow-state-icon (&rest _)
-  "Update the buffer narrowing state in mode-line."
-  (setq doom-modeline--buffer-narrow-icon
-        (when doom-modeline-buffer-state-icon
-          (ignore-errors
-            (cond ((buffer-narrowed-p)
-                   (doom-modeline-buffer-file-state-icon
-                    "vertical_align_center" "↕" "><" 'doom-modeline-warning))
-                  (t ""))))))
+;; (defun doom-modeline-update-buffer-narrow-state-icon (&rest _)
+;;   "Update the buffer narrowing state in mode-line."
+;;   (setq doom-modeline--buffer-narrow-icon
+;;         (when doom-modeline-buffer-state-icon
+;;           (ignore-errors
+;;             (cond ((buffer-narrowed-p)
+;;                    (doom-modeline-buffer-file-state-icon
+;;                     "vertical_align_center" "↕" "><" 'doom-modeline-warning))
+;;                   (t ""))))))
 
-(add-hook 'find-file-hook #'doom-modeline-update-buffer-narrow-state-icon)
+(fset 'doom-modeline-update-buffer-narrow-state-icon 'ignore)
+
+;; (add-hook 'find-file-hook #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (add-hook 'after-save-hook #'doom-modeline-update-buffer-narrow-state-icon)
-(add-hook 'clone-indirect-buffer-hook #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'pop-to-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (add-hook 'clone-indirect-buffer-hook #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'pop-to-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'undo :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'undo-tree-undo-1 :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'undo-tree-redo-1 :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'popup-create :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'popup-delete :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'popup-create :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'popup-delete :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'symbol-overlay-rename :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'narrow-to-region :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'durand-narrow-dwim :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'switch-to-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'kill-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'widen :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'org-narrow-to-block :after #'doom-modeline-update-buffer-narrow-state-icon)
+;; (advice-add #'narrow-to-region :after #'doom-modeline-update-buffer-narrow-state-icon)
+(advice-add #'durand-narrow-dwim :after #'doom-modeline-update-buffer-file-state-icon)
+(advice-add #'switch-to-buffer :after #'doom-modeline-update-buffer-file-state-icon)
+(advice-add #'kill-buffer :after #'doom-modeline-update-buffer-file-state-icon)
+(advice-add #'widen :after #'doom-modeline-update-buffer-file-state-icon)
+(add-hook 'doom-escape-hook #'durand-update-buffer-file-state-icon)
+(advice-add #'org-narrow-to-block :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'org-narrow-to-element :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'org-narrow-to-subtree :after #'doom-modeline-update-buffer-narrow-state-icon)
 ;; (advice-add #'org-toggle-narrow-to-subtree :after #'doom-modeline-update-buffer-narrow-state-icon)
 
-;; don't display narrowing state in the original function.
+;;;###autoload
+(defun durand-update-buffer-file-state-icon (&rest _)
+  "Wrapper around `doom-modeline-update-buffer-file-state-icon'"
+  (doom-modeline-update-buffer-file-state-icon)
+  nil)
+
+;; NOTE: Don't display narrowing state in the original function. Also, in
+;; doom-escape-hook, it stops at the first function that returns non-nil. So I
+;; have to wrap it around.
+;;
 ;;;###autoload
 (defun doom-modeline-update-buffer-file-state-icon (&rest _)
   "Update the buffer or file state in mode-line. Modified by Durand."
   (setq doom-modeline--buffer-file-state-icon
         (when doom-modeline-buffer-state-icon
           (ignore-errors
-            (cond (buffer-read-only
-                   (doom-modeline-buffer-file-state-icon
-                    "lock" "🔒" "%1*" `(:inherit doom-modeline-warning
-                                                 :weight ,(if doom-modeline-icon
-                                                              'normal
-                                                            'bold))))
-                  ((and buffer-file-name (buffer-modified-p)
-                        doom-modeline-buffer-modification-icon)
-                   (doom-modeline-buffer-file-state-icon
-                    "save" "💾" "%1*" `(:inherit doom-modeline-buffer-modified
-                                                 :weight ,(if doom-modeline-icon
-                                                              'normal
-                                                            'bold))))
-                  ((and buffer-file-name
-                        (not (file-exists-p buffer-file-name)))
-                   (doom-modeline-buffer-file-state-icon
-                    "block" "🚫" "!" 'doom-modeline-urgent))
-                  (t ""))))))
+            (concat
+             (ignore-errors
+               (cond ((buffer-narrowed-p)
+                      (doom-modeline-buffer-file-state-icon
+                       "vertical_align_center" "↕" "><" 'doom-modeline-warning))
+                     (t "")))
+             (cond (buffer-read-only
+                    (doom-modeline-buffer-file-state-icon
+                     "lock" "🔒" "%1*" `(:inherit doom-modeline-warning
+                                                  :weight ,(if doom-modeline-icon
+                                                               'normal
+                                                             'bold))))
+                   ((and buffer-file-name (buffer-modified-p)
+                         doom-modeline-buffer-modification-icon)
+                    (doom-modeline-buffer-file-state-icon
+                     "save" "💾" "%1*" `(:inherit doom-modeline-buffer-modified
+                                                  :weight ,(if doom-modeline-icon
+                                                               'normal
+                                                             'bold))))
+                   ((and buffer-file-name
+                         (not (file-exists-p buffer-file-name)))
+                    (doom-modeline-buffer-file-state-icon
+                     "block" "🚫" "!" 'doom-modeline-urgent))
+                   (t "")))))))
 
 ;;;###autoload
 (defsubst doom-modeline--buffer-narrow-icon-durand ()
@@ -627,3 +620,15 @@ If ARG is non-nil, show the full name of the buffer."
 ;; don't watch files since I sometimes have large projects.
 
 (setf lsp-enable-file-watchers nil)
+
+;; problem with helpful mode quit function
+
+(defadvice! +popup-quit-window-a (orig-fn &rest args)
+  :around #'quit-window
+  (interactive)
+  (let ((orig-buffer (current-buffer)))
+    (apply orig-fn args)
+    (when (and (eq orig-buffer (current-buffer))
+               (+popup-window-p))
+      (+popup/close)
+      (kill-buffer orig-buffer))))
