@@ -233,6 +233,8 @@ Don't bind it to a key in `general-hydra/heads'"
       ":stack:web_link:")
      ((string-match "https?://www.uukanshu.com" link)
       ":roman:")
+     ((string-match "https?://stacks.math.columbia.edu/" link)
+      ":web_link:stack:")
      (t
       ":web_link:"))))
 
@@ -372,7 +374,7 @@ EXCLUDE-TYPE can be nil or a regexp matching what would not be summed."
         "*ACCOUNT REPORT*" nil nil
         (insert (format "%s\nREPORT MODE: %s\nSUM-TYPE: %s\nEXCLUDE-TYPE: %s\n%s\n" durand-account-report-period-str
                         report-mode sum-type exclude-type
-                        (make-string (window-width) ?-)))
+                        (make-string (- (window-width) 2) ?-)))
         (let ((all-total 0))
           (dotimes (i (/ (length combined) 2))
             (let ((day-total 0)
@@ -393,8 +395,9 @@ EXCLUDE-TYPE can be nil or a regexp matching what would not be summed."
                               'day-total day-total
                               'all-total all-total)))))
         (account-report-mode))
-       (select-window (get-buffer-window "*ACCOUNT REPORT*"))
-       (delete-other-windows)))))
+       ;; (select-window (get-buffer-window "*ACCOUNT REPORT*"))
+       ;; (delete-other-windows)
+       ))))
 
 ;;;###autoload
 (defun durand-date-to-time (str)
@@ -426,9 +429,9 @@ or a custom specifier of time period."
           (str-day (nth 3 str-list)))
      ;; Ensure that the time being matched is less than or equal to the last day
      (cl-assert (or (time-less-p str-time last-time)
-                 (and (= last-day str-day)
-                      (= last-month str-month)
-                      (= last-year str-year))))
+                    (and (= last-day str-day)
+                         (= last-month str-month)
+                         (= last-year str-year))))
      (pcase unit
        ((or (pred null) 'day)
         (and (= last-day str-day)
@@ -549,10 +552,8 @@ or a custom specifier of time period."
 (defun durand-view-report-mode ()
   "Change report-mode"
   (interactive)
-  (durand-change-parameter :report-mode (cond ((string= (ivy-read "Mode: " '("separate" "combine"))
-                                                        "separate")
-                                               'separate)
-                                              (t 'combine))))
+  (durand-change-parameter :report-mode (intern (ivy-read "Mode: " '("separate" "combine")
+                                                          :require-match t))))
 
 ;;;###autoload
 (defvar durand-account-prev-position nil
@@ -607,7 +608,7 @@ Press \\[durand-view-last-day] to view the last day;
   "go to the corresponding date"
   (interactive)
   (unless (string= (buffer-name) "*ACCOUNT REPORT*")
-    (user-error "This should only e executed in account report buffer."))
+    (user-error "This should only be executed in account report buffer."))
   (cond
    ((save-excursion
       (beginning-of-line)
@@ -1103,7 +1104,9 @@ description."
                         (user-error "Je ne peux pas déterminer le lien automatiquement."))))
          (description (read-string "Description: "
                                    (cond
-                                    (desc desc)
+                                    ((and (stringp desc)
+                                          (null (string= desc "")))
+                                     desc)
                                     ((and (cadr chosen-link)
                                           (not (string= (cadr chosen-link) "")))
                                      (file-name-nondirectory (cadr chosen-link)))
@@ -1259,10 +1262,12 @@ and whose `caddr' is a list of strings, the content of the note."
                     res-list)))
           (nreverse res-list))))))
 
-(setq org-note-regexp (concat
-                       "^\\([ \t]+\\)- Note taken on \\("
-                       org-element--timestamp-regexp
-                       "\\).*$"))
+(after! org
+;;;###autoload
+  (setq org-note-regexp (concat
+			 "^\\([ \t]+\\)- Note taken on \\("
+			 org-element--timestamp-regexp
+			 "\\).*$")))
 
 ;;;###autoload
 (defun durand-org-get-logs ()
@@ -2039,71 +2044,95 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
 With \\[universal-argument], update novels;
 With \\[universal-argument]\\[universal-argument], show all links.
 With \\[universal-argument]\\[universal-argument]\\[universal-argument], visit every qidian link."
-  (interactive "P")
-  (cond
-   ((null arg)
-    (let* (cands)
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
-      (let ((liste-de-choix
-             (let ((sel (durand-choose-list cands t "Chois un roman: "))
-                   temp)
-               (dolist (ele sel temp)
-                 (setf temp (append temp
-                                    (durand-choose-list
-                                     (cl-remove-if
-                                      (lambda (element)
-                                        (string-match "qidian" (car element)))
-                                      (assoc-default ele cands))
-                                     t "Chois un lien: " nil t)))))))
-        (mapc #'browse-url liste-de-choix))))
-   ((equal arg '(4))
-    (org-update-novels))
-   ((equal arg '(16))
-    (let* (cands)
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
-      (let ((liste-de-choix
-             (let ((sel (durand-choose-list cands t "Chois un roman: "))
-                   temp)
-               (dolist (ele sel temp)
-                 (setf temp (append temp
-                                    (durand-choose-list
-                                     (assoc-default ele cands)
-                                     t "Chois un lien: " nil t)))))))
-        (mapc #'browse-url liste-de-choix))))
-   ((equal arg '(64))
-    (message "Opening novels' qidian pages...")
-    (let* (cands)
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
-      (let* ((liste-de-choix
-              (mapcar (lambda (ls)
-                        (caar (-filter (lambda (x) (string= "qidian" (cadr x)))
-                                       (cdr ls))))
-                      cands)))
-        (mapc #'browse-url (-filter #'stringp liste-de-choix))))
-    (message "Opening novels' qidian pages...DONE"))))
+  (interactive)
+  (let* ((action (if (memq arg '(open update all qidian))
+                     arg
+                   (ivy-read "Quel action: "
+                             '("open" "update" "open qidian" "open all")
+                             :require-match t)))
+         (action (if (memq arg '(open update qidian all))
+                     arg
+                   (pcase action
+                     ("open" 'open)
+                     ("update" 'update)
+                     ("open qidian" 'qidian)
+                     ("open all" 'all)
+                     (_ (user-error "Wrong choice: %s" action))))))
+    (cond
+     ((eq action 'open)
+      (let* (cands)
+        (with-current-file "/Users/durand/org/notes.org" nil
+          (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
+        (let ((liste-de-choix
+               (let ((sel (durand-choose-list cands t "Chois un roman: "))
+                     temp)
+                 (dolist (ele sel temp)
+                   (setf temp (append temp
+                                      (durand-choose-list
+                                       (cl-remove-if
+                                        (lambda (element)
+                                          (string-match "qidian" (car element)))
+                                        (assoc-default ele cands))
+                                       t "Chois un lien: " nil t)))))))
+          (mapc #'browse-url liste-de-choix))))
+     ((eq action 'update)
+      (org-update-novels))
+     ((eq action 'all)
+      (let* (cands)
+        (with-current-file "/Users/durand/org/notes.org" nil
+          (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
+        (let ((liste-de-choix
+               (let ((sel (durand-choose-list cands t "Chois un roman: "))
+                     temp)
+                 (dolist (ele sel temp)
+                   (setf temp (append temp
+                                      (durand-choose-list
+                                       (assoc-default ele cands)
+                                       t "Chois un lien: " nil t)))))))
+          (mapc #'browse-url liste-de-choix))))
+     ((eq action 'qidian)
+      (message "Opening novels' qidian pages...")
+      (let* (cands)
+        (with-current-file "/Users/durand/org/notes.org" nil
+          (setf cands (org-map-entries #'durand-org-link-info "roman-ARCHIVE")))
+        (let* ((liste-de-choix
+                (durand-choose-list
+                 cands
+                 t "Chois un qidian page d'un roman: "))
+               (choix-de-liens
+                (cl-loop for roman in liste-de-choix
+                         for element = (-filter
+                                        (lambda (x)
+                                          (string-match "^qidian" (cadr x)))
+                                        (assoc-default roman cands #'string=))
+                         append (car element))))
+          (mapc #'browse-url (-filter #'stringp choix-de-liens))))
+      (message "Opening novels' qidian pages...DONE")))))
 
 ;;;###autoload
-(defun org-update-novels ()
-  "Update the html link to a novel, or to a web_link."
+(defun org-update-novels (&optional desc)
+  "Update the html link to a novel, or to a web_link.
+If DESC is non-`nil', then it is the description of the new link."
   (interactive)
   (let* ((tags (ivy-read "tag: " '("roman-ARCHIVE"
                                    "web_link-ARCHIVE")
                          :require-match t))
+         (roman-p (string-match "roman" tags))
+         (prompt (if roman-p
+                     "Chois un roman à mettre à jour: "
+                   "Chois un web lien à mettre à jour: "))
          cands)
     (with-current-file "/Users/durand/org/notes.org" nil
       (setf cands (org-map-entries
                    (lambda () (durand-org-link-info t))
-                   tags)))
-    (let* ((choix (ivy-read "Chois un roman à mettre à jour: " cands
-                            :require-match t))
-           (item (cl-assoc choix cands :test #'string=))
-           (lien (read-string "Le lien: " (current-kill 0 t))))
-      (with-current-file "/Users/durand/org/notes.org" nil
+                   tags))
+      (unless roman-p (setf cands (nreverse cands)))
+      (let* ((choix (ivy-read prompt cands :require-match t))
+             (item (cl-assoc choix cands :test #'string=))
+             (lien (read-string "Le lien: " (current-kill 0 t)))
+             (desc (if roman-p lien desc)))
         (goto-char (cdr item))
-        (org-update-link lien)))))
+        (org-update-link lien nil nil desc)))))
 
 ;;;###autoload
 (defun org-open-youtube (&optional arg)
@@ -2173,8 +2202,8 @@ With \\[universal-argument] \\[universal-argument], don't kill the entry."
 (defun durand-org-open-link (str)
   "Since `org-open-link-from-string' does not handle links with brackets correctly, this function
 attempts to handle them."
-  (org-open-link-from-string
-   (org-make-link-string
+  (org-link-open-from-string
+   (org-link-make-string
     (org-link-decode (if (stringp str)
                          str
                        (car str)))
@@ -2493,8 +2522,7 @@ the link comes from the most recently stored link, so choose carefully the targe
 
 ;;;###autoload
 (defun durand-mark-weblink ()
-  "Choose web links and execute `durand-mark-links' for each of
-them."
+  "Choose web links and execute `durand-mark-links' for each of them."
   (interactive)
   (with-current-file "/Users/durand/org/notes.org" nil
     (let* ((tag "web_link-special-personnes-ARCHIVE")
@@ -2504,7 +2532,7 @@ them."
                                   (cdr x)))
                           cands))
            (cands (nreverse cands))
-           (choice-headings (durand-choose-list cands t "Chois un élément: " t))
+           (choice-headings (durand-choose-list cands t "Chois un lien à marquer: " t))
            (choice-elements (mapcar (lambda (x)
                                       (cl-assoc x cands :test #'string=))
                                     choice-headings)))
@@ -2517,32 +2545,52 @@ them."
 (defun durand-mark-links ()
   "Mark the links in a heading.
 marquer: mark as seen.
-unmarquer: remove the seen mark.
+presque marquer: mark as mostly seen.
+unmarquer: remove the seen and the mostly seen mark.
 tuer: delete the link."
   (interactive)
   (let* ((next-heading-position (save-excursion
                                   (outline-next-heading)
                                   (point)))
          (contained-links (save-excursion
-                            (cl-loop while (re-search-forward org-link-any-re next-heading-position t)
-                                     collect (list (match-string-no-properties 2)
-                                                   (match-string-no-properties 3)
-                                                   (match-beginning 0)
-                                                   (match-end 0)))))
+                            (nreverse
+                             (cl-loop while (re-search-forward org-link-any-re next-heading-position t)
+                                      collect (list (match-string-no-properties 2)
+                                                    (match-string-no-properties 3)
+                                                    (match-beginning 0)
+                                                    (match-end 0))))))
          (chosen-links (durand-choose-list contained-links t "Chois un lien: " t t))
+         (action-list (list "marquer" "presque marquer" "unmarquer" "tuer"))
          (chosen-elements (cl-loop for link in chosen-links
                                    collect (cl-assoc link contained-links :test #'string=)))
-         (chosen-action (ivy-read "Quoi faire? " '("marquer" "unmarquer" "tuer")
-                                  :require-match t)))
+         (chosen-action (ivy-read "Quoi faire? " action-list :require-match t)))
     (cond
      ((string= chosen-action "unmarquer")
       (cl-loop for element in (cl-sort chosen-elements
                                        (lambda (x y)
                                          (>= (nth 2 x)
                                              (nth 2 y))))
-               when (string-match " (seen)$" (cadr element))
+               when (string-match " (seen)$\\| (mostly seen)$" (cadr element))
                do (let* ((link-url (car element))
                          (link-desc (replace-match "" nil nil (cadr element)))
+                         (new-link (org-make-link-string link-url link-desc)))
+                    (setf (buffer-substring (nth 2 element)
+                                            (nth 3 element))
+                          new-link))))
+     ((string= chosen-action "presque marquer")
+      (cl-loop for element in (cl-sort chosen-elements
+                                       (lambda (x y)
+                                         (>= (nth 2 x)
+                                             (nth 2 y))))
+               do (let* ((link-url (car element))
+                         (orig-desc (cadr element))
+                         (link-desc (cond
+                                     ((string-match " (seen)$" orig-desc)
+                                      (replace-match " (mostly seen)" nil nil orig-desc))
+                                     ((string-match " (mostly seen)$" orig-desc)
+                                      orig-desc)
+                                     (t
+                                      (concat orig-desc " (mostly seen)"))))
                          (new-link (org-make-link-string link-url link-desc)))
                     (setf (buffer-substring (nth 2 element)
                                             (nth 3 element))
@@ -2553,10 +2601,13 @@ tuer: delete the link."
                                          (>= (nth 2 x)
                                              (nth 2 y))))
                do (let* ((link-url (car element))
-                         (link-desc (if (string-match " (seen)$" (cadr element))
-                                        (cadr element)
-                                      (concat (cadr element)
-                                              " (seen)")))
+                         (link-desc (cond
+                                     ((string-match " (seen)$" (cadr element))
+                                      (cadr element))
+                                     ((string-match " (mostly seen)$" (cadr element))
+                                      (replace-match " (seen)" nil nil (cadr element)))
+                                     (t
+                                      (concat (cadr element) " (seen)"))))
                          (new-link (org-make-link-string link-url link-desc)))
                     (setf (buffer-substring (nth 2 element)
                                             (nth 3 element))

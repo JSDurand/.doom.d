@@ -145,52 +145,52 @@
 ;; The original org-protocol-convert handles youtube links wrong
 (setq org-capture-templates
       '(("m" "Account records" entry
-	 (file+datetree "~/org/account/account.org")
-	 "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %^{COST|0}\n  :FROM: %^{FROM|Cash}\n  :RECORD_TIME: %U\n  :END:\n  %?\n\n  - "
-	 :jump-to-captured t)
-	("d" "Record Diaries" entry
-	 (file+datetree "~/org/diary.org")
-	 "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
-	 :jump-to-captured t)
-	("w" "Withdrawal records" entry
-	 (file+headline "~/org/wiki.org" "Money Withdrawal")
-	 "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
-	 :kill-buffer t)
-	("l" "Store links" entry
-	 (file+headline "~/org/notes.org" "Links")
-	 "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
+         (file+datetree "~/org/account/account.org")
+         "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %^{COST|0}\n  :FROM: %^{FROM|Cash}\n  :RECORD_TIME: %U\n  :END:\n  %?\n\n  - "
+         :jump-to-captured t)
+        ("d" "Record Diaries" entry
+         (file+datetree "~/org/diary.org")
+         "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
+         :jump-to-captured t)
+        ("w" "Withdrawal records" entry
+         (file+headline "~/org/wiki.org" "Money Withdrawal")
+         "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
+         :kill-buffer t)
+        ("l" "Store links" entry
+         (file+headline "~/org/notes.org" "Links")
+         "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
         ("L" "for storing webpages" entry
          (file+headline "~/org/notes.org" "Links")
          "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
          :empty-lines 1
          :kill-buffer t
          :immediate-finish t)
-	("t" "TODO" entry
-	 (file "~/org/aujourdhui.org")
-	 "* TODO %? %^{Date to do:}t\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
-	 :kill-buffer t)
-	("b" "Blog posts" entry
-	 (file+headline "~/org/notes.org" "Blog posts")
-	 "* %? %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%i\n")
-	("a" "Abstractions" entry
-	 (file+headline "~/org/wiki.org" "Abstractions")
-	 "* ABSTRACT %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n")
-	("A" "Agenda" entry
-	 (file+headline "~/org/agenda.org" "Agenda")
-	 "* TODO %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :DURATION: %^{Date: }t\n  :END:\n\n")
-	("y" "YiFu" entry
-	 (file+headline "~/org/wiki.org" "Yi Fu Tips")
-	 "* MEMO %^{word}\n  :PROPERTIES:\n  :STORY: %\\2\n  :MEANING: %\\3\n  :END:\n** Yi Fu story\n   %^{story}\n** Meaning\n   %^{meaning}"
-	 :kill-buffer t
-	 :immediate-finish t)
+        ("t" "TODO" entry
+         (file "~/org/aujourdhui.org")
+         "* TODO %? %^{Date to do:}t\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
+         :kill-buffer t)
+        ("b" "Blog posts" entry
+         (file+headline "~/org/notes.org" "Blog posts")
+         "* %? %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%i\n")
+        ("a" "Abstractions" entry
+         (file+headline "~/org/wiki.org" "Abstractions")
+         "* ABSTRACT %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n")
+        ("A" "Agenda" entry
+         (file+headline "~/org/agenda.org" "Agenda")
+         "* TODO %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :DURATION: %^{Date: }t\n  :END:\n\n")
+        ("y" "YiFu" entry
+         (file+headline "~/org/wiki.org" "Yi Fu Tips")
+         "* MEMO %^{word}\n  :PROPERTIES:\n  :STORY: %\\2\n  :MEANING: %\\3\n  :END:\n** Yi Fu story\n   %^{story}\n** Meaning\n   %^{meaning}"
+         :kill-buffer t
+         :immediate-finish t)
         ("c" "Chansons" entry
-	 (file+headline "~/org/wiki.org" "Liste de Chansons")
-	 "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: %A\n  :END:\n  %?"
-	 :jump-to-captured t)
+         (file+headline "~/org/wiki.org" "Liste de Chansons")
+         "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: %A\n  :END:\n  %?"
+         :jump-to-captured t)
         ("f" "français" entry
-	 (file+headline "~/org/français/français.org" "Liste de mots français")
-	 "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
-	 :jump-to-captured t)))
+         (file+headline "~/org/français/français.org" "Liste de mots français")
+         "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
+         :jump-to-captured t)))
 
 (add-hook 'org-capture-after-finalize-hook 'durand-capture-update-account)
 
@@ -198,9 +198,16 @@
   "The string to show in report buffer.
 This should be setted by the PERIOD-FUNC argument.")
 
+;; account report pop up rule
+(set-popup-rule! "\\*ACCOUNT REPORT\\*"
+  :side 'bottom
+  :height 0.5
+  :quit nil
+  :select t)
+
 (map! :map account-report-mode-map
       [?d] #'durand-view-last-day
-      [?w] #'durnad-view-last-week
+      [?w] #'durand-view-last-week
       [?m] #'durand-view-last-month
       [?y] #'durand-view-last-year
       [?c] #'durand-view-last-custom
@@ -382,3 +389,8 @@ This should be setted by the PERIOD-FUNC argument.")
         (append (-take 3 org-priority-faces)
                 (list '(?D :foreground "lightskyblue1")
                       '(?E :foreground "DeepSkyBlue1")))))
+
+;; set up org-pdfview
+
+(use-package! org-pdfview
+  :after-call org-open-articles)

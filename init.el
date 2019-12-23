@@ -8,6 +8,8 @@
 ;; More information about these modules (and what flags they support) can be
 ;; found in modules/README.org.
 
+;;* don't respect visual line mode!
+
 (setq evil-respect-visual-line-mode nil)
 
 (doom! :input
@@ -33,7 +35,10 @@
        hydra
        ;;indent-guides     ; highlighted indent columns
        (modeline
-        +battery) ; snazzy, Atom-inspired modeline, plus API
+        ;; +light
+        ;; +battery
+        ) ; snazzy, Atom-inspired modeline, plus API
+       durand-modeline ; my mode line configs
        ;; nav-flash         ; blink the current line after jumping
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints  ; highlight the region an operation acts on

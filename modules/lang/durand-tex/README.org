@@ -31,8 +31,8 @@ This module provides no flags.
 + Type =§= to insert an escape character =\.=
 + The key =ù= functions as a prefix for entering different symbols and alphabets such as
   =\alpha and \beta=.
-+ [ ] A =compile= command to compile the current buffer; by default it uses =XeTeX= and =XeLaTeX=.
-+ [ ] A =go to pdf= command which jumps to the associated /pdf/ file of the buffer.
++ A =compile= command to compile the current buffer; by default it uses =XeTeX= and =XeLaTeX=.
++ A =go to pdf= command which jumps to the associated /pdf/ file of the buffer.
 * Prerequisites
 This module has no prerequisites.
 
@@ -40,8 +40,8 @@ This module has no prerequisites.
 + Type =§= to insert an escape character =\.=
 + The key =ù= functions as a prefix for entering different symbols and alphabets such as
   =\alpha and \beta=.
-+ [ ] A =compile= command to compile the current buffer; by default it uses =XeTeX= and =XeLaTeX=.
-+ [ ] A =go to pdf= command which jumps to the associated /pdf/ file of the buffer.
++ A =compile= command to compile the current buffer; by default it uses =XeTeX= and =XeLaTeX=.
++ A =go to pdf= command which jumps to the associated /pdf/ file of the buffer.
 
 * TODO Configuration
 TO-DO

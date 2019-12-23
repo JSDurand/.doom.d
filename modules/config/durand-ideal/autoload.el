@@ -362,7 +362,7 @@ Version 2018-06-04"
      (save-buffer 0))))
 
 ;; REVIEW: Only for some edge cases.
-;;;autoload
+;;;###autoload
 (defun durand-buffer-scroll (&optional direction n other-p)
   "Scroll buffer"
   (interactive)

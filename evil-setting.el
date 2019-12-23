@@ -1,23 +1,12 @@
 ;;(add-to-list 'load-path (expand-file-name "evil" user-emacs-directory))
 
-(require 'evil)
+(setf evil-respect-visual-line-mode nil)
 
-(evil-mode 1)
+;; (require 'evil)
 
+;; (evil-mode 1)
 
-;; evil-surround
-
-;; load evil-surround before others in order to avoid conflicts
-
-;; (use-package evil-surround
-;;   :ensure t
-;;   :config
-;;   (global-evil-surround-mode 1)
-;;   (add-hook 'emacs-lisp-mode-hook
-;;    (lambda ()
-;;      (push '(?` . ("`" . "'"))
-;;            evil-surround-pairs-alist))))
-
+(after! evil
 (setf evil-normal-state-cursor   'box
       evil-emacs-state-cursor    '(bar . 7)
       evil-insert-state-cursor   'bar
@@ -449,6 +438,7 @@ With ARG, open the index file even not in `js2-mode'."
 
 ;; end of visual line
 
+;;;###autoload
 (defun evil-append-line (count &optional vcount)
   "Switch to Insert state at the end of the current visual line.
 The insertion will be repeated COUNT times.  If VCOUNT is non nil
@@ -540,6 +530,8 @@ And ARG behaves like in `align-regexp'."
 (define-and-bind-text-object "tikz" "z" "\\(\\\\bpi\\|\\\\tikzpicture\\).*$" "\\(\\\\epi\\|\\\\endtikzpicture\\)")
 (define-and-bind-text-object "environment" "e" "\\\\begin{[^{}]+}$" "\\\\end{[^{}]+}")
 
+)
+
 ;; for indentation
 ;; Now doom-emacs comes equipped with default bindings for indentation text
 ;; objects.
@@ -611,3 +603,16 @@ And ARG behaves like in `align-regexp'."
 ;;      (define-key evil-inner-text-objects-map "i" 'evil-indent-i-indent)
 ;;      (define-key evil-outer-text-objects-map "i" 'evil-indent-a-indent)
 ;;      (define-key evil-outer-text-objects-map "I" 'evil-indent-a-indent-lines)))
+
+;; evil-surround
+
+;; load evil-surround before others in order to avoid conflicts
+
+;; (use-package evil-surround
+;;   :ensure t
+;;   :config
+;;   (global-evil-surround-mode 1)
+;;   (add-hook 'emacs-lisp-mode-hook
+;;    (lambda ()
+;;      (push '(?` . ("`" . "'"))
+;;            evil-surround-pairs-alist))))

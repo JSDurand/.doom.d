@@ -60,7 +60,7 @@
 (load! "evil-setting.el" doom-private-dir)
 
 ;;* use home key
-(map! :meorgvi [home] #'evil-force-normal-state
+(map! :meorgvi [home] #'evil-normal-state
       :mov "à" #'durand-beginning-of-line-or-block
       :n (kbd "<backspace>") #'durand-other-buffer)
 
@@ -217,34 +217,6 @@
 
 (add-hook 'after-make-frame-functions #'frame-init-behaviour)
 
-;;*  I want to cut down the buffer name
-
-(require 'doom-modeline)
-(defvar durand-buffer-name-max 50)
-
-;;;###autoload
-(defun doom-modeline-segment--buffer-info-durand ()
-  "Almost the same as `doom-modeline-segment--buffer-info',
-but it truncates the buffer name within `durand-buffer-name-max'."
-  (concat
-   (doom-modeline--buffer-narrow-icon-durand)
-   (s-truncate durand-buffer-name-max
-               (format-mode-line (doom-modeline-segment--buffer-info))
-               "...")))
-
-;;* buffer file name style
-(setf doom-modeline-buffer-file-name-style 'buffer-name)
-
-(byte-compile 'doom-modeline-segment--buffer-info-durand)
-
-(add-to-list 'doom-modeline-fn-alist (cons 'buffer-info-durand 'doom-modeline-segment--buffer-info-durand))
-
-;; show the narrowing information
-
-;;;###autoload
-(defvar doom-modeline--buffer-narrow-icon nil
-  "Icon for the narrowing state of the buffer.")
-
 ;; This is not used anymore.
 ;;;###autoload
 ;; (defun doom-modeline-update-buffer-narrow-state-icon (&rest _)
@@ -257,158 +229,30 @@ but it truncates the buffer name within `durand-buffer-name-max'."
 ;;                     "vertical_align_center" "↕" "><" 'doom-modeline-warning))
 ;;                   (t ""))))))
 
-(fset 'doom-modeline-update-buffer-narrow-state-icon 'ignore)
-
-;; (add-hook 'find-file-hook #'doom-modeline-update-buffer-narrow-state-icon)
-;; (add-hook 'after-save-hook #'doom-modeline-update-buffer-narrow-state-icon)
-;; (add-hook 'clone-indirect-buffer-hook #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'pop-to-buffer :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'undo :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'undo-tree-undo-1 :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'undo-tree-redo-1 :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'popup-create :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'popup-delete :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'symbol-overlay-rename :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'narrow-to-region :after #'doom-modeline-update-buffer-narrow-state-icon)
-(advice-add #'durand-narrow-dwim :after #'doom-modeline-update-buffer-file-state-icon)
-(advice-add #'switch-to-buffer :after #'doom-modeline-update-buffer-file-state-icon)
-(advice-add #'kill-buffer :after #'doom-modeline-update-buffer-file-state-icon)
-(advice-add #'widen :after #'doom-modeline-update-buffer-file-state-icon)
-(add-hook 'doom-escape-hook #'durand-update-buffer-file-state-icon)
-(advice-add #'org-narrow-to-block :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'org-narrow-to-element :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'org-narrow-to-subtree :after #'doom-modeline-update-buffer-narrow-state-icon)
-;; (advice-add #'org-toggle-narrow-to-subtree :after #'doom-modeline-update-buffer-narrow-state-icon)
-
-;;;###autoload
-(defun durand-update-buffer-file-state-icon (&rest _)
-  "Wrapper around `doom-modeline-update-buffer-file-state-icon'"
-  (doom-modeline-update-buffer-file-state-icon)
-  nil)
 
 ;; NOTE: Don't display narrowing state in the original function. Also, in
 ;; doom-escape-hook, it stops at the first function that returns non-nil. So I
 ;; have to wrap it around.
 ;;
-;;;###autoload
-(defun doom-modeline-update-buffer-file-state-icon (&rest _)
-  "Update the buffer or file state in mode-line. Modified by Durand."
-  (setq doom-modeline--buffer-file-state-icon
-        (when doom-modeline-buffer-state-icon
-          (ignore-errors
-            (concat
-             (ignore-errors
-               (cond ((buffer-narrowed-p)
-                      (doom-modeline-buffer-file-state-icon
-                       "vertical_align_center" "↕" "><" 'doom-modeline-warning))
-                     (t "")))
-             (cond (buffer-read-only
-                    (doom-modeline-buffer-file-state-icon
-                     "lock" "🔒" "%1*" `(:inherit doom-modeline-warning
-                                                  :weight ,(if doom-modeline-icon
-                                                               'normal
-                                                             'bold))))
-                   ((and buffer-file-name (buffer-modified-p)
-                         doom-modeline-buffer-modification-icon)
-                    (doom-modeline-buffer-file-state-icon
-                     "save" "💾" "%1*" `(:inherit doom-modeline-buffer-modified
-                                                  :weight ,(if doom-modeline-icon
-                                                               'normal
-                                                             'bold))))
-                   ((and buffer-file-name
-                         (not (file-exists-p buffer-file-name)))
-                    (doom-modeline-buffer-file-state-icon
-                     "block" "🚫" "!" 'doom-modeline-urgent))
-                   (t "")))))))
-
-;;;###autoload
-(defsubst doom-modeline--buffer-narrow-icon-durand ()
-  "The icon of the current narrowing state."
-  (when doom-modeline-buffer-state-icon
-    (when-let ((icon (or doom-modeline--buffer-narrow-icon
-                         (doom-modeline-update-buffer-narrow-state-icon))))
-      (concat
-       (if (doom-modeline--active)
-           icon
-         (propertize icon 'face `(:inherit ,(get-text-property 0 'face icon)
-                                           :inherit mode-line-inactive)))
-       (doom-modeline-vspc)))))
-
-;;;###autoload
-(defun doom-modeline-segment--buffer-position-durand ()
-  "Almost the same as `doom-modeline-segment--buffer-position',
-except when in `org-agenda-mode' it uses `org-agenda-show-blocks-number' instead."
-  (cond
-   ((derived-mode-p 'org-agenda-mode)
-    (let* ((active (doom-modeline--active))
-           (po (org-agenda-show-blocks-number))
-           (face (if active 'mode-line 'mode-line-inactive))
-           (mouse-face 'mode-line-highlight))
-      (concat
-       (doom-modeline-spc)
-       (doom-modeline-spc)
-       (propertize po
-                   'face face
-                   'help-echo "org agenda block position"
-                   'mouse-face mouse-face))))
-   (t
-    (doom-modeline-segment--buffer-position))))
-
-(byte-compile 'doom-modeline-segment--buffer-position-durand)
-
-(add-to-list 'doom-modeline-fn-alist
-             (cons 'buffer-position-durand
-                   'doom-modeline-segment--buffer-position-durand))
 
 ;;* the original function does not work
 
-(defun doom-modeline-set-modeline-durand (key &optional default)
-  "Set the modeline format. Does nothing if the modeline KEY doesn't exist.
-If DEFAULT is non-nil, set the default mode-line for all buffers."
-  (when-let ((modeline (doom-modeline key)))
-    (if default
-        (setq-default mode-line-format (list "%e" modeline))
-      (setf (buffer-local-value 'mode-line-format (current-buffer))
-            (list "%e" modeline)))))
+;; (defun doom-modeline-set-modeline-durand (key &optional default)
+;;   "Set the modeline format. Does nothing if the modeline KEY doesn't exist.
+;; If DEFAULT is non-nil, set the default mode-line for all buffers."
+;;   (when-let ((modeline (doom-modeline key)))
+;;     (if default
+;;         (setq-default mode-line-format (list "%e" modeline))
+;;       (setf (buffer-local-value 'mode-line-format (current-buffer))
+;;             (list "%e" modeline)))))
 
-(doom-modeline-def-modeline 'durand
-  '(bar
-    ;; workspace-name
-    ;; window-number
-    modals
-    buffer-info-durand
-    remote-host
-    buffer-position-durand
-    matches
-    ;; parrot
-    ;; selection-info
-    )
-  '(;; objed-state
-    misc-info
-    ;; persp-name
-    ;; battery
-    ;; grip
-    ;; irc
-    mu4e
-    ;; github
-    debug
-    lsp
-    ;; minor-modes
-    input-method
-    indent-info
-    ;; buffer-encoding
-    major-mode
-    ;; process
-    vcs
-    checker))
-  
-(doom-modeline-mode 1)
+;; (doom-modeline-mode 1)
 ;; (display-battery-mode 1)
 
 ;; (doom-modeline-set-modeline-durand 'durand t)
-(after! doom-modeline
-  (add-hook! 'doom-modeline-mode-hook :append
-    (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))))
+;; (after! doom-modeline
+;;   (add-hook! 'doom-modeline-mode-hook :append
+;;     (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))))
 ;; (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 
 ;;* pdf view scrolling
@@ -436,25 +280,11 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 
 ;;* pdf view mode mode line
 ;;;###autoload
-(defun set-durand-mode-line ()
-  "Set the mode line to durand style."
-  (interactive)
-  (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
-  (force-mode-line-update))
-
-;;;###autoload
-(defun set-nil-mode-line ()
-  "Disable mode line."
-  (interactive)
-  (setf mode-line-format nil)
-  (force-mode-line-update))
-
-(add-hook 'pdf-view-mode-hook #'set-nil-mode-line)
-;;* doom-emacs automatically modifies the mode line format for pdf mode, so I
-;; want to stop it.
-(setf pdf-view-mode-hook (remq 'doom-modeline-set-pdf-modeline pdf-view-mode-hook))
-;; (remove-hook 'pdf-view-mode-hook (lambda () (setf (buffer-local-value mode-line-format (current-buffer))
-;;                                                   nil)))
+;; (defun set-durand-mode-line ()
+;;   "Set the mode line to durand style."
+;;   (interactive)
+;;   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
+;;   (force-mode-line-update))
 
 ;;* don't ask me if I want to open a file!
 (setf large-file-warning-threshold nil)
@@ -636,3 +466,6 @@ If ARG is non-nil, show the full name of the buffer."
                (+popup-window-p))
       (+popup/close)
       (kill-buffer orig-buffer))))
+
+;; prevent terminal specific initialisations
+(setf term-file-prefix nil)
