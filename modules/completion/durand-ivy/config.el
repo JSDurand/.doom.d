@@ -109,6 +109,7 @@
                          counsel-describe-variable
                          doom/help-search-headings
                          doom/help-packages
-                         doom/help-package-homepage)
+                         doom/help-package-homepage
+                         counsel-minibuffer-history)
              do (setf (alist-get fn ivy-posframe-display-functions-alist)
                       nil))))

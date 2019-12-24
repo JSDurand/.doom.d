@@ -2,6 +2,9 @@
 
 (setf evil-respect-visual-line-mode nil)
 
+(after! (evil-collection lispy)
+  (lispy-set-key-theme '(special lispy)))
+
 (after! evil
   (setf evil-normal-state-cursor 'box
         evil-emacs-state-cursor '(bar . 7)

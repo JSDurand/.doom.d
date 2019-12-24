@@ -1,5 +1,8 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+;;* save-place cannot work automatically
+(save-place-mode 1)
+
 ;;* don't keep screen position
 (setf scroll-preserve-screen-position nil)
 
@@ -116,20 +119,25 @@
 ;; (map! :n (kbd "s-q") 'load-config)
 (map! :n [?\s-q] (lambda! (message "Don't use s-q!")))
 
+;;* set lispy key
+(after! (evil-collection lispy)
+  (lispy-set-key-theme '(special lispy)))
+
+(setq-default pdf-view-display-size 'fit-width)
+
+;;* message mode quit
+(map! :map messages-buffer-mode-map
+      :n [?q] 'quit-window)
+
 ;; (map! :nvm "s" nil)
 ;; (map! :g "c" 'self-insert-command)
-
-;;* pdf-tools
-
-(after! pdf-tools
-  (setq-default pdf-view-display-size 'fit-width))
 
 ;;* bookmark remap
 (map! :leader :nv (kbd "RET") 'durand-evil-spc-ret-map
       :map doom-leader-map "fp" #'doom/open-private-config)
 
 ;;* mu4e and elfeed
-(load! "mu-el.el" doom-private-dir)
+;; (load! "mu-el.el" doom-private-dir)
 
 ;;* pop up rule for timer list
 (set-popup-rule! "timer-list"
@@ -254,29 +262,6 @@
 ;;   (add-hook! 'doom-modeline-mode-hook :append
 ;;     (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))))
 ;; (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
-
-;;* pdf view scrolling
-
-;;;###autoload
-(defun durand-pdf-scroll-up-or-next-page ()
-  "Scroll half a page instead of nearly a page."
-  (interactive)
-  (durand-buffer-scroll 'up nil nil))
-
-;;;###autoload
-(defun durand-pdf-scroll-down-or-previous-page ()
-  "Scroll half a page instead of nearly a page."
-  (interactive)
-  (durand-buffer-scroll 'down nil nil))
-
-(map! (:map pdf-view-mode-map
-        :n [return] durand-evil-ret-map
-        :n (kbd "s-m") 'set-durand-mode-line
-        :n [?§] 'durand-pdf-scroll-up-or-next-page
-        :n [?è] 'durand-pdf-scroll-down-or-previous-page
-        :n [?!] 'evil-collection-pdf-view-next-line-or-next-page
-        :n [?ç] 'evil-collection-pdf-view-previous-line-or-previous-page
-        :n [?q] 'bury-buffer))
 
 ;;* pdf view mode mode line
 ;;;###autoload

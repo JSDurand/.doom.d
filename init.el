@@ -102,6 +102,7 @@
        ;;make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
        pdf                              ; pdf enhancements
+       durand-pdf
        ;;prodigy           ; FIXME managing external services & code builders
        ;;rgb               ; creating color strings
        ;;terraform         ; infrastructure as code
@@ -173,6 +174,7 @@
 
        :email
        (mu4e +gmail)
+       durand-mu           ; My mu4e configurations
        ;;notmuch
        ;;(wanderlust +gmail)
 
