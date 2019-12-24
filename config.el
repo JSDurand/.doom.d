@@ -123,7 +123,8 @@
 (after! (evil-collection lispy)
   (lispy-set-key-theme '(special lispy)))
 
-(setq-default pdf-view-display-size 'fit-width)
+(after! pdf-tools
+  (setq-default pdf-view-display-size 'fit-width))
 
 ;;* message mode quit
 (map! :map messages-buffer-mode-map
