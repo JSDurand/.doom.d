@@ -38,26 +38,36 @@ but it truncates the buffer name within `durand-buffer-name-max'."
               (concat
                (ignore-errors
                  (cond ((buffer-narrowed-p)
-                        (doom-modeline-buffer-file-state-icon
-                         "vertical_align_center" "↕" "><" 'doom-modeline-warning))
+                        (concat
+                         (propertize
+                          (doom-modeline-buffer-file-state-icon
+                           "vertical_align_center" "↕" "><" 'doom-modeline-warning)
+                          'help-echo "Narrowed")
+                         (doom-modeline-spc)))
                        (t "")))
                (cond (buffer-read-only
-                      (doom-modeline-buffer-file-state-icon
+                      (propertize
+                       (doom-modeline-buffer-file-state-icon
                        "lock" "🔒" "%1*" `(:inherit doom-modeline-warning
                                                     :weight ,(if doom-modeline-icon
                                                                  'normal
-                                                               'bold))))
+                                                               'bold)))
+                       'help-echo "Read only"))
                      ((and buffer-file-name (buffer-modified-p)
                            doom-modeline-buffer-modification-icon)
-                      (doom-modeline-buffer-file-state-icon
+                      (propertize
+                       (doom-modeline-buffer-file-state-icon
                        "save" "💾" "%1*" `(:inherit doom-modeline-buffer-modified
                                                     :weight ,(if doom-modeline-icon
                                                                  'normal
-                                                               'bold))))
+                                                               'bold)))
+                       'help-echo "Modified"))
                      ((and buffer-file-name
                            (not (file-exists-p buffer-file-name)))
-                      (doom-modeline-buffer-file-state-icon
-                       "block" "🚫" "!" 'doom-modeline-urgent))
+                      (propertize
+                       (doom-modeline-buffer-file-state-icon
+                        "block" "🚫" "!" 'doom-modeline-urgent)
+                       'help-echo "File not saved yet"))
                      (t "")))))))
 ;;;###autoload
   (defsubst doom-modeline--buffer-narrow-icon-durand (&rest _arg)

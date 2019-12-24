@@ -54,3 +54,6 @@
 (after! pdf-view
   (add-hook 'pdf-view-mode-hook #'set-nil-mode-line)
   (setf pdf-view-mode-hook (remq 'doom-modeline-set-pdf-modeline pdf-view-mode-hook)))
+
+
+(add-hook 'doom-escape-hook 'durand-update-buffer-file-state-icon)

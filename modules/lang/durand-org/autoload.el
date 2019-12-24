@@ -2040,10 +2040,12 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
 
 ;;;###autoload
 (defun org-open-novels (&optional arg)
-  "Choose novel to open. By default, filter out qidian links.
-With \\[universal-argument], update novels;
-With \\[universal-argument]\\[universal-argument], show all links.
-With \\[universal-argument]\\[universal-argument]\\[universal-argument], visit every qidian link."
+  "Choose novel to open.
+Choose first an action to perform:
+open: choose links that are not qidian pages to open.
+update: update the novel links.
+open qidian: only open qidian pages.
+open all: offer every link to open."
   (interactive)
   (let* ((action (if (memq arg '(open update all qidian))
                      arg

@@ -22,6 +22,7 @@
        ;;ido               ; the other *other* search engine...
        ;; ivy
        (ivy
+        +childframe
         +fuzzy)                         ; a search engine for love and life
        durand-ivy
 
@@ -58,6 +59,7 @@
        (evil +everywhere)             ; come to the dark side, we have cookies
        file-templates                 ; auto-snippets for empty files
        durand-template                ; my custom templates
+       durand-evil                    ; my evil settings
        fold                           ; (nigh) universal code folding
        ;;(format +onsave)  ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys

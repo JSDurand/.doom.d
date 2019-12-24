@@ -100,3 +100,15 @@
 				                            x
 				                            (ivy-rich-minibuffer-width 0.7))
 				                           (ivy-rich-minibuffer-width 0.7))))))))))
+
+(when (featurep! :completion ivy +childframe)
+  (after! ivy-posframe
+    (cl-loop for fn in '(durand-switch-buffer
+                         ivy-switch-buffer
+                         counsel-describe-function
+                         counsel-describe-variable
+                         doom/help-search-headings
+                         doom/help-packages
+                         doom/help-package-homepage)
+             do (setf (alist-get fn ivy-posframe-display-functions-alist)
+                      nil))))

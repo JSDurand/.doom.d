@@ -39,25 +39,25 @@
 ;;* ideal.el
 ;; (load! "+ideal.el" doom-private-dir)
 
-(setq package-enable-at-startup nil)
-(setq package-archives '(("org" . "http://orgmode.org/elpa/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")))
-(package-initialize)
+;; (setq package-enable-at-startup nil)
+;; (setq package-archives '(("org" . "http://orgmode.org/elpa/")
+;;                          ("gnu" . "http://elpa.gnu.org/packages/")
+;;                          ("melpa" . "http://melpa.milkbox.net/packages/")
+;;                          ("marmalade" . "http://marmalade-repo.org/packages/")))
+;; (package-initialize)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+;; (unless (package-installed-p 'use-package)
+;;   (package-refresh-contents)
+;;   (package-install 'use-package))
 
-(require 'use-package)
+;; (require 'use-package)
 
 ;; (setf use-package-always-ensure t)
 ;; +org.el
 ;; (load! "+org.el" doom-private-dir)
 
 ;;* evil-setting.el
-(load! "evil-setting.el" doom-private-dir)
+;; (load! "evil-setting.el" doom-private-dir)
 
 ;;* use home key
 (map! :meorgvi [home] #'evil-normal-state
@@ -66,8 +66,9 @@
 
 ;;* some custom mappings
 
-(map! :ngvm (kbd "s-w") 'delete-other-windows
-      :map doom-leader-code-map
+;; archive mapping :ngvm (kbd "s-w") 'delete-other-windows
+
+(map! :map doom-leader-code-map
       "b" 'clean-up-buffers
       "v" #'TeX-view
       "t" #'TeX-command-run-all)
@@ -155,12 +156,12 @@
   :modeline nil)
 
 ;;* wrap-region
-(use-package! wrap-region
-  :config
-  (wrap-region-global-mode t)
-  (wrap-region-add-wrapper "$" "$")
-  (wrap-region-add-wrapper "=" "=")
-  (wrap-region-add-wrapper "-" "-"))
+;; (use-package! wrap-region
+;;   :config
+;;   (wrap-region-global-mode t)
+;;   (wrap-region-add-wrapper "$" "$")
+;;   (wrap-region-add-wrapper "=" "=")
+;;   (wrap-region-add-wrapper "-" "-"))
 
 ;;* default frames behaviour
 
@@ -178,7 +179,6 @@
 (setq revert-without-query '(".*"))
 
 ;;* org-agenda and magit should start with emacs state
-
 
 (set-evil-initial-state!
   '(org-agenda-mode magit-status-mode)
@@ -468,4 +468,4 @@ If ARG is non-nil, show the full name of the buffer."
       (kill-buffer orig-buffer))))
 
 ;; prevent terminal specific initialisations
-(setf term-file-prefix nil)
+;; (setf term-file-prefix nil)

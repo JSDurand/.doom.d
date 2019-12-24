@@ -13,3 +13,5 @@
 (package! wrap-region)
 
 (package! outline-magic :recipe (:host github :repo "tj64/outline-magic"))
+
+(package! mu4e-alert)
