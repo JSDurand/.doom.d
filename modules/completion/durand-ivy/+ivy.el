@@ -31,7 +31,7 @@
 
 (defface durand-arrow-face
   '((t
-     (:inherit minibuffer-prompt :height 300)))
+     (:inherit minibuffer-prompt :height 200)))
   "Face for the arrow used by `durand-ivy-format-function-arrow'.")
 
 ;;;###autoload

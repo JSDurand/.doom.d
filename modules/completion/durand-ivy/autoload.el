@@ -5,7 +5,7 @@
 ;;;###autoload
 (defface durand-arrow-face
   '((t
-     (:inherit minibuffer-prompt :height 300)))
+     (:inherit minibuffer-prompt :foreground "gold" :height 300)))
   "Face for the arrow used by `durand-ivy-format-function-arrow'.")
 
 ;;;###autoload

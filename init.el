@@ -30,6 +30,7 @@
        ;;deft              ; notational velocity for Emacs
        doom                   ; what makes DOOM look the way it does
        doom-dashboard         ; a nifty splash screen for Emacs
+       durand-dashboard       ; my dashboard configs
        doom-quit              ; DOOM quit-message prompts when you quit Emacs
        ;; fill-column       ; a `fill-column' indicator
        hl-todo                ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
@@ -95,6 +96,7 @@
        flyspell              ; tasing you for misspelling mispelling
        ;;gist              ; interacting with github gists
        (lookup                  ; helps you navigate your code and documentation
+        +dictionary             ; a dictionary in emacs is good.
         +docsets)               ; ...or in Dash docsets locally
        lsp
        ;;macos             ; MacOS-specific commands

@@ -62,6 +62,22 @@
 ;;* evil-setting.el
 ;; (load! "evil-setting.el" doom-private-dir)
 
+;;* dollar map is a little strange
+
+(when (and (boundp 'durand-evil-dollar-map)
+           (keymapp 'durand-evil-dollar-map))
+  (define-key 'durand-evil-dollar-map [?b] (lambda! (recenter -1))))
+
+;;* dictionary mode map
+
+(when (featurep! :tools lookup +dictionary)
+  (after! osx-dictionary
+    (map! :map osx-dictionary-mode-map
+          :n [?q] 'osx-dictionary-quit
+          :n [?r] 'osx-dictionary-read-word
+          :n [?o] 'osx-dictionary-open-dictionary.app
+          :n [?s] 'osx-dictionary-search-input)))
+
 ;;* use home key
 (map! :meorgvi [home] #'evil-normal-state
       :mov "à" #'durand-beginning-of-line-or-block
@@ -77,15 +93,6 @@
       "t" #'TeX-command-run-all)
 
 ;; toggle hl-todo-mode
-;;;###autoload
-(defun durand-toggle-hl-todo ()
-  "Toggle `hl-todo-mode'."
-  (interactive)
-  (cond
-   (hl-todo-mode
-    (hl-todo-mode -1))
-   ((not hl-todo-mode)
-    (hl-todo-mode 1))))
 
 (map! :map doom-leader-toggle-map
       "h" #'durand-toggle-hl-todo)
@@ -208,20 +215,6 @@
       doom-modeline-mu4e t)
 (setq inhibit-compacting-font-caches t)
 
-;; when in terminal mode, don't display icons.
-
-;; I need to check for GUI in a hook
-;;;###autoload
-(cl-defun frame-init-behaviour (&optional (frame (selected-frame)))
-  "Disable displaying icons in the mode line when run in a terminal"
-  (with-selected-frame frame
-    (cond
-     ((display-graphic-p nil)
-      (setf doom-modeline-icon t))
-     (t
-      (setf doom-modeline-icon nil)
-      (set-frame-parameter nil 'menu-bar-lines 0)))))
-
 (frame-init-behaviour)
 
 (add-hook 'after-make-frame-functions #'frame-init-behaviour)
@@ -295,40 +288,13 @@
 (which-key-mode -1)
 
 ;;* load my dashboard configurations
-(load! "dashboard.el" doom-private-dir)
+;; (load! "dashboard.el" doom-private-dir)
 
 ;;* +default/find-in-notes sometimes crashes because of project detection issues.
 ;; and no highlights
 (map! :map doom-leader-notes-map
       [?n] #'+default/browse-notes
       [?j] 'evil-ex-nohighlight)
-
-;;* count the size of a buffer
-;;;###autoload
-(defun durand-file-size (&optional arg)
-  "Show the buffer size in echo area.
-If ARG is non-nil, show raw file size;
-if ARG is nil, then show human-readable format."
-  (interactive "P")
-  (message
-   "%s"
-   (cond
-    (arg
-     (- (point-max) (point-min)))
-    (t
-     (file-size-human-readable
-      (- (point-max) (point-min)))))))
-
-;;;###autoload
-(defun show-buffer-name (&optional arg)
-  "Show the name of the buffer in echo area.
-If ARG is non-nil, show the full name of the buffer."
-  (interactive "P")
-  (cond
-   (arg
-    (message (buffer-file-name)))
-   (t
-    (message (buffer-name)))))
 
 (map! :g
       [f5] #'durand-file-size
@@ -339,28 +305,6 @@ If ARG is non-nil, show the full name of the buffer."
 
 ;;* ispell default dictionary
 (setq-default ispell-dictionary "english")
-
-;;* dashboard banner directory
-(setf +doom-dashboard-banner-dir (expand-file-name "banners" doom-private-dir))
-
-;;* flyspell save a word to the current dictionary
-;;;###autoload
-(defun durand-save-word ()
-  (interactive)
-  (let ((current-location (point))
-         (word (flyspell-get-word)))
-    (cond
-     ((consp word)
-      (flyspell-do-correct
-       'save
-       nil
-       (car word)
-       current-location
-       (cadr word)
-       (caddr word)
-       current-location))
-     (t
-      (message "No word to save.")))))
 
 ;;* this replaces `save-buffer', but I have my custom key bindings.
 (map! :map doom-leader-file-map
@@ -394,30 +338,6 @@ If ARG is non-nil, show the full name of the buffer."
   "The executable name to run after compilation.")
 
 (make-variable-buffer-local 'c-program-name)
-
-;;;###autoload
-(defun compile-and-run-c (&optional arg)
-  "Compile and run in c-mode"
-  (interactive "P")
-  (if (null arg)
-      (make-process
-       :name "*compilation*"
-       :buffer "*C compilation*"
-       :command '("make" "main")
-       :sentinel (lambda (_process event-string)
-                   (if (string-prefix-p "finished" event-string)
-                       (let ((default-directory (file-name-directory (buffer-file-name))))
-                         (make-process
-                          :name "run"
-                          :buffer "*running*"
-                          :command (list (concat (file-name-as-directory default-directory) c-program-name))))
-                     (user-error "There is a problem!")
-                     (switch-to-buffer "C compilation"))))
-    (make-process
-     :name "*Instruments*"
-     :buffer nil
-     :command '("open" "/Applications/Xcode.app/Contents/Applications/Instruments.app"))))
-
 
 ;;* glsl auto mode
 

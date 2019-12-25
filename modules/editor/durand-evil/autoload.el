@@ -109,18 +109,18 @@ With ARG, open the index file even not in `js2-mode'."
     (message "%s" (process-list))))
 
 ;;;###autoload
-(defun universal-argument--description ()
-  (when prefix-arg
-    (concat "("
-            (pcase prefix-arg
-              (`(-) " -")
-              (`(,(and (pred integerp) n))
-               (let ((str ""))
-                 (while (and (> n 4) (= (mod n 4) 0))
-                   (setq str (concat str " ("))
-                   (setq n (/ n 4)))
-                 (if (= n 4) str (format " %s" prefix-arg))))
-              (_ (format " %s" prefix-arg))))))
+;; (defun universal-argument--description ()
+;;   (when prefix-arg
+;;     (concat "C-u"
+;;             (pcase prefix-arg
+;;               (`(-) " -")
+;;               (`(,(and (pred integerp) n))
+;;                (let ((str ""))
+;;                  (while (and (> n 4) (= (mod n 4) 0))
+;;                    (setq str (concat str " C-u"))
+;;                    (setq n (/ n 4)))
+;;                  (if (= n 4) str (format " %s" prefix-arg))))
+;;               (_ (format " %s" prefix-arg))))))
 
 (after! evil
 ;;;###autoload
