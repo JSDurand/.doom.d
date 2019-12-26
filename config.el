@@ -68,9 +68,10 @@
 
 ;;* dollar map is a little strange
 
-(when (and (boundp 'durand-evil-dollar-map)
-           (keymapp 'durand-evil-dollar-map))
-  (define-key 'durand-evil-dollar-map [?b] (lambda! (recenter -1))))
+(after! org
+  (when (and (boundp 'durand-evil-dollar-map)
+             (keymapp 'durand-evil-dollar-map))
+    (define-key 'durand-evil-dollar-map [?b] (lambda! (recenter -1)))))
 
 ;;* dictionary mode map
 

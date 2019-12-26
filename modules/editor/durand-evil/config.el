@@ -87,6 +87,8 @@
 
 (define-prefix-command 'durand-evil-dollar-map)
 
+(map! :n [?z ?b] (lambda () (interactive) (recenter -1)))
+
 (map! :map durand-evil-dollar-map
       [?\d] 'back-to-indentation
       [?t] (lambda () (interactive) (recenter 0))
