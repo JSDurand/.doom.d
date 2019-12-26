@@ -1,5 +1,9 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+;;* avy single candidate jump
+
+(setf avy-single-candidate-jump t)
+
 ;;* save-place cannot work automatically
 (save-place-mode 1)
 

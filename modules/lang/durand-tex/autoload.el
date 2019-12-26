@@ -1,9 +1,9 @@
 ;;; .doom.d/modules/lang/durand-tex/autoload.el -*- lexical-binding: t; -*-
 
-(require 'tex)
-(require 'ivy)
-(require 'latex)
-(require 'pdf-view)
+;; (require 'tex)
+;; (require 'ivy)
+;; (require 'latex)
+;; (require 'pdf-view)
 
 ;; (define-derived-mode durand-tex-output-mode special-mode "DTOutput"
 ;;   "Keymap used in the output buffer of the tex command.")

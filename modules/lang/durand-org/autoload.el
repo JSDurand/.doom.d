@@ -974,7 +974,7 @@ If this information is not given, the function uses the tree at point."
   "Cette fonction ne sert rien!")
 
 ;; redefine org-agenda-goto
-(require 'org-agenda)
+;; (require 'org-agenda)
 ;;;###autoload
 (defun org-agenda-goto (&optional highlight)
   "Go to the entry at point in the corresponding Org file."

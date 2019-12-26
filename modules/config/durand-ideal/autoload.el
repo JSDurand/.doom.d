@@ -63,6 +63,7 @@ With prefix arg, show in a separate window."
   "Inspired by `bookmark-jump-headlong', but using `ivy-read':
 If there is only one match, then perform the default action"
   (interactive)
+  (require 'bookmark)
   (bookmark-maybe-load-default-file)
   (reset-durand-changed)
   (reset-durand-headlong)

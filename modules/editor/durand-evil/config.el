@@ -109,6 +109,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
       [?t] #'durand-view-timers
       [?P] #'durand-view-process
       [?p] #'durand-chercher-pdf
+      [?d] #'durand-open-dashboard
       [?v] #'durand-view-videos)
 
 ;; space: this is the leader of doom.

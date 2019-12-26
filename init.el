@@ -183,8 +183,8 @@
        :app
        calendar
        ;;irc               ; how neckbeards socialize
-       ;;(rss +org)        ; emacs as an RSS reader
-       ;;durand-rss        ; my elfeed configs
+       (rss +org)        ; emacs as an RSS reader
+       durand-rss        ; my elfeed configs
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;write             ; emacs for writers (fiction, notes, papers, etc.)
 

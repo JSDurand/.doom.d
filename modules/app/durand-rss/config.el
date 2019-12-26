@@ -1,99 +1,101 @@
 ;;; app/durand-rss/config.el -*- lexical-binding: t; -*-
 
 ;; feeds
-(setq elfeed-feeds
-      '(;; ("http://nullprogram.com/feed/"
-	;;  program)
-	;; ("http://planet.emacsen.org/atom.xml"
-	;;  emacs
-	;;  blog)
-	("https://lukesmith.xyz/rss.xml"
-	 luke
-	 blog)
-	("http://notrelated.libsyn.com/rss"
-	 luke
-	 relevant
-	 podcast)
-	;; ("https://stackexchange.com/feeds/tagsets/347224/favorite-tags?sort=active"
-	;;  stackexchange
-	;;  favorite)
-	;; ("https://stackexchange.com/feeds/tagsets/347226/real-love?sort=active"
-	;;  real-love
-	;;  interests)
-	("https://www.reddit.com/r/emacs/.rss"
-	 emacs
-	 reddit)
-	("https://math.stackexchange.com/feeds/tag?tagnames=number-theory&sort=newest"
-	 interests
-	 favorite)
-	("https://mattbaker.blog/feed/"
-	 interests
-	 mattbaker
-	 blog)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTfRwznpxtbjQQQJ_15Fk2w"
-	;;  youtube
-	;;  3M)
-	("https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw"
-	 youtube
-	 3blue1brown)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyC_4jvPzLiSkJkLIkA7B8g"
-	;;  youtube
-	;;  music
-	;;  lindsey)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCPRWWKG0VkBA0Pqa4Jr5j0Q"
-	;;  youtube
-	;;  joeman)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjhwHd3mgmqm0ONm0bXKmng"
-	;;  youtube
-	;;  anju)
-	("https://www.youtube.com/feeds/videos.xml?channel_id=UCcXhhVwCT6_WqjkEniejRJQ"
-	 wintergarten
-	 youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtR5okwgTMghi_uyWvbloEg"
-         lao_kao
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI4xp8qHD1MDErkqxb1dPbA"
-         innerFrench
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTx8xR4VZ46IAsp5yBgLMzw"
-         endClashRoyale
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8TtAsZE51ekqffnNASo7DA"
-         dacon
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMUnInmOkrWN4gof9KlhNmQ"
-         KaoetMuo
-         youtube)
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCwYJs4-yKmaALkLFX1uHFsw"
-         drama
-         youtube)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqripRcC8scod22F5NKvLcQ"
-	;;  julia
-	;;  youtube)
-	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKSiE8dIEWsT-1jQCGrOqtw"
-	;;  youtube
-	;;  little-white)
-	;; ("https://math.stackexchange.com/feeds/question/2883754"
-	;;  math
-	;;  relation
-	;;  important)
-	;; ("https://haskellweekly.news/haskell-weekly.atom"
-	;;  haskell
-	;;  relevant
-	;;  blog)
-	("https://themonadreader.wordpress.com/feed/"
-	 monad-reader
-	 blog
-	 important)
-	;; ("https://www.reddit.com/r/haskell/.rss"
-	;;  haskell
-	;;  reddit)
-	;; ("https://www.archlinux.org/feeds/news/"
-	;;  archlinux
-	;;  relevant)
-	))
+;; NOTE: I put my feeds in ~/org/elfeed.org now.
+;; (setq elfeed-feeds
+;;       '(;; ("http://nullprogram.com/feed/"
+;; 	;;  program)
+;; 	;; ("http://planet.emacsen.org/atom.xml"
+;; 	;;  emacs
+;; 	;;  blog)
+;; 	("https://lukesmith.xyz/rss.xml"
+;; 	 luke
+;; 	 blog)
+;; 	("http://notrelated.libsyn.com/rss"
+;; 	 luke
+;; 	 relevant
+;; 	 podcast)
+;; 	;; ("https://stackexchange.com/feeds/tagsets/347224/favorite-tags?sort=active"
+;; 	;;  stackexchange
+;; 	;;  favorite)
+;; 	;; ("https://stackexchange.com/feeds/tagsets/347226/real-love?sort=active"
+;; 	;;  real-love
+;; 	;;  interests)
+;; 	("https://www.reddit.com/r/emacs/.rss"
+;; 	 emacs
+;; 	 reddit)
+;; 	("https://math.stackexchange.com/feeds/tag?tagnames=number-theory&sort=newest"
+;; 	 interests
+;; 	 favorite)
+;; 	("https://mattbaker.blog/feed/"
+;; 	 interests
+;; 	 mattbaker
+;; 	 blog)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTfRwznpxtbjQQQJ_15Fk2w"
+;; 	;;  youtube
+;; 	;;  3M)
+;; 	("https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw"
+;; 	 youtube
+;; 	 3blue1brown)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyC_4jvPzLiSkJkLIkA7B8g"
+;; 	;;  youtube
+;; 	;;  music
+;; 	;;  lindsey)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCPRWWKG0VkBA0Pqa4Jr5j0Q"
+;; 	;;  youtube
+;; 	;;  joeman)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjhwHd3mgmqm0ONm0bXKmng"
+;; 	;;  youtube
+;; 	;;  anju)
+;; 	("https://www.youtube.com/feeds/videos.xml?channel_id=UCcXhhVwCT6_WqjkEniejRJQ"
+;; 	 wintergarten
+;; 	 youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtR5okwgTMghi_uyWvbloEg"
+;;          lao_kao
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI4xp8qHD1MDErkqxb1dPbA"
+;;          innerFrench
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTx8xR4VZ46IAsp5yBgLMzw"
+;;          endClashRoyale
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8TtAsZE51ekqffnNASo7DA"
+;;          dacon
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMUnInmOkrWN4gof9KlhNmQ"
+;;          KaoetMuo
+;;          youtube)
+;;         ("https://www.youtube.com/feeds/videos.xml?channel_id=UCwYJs4-yKmaALkLFX1uHFsw"
+;;          drama
+;;          youtube)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqripRcC8scod22F5NKvLcQ"
+;; 	;;  julia
+;; 	;;  youtube)
+;; 	;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKSiE8dIEWsT-1jQCGrOqtw"
+;; 	;;  youtube
+;; 	;;  little-white)
+;; 	;; ("https://math.stackexchange.com/feeds/question/2883754"
+;; 	;;  math
+;; 	;;  relation
+;; 	;;  important)
+;; 	;; ("https://haskellweekly.news/haskell-weekly.atom"
+;; 	;;  haskell
+;; 	;;  relevant
+;; 	;;  blog)
+;; 	("https://themonadreader.wordpress.com/feed/"
+;; 	 monad-reader
+;; 	 blog
+;; 	 important)
+;; 	;; ("https://www.reddit.com/r/haskell/.rss"
+;; 	;;  haskell
+;; 	;;  reddit)
+;; 	;; ("https://www.archlinux.org/feeds/news/"
+;; 	;;  archlinux
+;; 	;;  relevant)
+;; 	))
 
 (after! elfeed
+  (map! :leader :n [?e] '=rss)
   (add-to-list 'elfeed-search-face-alist
                '(emacs elfeed-emacs-face))
   (add-to-list 'elfeed-search-face-alist

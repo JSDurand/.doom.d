@@ -12,6 +12,7 @@
 
 
 (setf +doom-dashboard-functions '(doom-dashboard-widget-banner
+;;                                   doom-dashboard-widget-loaded
                                   doom-dashboard-widget-shortmenu)
       +doom-dashboard-banner-padding '(5 . 5))
 
