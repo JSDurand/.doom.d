@@ -230,13 +230,19 @@
 ;; clear `org-capture-plist' after each capture
 (add-hook! 'org-capture-after-finalize-hook (setq org-capture-plist nil))
 
-;; electric math
-(add-hook! 'plain-TeX-mode-hook
-  (set (make-local-variable 'TeX-electric-math)
-       (cons "$" "$")))
-(add-hook! 'LaTeX-mode-hook
-  (set (make-local-variable 'TeX-electric-math)
-       (cons "\\(" "")))
+;;* electric math. NOTE: This is redundant, as doom uses smartparens to manage
+;;* pairs.
+;;
+;; (add-hook! 'plain-TeX-mode-hook
+;;   (set (make-local-variable 'TeX-electric-math)
+;;        (cons "$" "$")))
+;; (add-hook! 'LaTeX-mode-hook
+;;   (set (make-local-variable 'TeX-electric-math)
+;;        (cons "\\(" "\\)")))
+
+(map! :map LaTeX-mode-map :i [?$] (lambda! (sp-insert-pair "\\(")))
+
+;; (add-hook! (TeX-mode LaTeX-mode) 'turn-off-smartparens-mode)
 
 ;; insert display equation symbols
 

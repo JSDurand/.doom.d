@@ -380,3 +380,13 @@
 
 ;; prevent terminal specific initialisations
 ;; (setf term-file-prefix nil)
+
+;;* osxdictionary pop up rule
+
+(set-popup-rule! "\\*osx-dictionary\\*"
+  :size 0.25
+  :side 'bottom
+  :modeline nil
+  :ttl 5
+  :quit t
+  :select t)

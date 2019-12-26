@@ -12,9 +12,9 @@
 
 
 (setf +doom-dashboard-functions '(doom-dashboard-widget-banner
-;;                                   doom-dashboard-widget-loaded
-                                  doom-dashboard-widget-shortmenu)
-      +doom-dashboard-banner-padding '(1 . 5))
+                                  doom-dashboard-widget-shortmenu
+                                  doom-dashboard-widget-loaded)
+      +doom-dashboard-banner-padding '(1 . 3))
 
 (setf +doom-dashboard-menu-sections
       '(;; ("Open articles"
