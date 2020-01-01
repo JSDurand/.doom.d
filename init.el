@@ -12,11 +12,7 @@
 
 (setq evil-respect-visual-line-mode nil)
 
-(doom! :input
-       ;; chinese
-       ;;japanese
-
-       :completion
+(doom! :completion
        (company
         ;; +childframe
         )       ; the ultimate code completion backend
@@ -175,7 +171,6 @@
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
        ;;web               ; the tubes
-       durand-greek      ; input greek letters using code letters
 
        :email
        (mu4e +gmail)
@@ -190,6 +185,10 @@
        durand-rss        ; my elfeed configs
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;write             ; emacs for writers (fiction, notes, papers, etc.)
+       :input
+       ;; chinese
+       ;;japanese
+       durand-greek      ; input greek letters using code letters
 
        :config
        ;;literate

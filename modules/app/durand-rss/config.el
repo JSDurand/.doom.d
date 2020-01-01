@@ -94,8 +94,9 @@
 ;; 	;;  relevant)
 ;; 	))
 
+(map! :leader :n [?e] '=rss)
+
 (after! elfeed
-  (map! :leader :n [?e] '=rss)
   (add-to-list 'elfeed-search-face-alist
                '(emacs elfeed-emacs-face))
   (add-to-list 'elfeed-search-face-alist

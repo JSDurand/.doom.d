@@ -1,6 +1,6 @@
-;;; lang/durand-greek/autoload.el -*- lexical-binding: t; -*-
+;;; input/durand-greek/autoload.el -*- lexical-binding: t; -*-
 
-;;;###autoload (autoload 'durand-transform-code-to-greek "lang/durand-greek/autoload" nil t)
+;;;###autoload (autoload 'durand-transform-code-to-greek "input/durand-greek/autoload" nil t)
 (evil-define-operator durand-transform-code-to-greek (beg end type)
   "Transform code letters into ancient greek letters."
   :move-point nil
@@ -12,7 +12,7 @@
     (_
      (durand-greek-transform-from-beg-to-end beg end))))
 
-;;;###autoload (autoload 'durand-greek-search-replace-generic "lang/durand-greek/autoload" nil nil 'macro)
+;;;###autoload (autoload 'durand-greek-search-replace-generic "input/durand-greek/autoload" nil nil 'macro)
 (cl-defmacro durand-greek-search-replace-generic (match-str
                                                   replace
                                                   &key

@@ -210,13 +210,13 @@ See `durand-greek-search-replace-generic' for more details.")
 (define-derived-mode durand-greek-search-mode special-mode "Greek Search"
   "To show search results")
 
-(map! :map durand-greek-search-mode-map
-      :n [?j] 'durand-goto-greek-search-result
-      :n [?n] 'forward-line
-      :n [?p] (lambda! (forward-line -1)))
 ;; (define-key durand-greek-search-mode-map [?j] #'durand-goto-greek-search-result)
 ;; (define-key durand-greek-search-mode-map [?n] #'forward-line)
 ;; (define-key durand-greek-search-mode-map [?p] (lambda! (forward-line -1)))
+
+;;;###autoload
+(defvar durand-search-greek-overlays nil
+  "Overlays for the search.")
 
 ;;;###autoload
 (defvar durand-search-greek-last-search nil
@@ -226,18 +226,26 @@ See `durand-greek-search-replace-generic' for more details.")
   "Provides a transformation function to transform English code letters to ancient greek.")
 
 ;; keys
+(map! :map durand-greek-search-mode-map
+      :n [?j] 'durand-goto-greek-search-result
+      :n [?n] 'forward-line
+      :n [?p] (lambda! (forward-line -1)))
+
 (map! :map durand-greek-mode-map
       :niv [?ù] 'durand-transform-code-to-greek
       :i [?§] (lambda! (insert "\\"))
       :i [?:] (lambda! (insert "/"))
       :i [?/] (lambda! (insert ":"))
-      :i [?ç] (lambda! (insert "."))
+      :i [?ç] (lambda! (insert "·"))
+      :i [?à] (lambda! (insert "*"))
+      ;; :i [?|] (lambda! (turn-on-orgtbl) (insert "|"))
       :i [?\M-\r] 'org-insert-item)
 ;; (define-key durand-greek-mode-map [?ù] #'durand-transform-code-to-greek)
 ;; (define-key durand-greek-mode-map [?§] (lambda () (interactive) (insert "\\")))
 ;; (define-key durand-greek-mode-map [?:] (lambda () (interactive) (insert "/")))
 ;; (define-key durand-greek-mode-map [?/] (lambda () (interactive) (insert ":")))
 ;; (define-key durand-greek-mode-map [?\ç] (lambda () (interactive) (insert "·")))
+;; (define-key durand-greek-mode-map [?\à] (lambda () (interactive) (insert "*")))
 ;; (define-key durand-greek-mode-map [?ç] #'durand-search-greek)
 ;; (define-key durand-greek-mode-map [?%] #'durand-search-last-greek)
 ;; (define-key durand-greek-mode-map [?\M-\r] #'org-insert-item) ; M-RET
