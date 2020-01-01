@@ -71,7 +71,9 @@
 (after! org
   (when (and (boundp 'durand-evil-dollar-map)
              (keymapp 'durand-evil-dollar-map))
-    (define-key 'durand-evil-dollar-map [?b] (lambda! (recenter -1)))))
+    (map! :map durand-evil-dollar-map
+          [?b] (lambda! (recenter -1))
+          [?k] 'outline-previous-visible-heading)))
 
 ;;* dictionary mode map
 
@@ -147,7 +149,9 @@
 
 ;;* bookmark remap
 (map! :leader :nv (kbd "RET") 'durand-evil-spc-ret-map
-      :map doom-leader-map "fp" #'doom/open-private-config)
+      (:map doom-leader-map
+        "fp" 'doom/find-file-in-private-config
+        "fP" 'doom/open-private-config))
 
 ;;* mu4e and elfeed
 ;; (load! "mu-el.el" doom-private-dir)

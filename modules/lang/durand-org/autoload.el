@@ -1,3 +1,4 @@
+;;; lang/durand-org/autoload.el -*- lexical-binding: t; -*-
 ;;;###autoload
 (defun durand-redo-agenda ()
   "Redo and then go to the first block."
@@ -680,7 +681,7 @@ Modified by Durand"
              (with-output-to-temp-buffer "*Select Link*"
                (dolist (l links)
                  (cond
-                  ((not (string-match org-link-bracket-regexp l))
+                  ((not (string-match org-link-bracket-re l))
                    (princ (format "[%c]  %s\n" (cl-incf cnt)
                                   (org-unbracket-string "<" ">" l))))
                   ((match-end 3)
@@ -1122,9 +1123,10 @@ description."
         (setf (buffer-substring (nth 2 choice-to-update)
                                 (nth 3 choice-to-update))
               nouveau-lien)
-      (goto-char next-heading-position)
+      (org-end-of-meta-data)
       (newline)
-      (forward-char -2)
+      (newline)
+      (forward-char -1)
       (insert nouveau-lien)
       (indent-according-to-mode))))
 
@@ -1981,6 +1983,11 @@ If ARG is `youtube' or `all', then return (text list point)"
    cands "\n"))
 
 ;;;###autoload
+(defvar durand-choose-list-result nil
+  "The variable to hold the result of `durand-choose-list'.
+See the documentation of the function for more details.")
+
+;;;###autoload
 (defun durand-choose-list (cands &optional all texte non-quick display-cadr)
   "Choose from an alist. Multiple selection is supported.
 If ALL is non-nil, add a choice to select all of them.
@@ -1990,7 +1997,8 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
       (list (caar cands))
     (let ((cands (if all (cons '("all") cands) cands))
           (question (or texte "Chois un: "))
-          res det exc)
+          det exc)
+      (setf durand-choose-list-result nil)
       (setf ivy--index 0
             cands (mapcar (lambda (x)
                             (cond
@@ -2008,7 +2016,7 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
               exc nil)
         (let* ((ivy-format-functions-alist
                 '((durand-choose-list . (lambda (cands)
-                                          (durand-choose-list-format-function cands res)))))
+                                          (durand-choose-list-format-function cands durand-choose-list-result)))))
                (ele (ivy-read question cands
                               :require-match t
                               :action '(1
@@ -2023,7 +2031,7 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                                          "exclude"))
                               :preselect ivy--index
                               :caller 'durand-choose-list)))
-          (unless exc (push ele res))
+          (unless exc (push ele durand-choose-list-result))
           (when exc
             (setf cands
                   (cl-remove-if
@@ -2031,12 +2039,12 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                      (string= (if (listp y) (car y) y)
                               (if (stringp ele) ele (car ele))))
                    cands)))))
-      (when (member "all" res) (setf res (mapcar #'car (cdr cands))))
-      (setf res (cl-remove-duplicates res :test #'string=)
-            res (mapcar (lambda (x)
-                          (cadr (assoc x cands #'string=)))
-                        res))
-      res)))
+      (when (member "all" durand-choose-list-result) (setf durand-choose-list-result (mapcar #'car (cdr cands))))
+      (setf durand-choose-list-result (cl-remove-duplicates durand-choose-list-result :test #'string=)
+            durand-choose-list-result (mapcar (lambda (x)
+                                                (cadr (assoc x cands #'string=)))
+                                              durand-choose-list-result))
+      durand-choose-list-result)))
 
 ;;;###autoload
 (defun org-open-novels (&optional arg)
@@ -2131,8 +2139,7 @@ If DESC is non-`nil', then it is the description of the new link."
       (unless roman-p (setf cands (nreverse cands)))
       (let* ((choix (ivy-read prompt cands :require-match t))
              (item (cl-assoc choix cands :test #'string=))
-             (lien (read-string "Le lien: " (current-kill 0 t)))
-             (desc (if roman-p lien desc)))
+             (lien (read-string "Le lien: " (current-kill 0 t))))
         (goto-char (cdr item))
         (org-update-link lien nil nil desc)))))
 
@@ -2148,7 +2155,7 @@ With \\[universal-argument] \\[universal-argument], don't kill the entry."
       (with-current-file "/Users/durand/org/notes.org" nil
         (setf cands (org-map-entries
                      (lambda () (durand-org-link-info 'youtube))
-                     "youtube")))
+                     "youtube-ARCHIVE")))
       (let* ((sel (durand-choose-list cands t "Chois une vidéo: " t))
              (download-or-not (y-or-n-p "Download or not?")))
         (setf sel (sort sel (lambda (x y)

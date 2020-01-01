@@ -12,36 +12,36 @@
                (cons 'buffer-position-durand
                      'doom-modeline-segment--buffer-position-durand))
 
-(doom-modeline-def-modeline 'durand
-  '(bar
-    ;; workspace-name
-    ;; window-number
-    modals
-    buffer-info-durand
-    remote-host
-    buffer-position-durand
-    matches
-    ;; parrot
-    ;; selection-info
-    )
-  '(;; objed-state
-    misc-info
-    ;; persp-name
-    ;; battery
-    ;; grip
-    ;; irc
-    mu4e
-    ;; github
-    debug
-    lsp
-    ;; minor-modes
-    input-method
-    indent-info
-    ;; buffer-encoding
-    major-mode
-    ;; process
-    vcs
-    checker)))
+  (doom-modeline-def-modeline 'durand
+    '(bar
+      ;; workspace-name
+      ;; window-number
+      modals
+      buffer-info-durand
+      remote-host
+      buffer-position-durand
+      matches
+      ;; parrot
+      ;; selection-info
+      )
+    '(;; objed-state
+      misc-info
+      ;; persp-name
+      ;; battery
+      ;; grip
+      ;; irc
+      mu4e
+      ;; github
+      debug
+      lsp
+      ;; minor-modes
+      input-method
+      indent-info
+      ;; buffer-encoding
+      major-mode
+      ;; process
+      vcs
+      checker)))
 
 (after! doom-modeline
   (advice-add 'durand-narrow-dwim :after 'doom-modeline--buffer-narrow-icon-durand)

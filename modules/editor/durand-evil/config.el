@@ -87,7 +87,8 @@
 
 (define-prefix-command 'durand-evil-dollar-map)
 
-(map! :n [?z ?b] (lambda () (interactive) (recenter -1)))
+(map! :n [?z ?b] (lambda! (recenter -1))
+      :n [?z ?k] 'outline-previous-visible-heading)
 
 (map! :map durand-evil-dollar-map
       [?\d] 'back-to-indentation
@@ -117,7 +118,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
 ;; space: this is the leader of doom.
 
 (map! :leader
-      [tab] 'yas-expand
+      ;; [tab] 'yas-expand
       ;; [?n] 'evil-ex-nohighlight
       [?=] 'evil-align-regexp
       [?%] 'widen

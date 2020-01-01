@@ -1,0 +1,79 @@
+#+TITLE:   lang/durand-greek
+#+DATE:    janvier 1, 2020
+#+SINCE:   doom v2.0.9
+#+STARTUP: inlineimages
+
+* Description
+This module is for inputting ancient Greek letters using code letters in English.
+
++ It is intended to be used in =evil-mode=, but non-evil users can also bind the keys
+  manually.
++ The workflow is simple: enter code letters in English, then call the function
+  =durand-greek-transform-from-beg-to-end= to turn the code letters into ancient Greek
+  letters.
++ For evil-users, in /insert state/, the key *ù* is bound to =durand-transform-code-to-greek=
+  which is an evil operator.
++ For non-evil users, one should bind the function =durand-greek-transform-from-beg-to-end=
+  to some convenient key-binding.
+** Module Flags
+This module provides no flags.
+
+** Plugins
+This module depends on no plugins.
+
+** Hacks
+There is no hack on packages, since it uses none.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
++ The module provides a core macro =durand-greek-search-replace-generic=, which expands to a
+  *search-and-replace* form that performs search and replace, either on buffer contents, or on
+  a string. See its documention for more details and usage.
+
+  # TODO: Make this function depend on evil.
++ Also the main entry point of the module is the function =durand-transform-code-to-greek=,
+  which is an evil operator.
+
++ And there is a function that transforms the code letters to ancient Greek letters in a
+  string, called =durand-transform-string=. This is mainly used by =durand-search-greek= to
+  transform the query string to Greek letters to search. And there is another search
+  function =durand-show-search-greek= which shows the search results in a separate buffer.
+
++ Notice that the search functions are accent-marks-insensitive by default. But if accent
+  marks are provided, then they are respected.
+
++ The module also provides some key-bindings for inputting more conveniently using a
+  keyboard with French layout.
+
+  |-------+-----------------|
+  | key   | action          |
+  |-------+-----------------|
+  | §     | insert \        |
+  | ç     | insert .        |
+  | :     | insert /        |
+  | \/    | insert :        |
+  | M-ret | org-insert-item |
+  |-------+-----------------|
+
++ In the buffer showing search results there are some simple key-bindings.
+
+  |-----+---------------------------------|
+  | key | action                          |
+  |-----+---------------------------------|
+  | j   | =durand-goto-greek-search-result= |
+  | n   | =forward-line=                    |
+  | p   | =(forward-line -1)=               |
+  |-----+---------------------------------|
+
++ As a side note, =durand-greek-mode= runs =turn-on-orgtbl= in the hook.
+
+* Configuration
+The code letter to Greek letter conversion is controlled by the variable
+=durand-greek-replace-list=, whose elements are the argument lists of the function
+=durand-greek-search-replace-generic=. So one can add custom conversion rules to that
+variable conveniently.
+
+* TODO Troubleshooting
+Common issues and their solution, or places to look for help.

@@ -103,8 +103,8 @@
 
 (when (featurep! :completion ivy +childframe)
   (after! ivy-posframe
-    (cl-loop for fn in '(durand-switch-buffer
-                         ivy-switch-buffer
+    (cl-loop for fn in '(;; durand-switch-buffer
+                         ;; ivy-switch-buffer
                          counsel-describe-function
                          counsel-describe-variable
                          doom/help-search-headings

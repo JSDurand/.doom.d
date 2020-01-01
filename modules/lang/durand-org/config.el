@@ -1,10 +1,17 @@
+;;; lang/durand-org/config.el -*- lexical-binding: t; -*-
+
 ;; use amsfont in latex preview
 (setf org-latex-packages-alist '(("" "amsfonts" t)))
-;; Necessary since org-mode 9.2
 (ignore-errors (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5)))
 ;; (require 'org-tempo)
-(after! org-tempo
+
+;; NOTE: Necessary since org-mode 9.2
+(use-package! org-tempo
+  :after org
+  :config
   (add-to-list 'org-structure-template-alist '("g" . "src durand-greek")))
+;; (after! org-tempo
+;;   (add-to-list 'org-structure-template-alist '("g" . "src durand-greek")))
 (after! org
   (setq org-todo-keywords
         '((sequence "TODO(t)" "START(s)" "WORKING(w)" "HARD-WORKING(h)" "ALMOST(a)" "|" "DONE(d)")
@@ -30,13 +37,18 @@
 ;; org tab command!
 ;; (map! :map org-mode-map :n [tab] 'org-cycle)
 
-(map! :map org-mode-map
-      [?\ù] abbrev-prefix-map
-      [?\§] (lambda () (interactive) (insert "\\"))
-      [?\C-c tab] 'durand-forward-link
-      [?\C-c \S-tab] 'find-previous-link-in-buffer
-      [f8] 'org-account-prefix-map
-      [?\C-c ?\C-j] 'counsel-org-goto)
+;; org open at point
+(after! org
+  (map! :map org-mode-map
+        :n [?g ?o] 'org-open-at-point-decoded)
+
+  (map! :map org-mode-map
+        [?\ù] abbrev-prefix-map
+        [?\§] (lambda () (interactive) (insert "\\"))
+        [?\C-c tab] 'durand-forward-link
+        [?\C-c \S-tab] 'find-previous-link-in-buffer
+        [f8] 'org-account-prefix-map
+        [?\C-c ?\C-j] 'counsel-org-goto))
 ;; (define-key org-mode-map [?\ù] abbrev-prefix-map)
 ;; (define-key org-mode-map [?\§] (lambda () (interactive) (insert "\\")))
 ;; (add-hook 'org-archive-hook 'org-archive-kill-archive-file)
@@ -259,7 +271,7 @@ This should be setted by the PERIOD-FUNC argument.")
   (setf org-agenda-start-day "+0d"))
 
 (use-package! org-super-agenda
-  :after org-agenda
+  :after-call durand-agenda
   :init
   (setf org-agenda-custom-commands
         '(("o" "Custom"
@@ -321,7 +333,7 @@ This should be setted by the PERIOD-FUNC argument.")
   '(org-agenda-mode)
   'emacs)
 
-(map! :leader :n "oaa" #'durand-agenda)
+;; (map! :leader :n "oaa" #'durand-agenda)
 
 
 (define-prefix-command 'durand-org-account-prefix-map)

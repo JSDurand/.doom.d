@@ -195,16 +195,17 @@ This is defined in \"custom.el\""
   "The map for space v. Generally the map for viewing things, like
 articles, bookmarks, youtube links, novels, or weblinks.")
 
-(define-key durand-view-map [?l] #'org-open-articles)
-(define-key durand-view-map [?b] #'org-open-bookmarks)
-(define-key durand-view-map [?y] #'org-open-youtube)
-(define-key durand-view-map [?w] #'org-open-weblink)
-(define-key durand-view-map [?W] #'durand-wifi)
-(define-key durand-view-map [?n] #'org-open-novels)
-(define-key durand-view-map [?t] #'durand-view-timers)
-(define-key durand-view-map [?P] #'durand-view-process)
-(define-key durand-view-map [?p] #'durand-chercher-pdf)
-(define-key durand-view-map [?v] #'durand-view-videos)
+(define-key durand-view-map [?l] 'org-open-articles)
+(define-key durand-view-map [?b] 'org-open-bookmarks)
+(define-key durand-view-map [?y] 'org-open-youtube)
+(define-key durand-view-map [?w] 'org-open-weblink)
+(define-key durand-view-map [?W] 'durand-wifi)
+(define-key durand-view-map [?n] 'org-open-novels)
+(define-key durand-view-map [?t] 'durand-view-timers)
+(define-key durand-view-map [?P] 'durand-view-process)
+(define-key durand-view-map [?p] 'durand-chercher-pdf)
+(define-key durand-view-map [?v] 'durand-view-videos)
+(define-key durand-view-map [?'] 'ivy-resume)
 
 ;; space
 (define-prefix-command 'durand-evil-space-map)

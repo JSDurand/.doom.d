@@ -9,23 +9,22 @@
 ;; show current time
 
 ;;;###autoload
-(defun durand-show-current-time ()
+(defun durand-show-current-time (&optional arg)
   "Show the current time.
 Invoke the command again to disable it.
-With prefix arg, show in a separate window."
-  (interactive)
-  (let ((time-string (format-time-string "%A %e %B %H:%M:%S")))
-    (if current-prefix-arg
+When ARG is non-nil, show it in a pop-up window."
+  (interactive "P")
+  (let ((time-string (format-time-string "%A %e %B %H:%M:%S"))
+        (display-time-day-and-date t))
+    (if arg
         (with-current-buffer-window
          "*current time*" nil nil
          (prin1 time-string)
          (helpful-mode))
       ;; (message time-string)
       (display-time-mode (cond
-                          (display-time-mode
-                           -1)
-                          (t
-                           1))))))
+                          (display-time-mode -1)
+                          (t 1))))))
 
 ;;;###autoload
 (defvar durand-jump-hook-alist nil

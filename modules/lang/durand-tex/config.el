@@ -205,8 +205,9 @@
   "The old position to go back to.")
 
 ;; use pdf-tools to open document
-(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
-      TeX-source-correlate-start-server t)
+(after! (latex tex)
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+        TeX-source-correlate-start-server t))
 
 ;; my custom view function
 (map! :map TeX-mode-map

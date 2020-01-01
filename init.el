@@ -13,11 +13,13 @@
 (setq evil-respect-visual-line-mode nil)
 
 (doom! :input
-       chinese
+       ;; chinese
        ;;japanese
 
        :completion
-       company ; the ultimate code completion backend
+       (company
+        ;; +childframe
+        )       ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;; ivy
@@ -173,6 +175,7 @@
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
        ;;web               ; the tubes
+       durand-greek      ; input greek letters using code letters
 
        :email
        (mu4e +gmail)

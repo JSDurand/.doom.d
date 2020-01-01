@@ -3,7 +3,7 @@
 #+STARTUP: inlineimages
 
 * Table of Contents :TOC_3:noexport:
-- [[#description][Description]]
+- [[#working-description][WORKING Description]]
   - [[#module-flags][Module Flags]]
   - [[#plugins][Plugins]]
   - [[#hacks][Hacks]]
@@ -12,18 +12,47 @@
 - [[#configuration][Configuration]]
 - [[#troubleshooting][Troubleshooting]]
 
-* TODO Description
+* WORKING Description
 My org configs.
 
-+ If possible, include a brief list of feature highlights here
-+ Like code completion, syntax checking or available snippets
++ I have three specific files for =org-agenda=: notes.org, aujourdhui.org, and agenda.org.
+  Other files may be added later, but at the moment I only use those three files for
+  agenda.
++ My agenda is customized by having *pages*. Each page corresponds to a section in
+  =org-super-agenda=. And there are key-bindings to navigate these pages conveniently.
+
+  |-----+----------------|
+  | key | action         |
+  |-----+----------------|
+  | )   | next page      |
+  | -   | previous page  |
+  | S-) | next group     |
+  | S-- | previous group |
+  | DEL | first page     |
+  | à   | last page      |
+  |-----+----------------|
+
+  Here is a [[file:~/org/screen-shots/org%20agenda%20screen%20shot.png][screen shot]] of the agenda.
+
++ I hate to edit in a pop up window, since I have a rather small screen. So I add an
+  advice to =org-edit-special= so that it deletes other windows after it pops up the buffer.
+
++ I have a specific major mode for inserting Greek. Usually I insert Greek in a source
+  block in =org-mode=, so there is a custom =org-tempo= snippet for this:
+  #+BEGIN_EXAMPLE
+  <g should expand to durand-greek mode source block.
+  #+END_EXAMPLE
+
+  Unfortunately currently this is not working, perhaps because some settings are wrongly
+  configured. I shall investigate the cause later when I have enough time.
+
 + Include links to packages & external things where possible
 
 ** Module Flags
 This module provides no flags.
 
 ** Plugins
-This module has no plugins.
++ [[https://github.com/alphapapa/org-super-agenda][org-super-agenda]]
 
 ** TODO Hacks
 {A list of internal modifications to included packages}
