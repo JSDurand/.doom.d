@@ -88,6 +88,7 @@ If there is only one match, then perform the default action"
                 :unwind 'reset-durand-changed
                 :keymap durand-switch-buffer-map
                 :caller 'durand-bookmark-jump-headlong)
+    (+workspaces-add-current-buffer-h)
     (let* ((cur-name (buffer-name))
            (action (assoc-default cur-name durand-jump-hook-alist
                                   (lambda (element key)
@@ -132,18 +133,19 @@ If there is only one match, then perform the default action"
               :caller 'durand-recentf-jump-headlong)))
 
 ;;;###autoload
-(defun durand-self-insert-complete-and-exit ()
+(defun durand-self-insert-complete-and-exit (&rest _args)
   "Taken from headlong file.
 Insert the character you type and try to complete.
 If this results in one candidate, then immediately exit the minibuffer with the default action."
   (interactive)
   (when durand-headlong
-    (let ((candidates-length (let ((collection (ivy-state-collection ivy-last)))
-                               (cond
-                                ((sequencep collection)
-                                 (safe-length (ivy--filter ivy-text collection)))
-                                ((functionp collection)
-                                 (safe-length (funcall collection ivy-text)))))))
+    (let* ((cands (let ((collection (ivy-state-collection ivy-last)))
+                    (cond
+                     ((sequencep collection)
+                      (ivy--filter ivy-text collection))
+                     ((functionp collection)
+                      (funcall collection ivy-text)))))
+           (candidates-length (safe-length cands)))
       (cond
        ((= 1 candidates-length)
         (if durand-changed-p
@@ -226,7 +228,7 @@ See the documentation of `durand-complete-buffer' to know more."
             :keymap 'durand-switch-buffer-map))
 
 ;;;###autoload
-(defun durand-complete-buffer (str)
+(defun durand-complete-buffer (str &rest _args)
   "Complete buffers; intended to be used as `collection' of `ivy-read' with `dynamic-collection' set to t.
 If STR starts with \"-\", then complete also with mode name;
 if STR starts with \"/\", then complete also with the file name;
@@ -265,6 +267,11 @@ if STR starts with a space, then consider also hidden buffers."
                           (funcall matcher re-str
                                    (ivy-rich-switch-buffer-path nom)))))
                    (t (funcall matcher re-str nom))))
+           when (cond ((and (featurep! :ui workspaces)
+                            (/= (aref (buffer-name buffer) 0) 42)
+                            (/= (aref (buffer-name buffer) 0) 32))
+                       (+ivy--is-workspace-buffer-p (list buffer)))
+                      (t t))
            collect (buffer-name buffer)))
 
 ;;;###autoload

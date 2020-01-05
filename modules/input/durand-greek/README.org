@@ -75,5 +75,9 @@ The code letter to Greek letter conversion is controlled by the variable
 =durand-greek-search-replace-generic=. So one can add custom conversion rules to that
 variable conveniently.
 
+* Usage
+
+* Conversion Rules
+
 * TODO Troubleshooting
 Common issues and their solution, or places to look for help.

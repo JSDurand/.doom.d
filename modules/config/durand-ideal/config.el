@@ -13,7 +13,11 @@
                       "head long activated"
                     "head long desactivated"))))
 
-(map! :map doom-leader-buffer-map "b" #'durand-switch-buffer)
+;; workspaced version is in `SPC b b'.
+;; (map! :map doom-leader-buffer-map "b" #'durand-switch-buffer)
+(map! :leader
+      "," 'durand-switch-buffer
+      :n [?b ?v] 'ivy-switch-buffer)
 
 (map! :leader "wa" #'ace-window)
 

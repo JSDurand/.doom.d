@@ -7,7 +7,7 @@
 ;; (package! builtin-package :disable t)
 
 ;; (package! evil-snipe :disable t)
-(disable-packages! evil-snipe)
+(disable-packages! evil-snipe which-key)
 ;; (package! org-pdfview)
 
 (package! wrap-region)

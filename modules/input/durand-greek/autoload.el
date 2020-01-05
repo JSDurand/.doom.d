@@ -21,16 +21,18 @@
                                                   str-p
                                                   search-end)
   "A macro to expand to a \"search and replace\" form.
-MATCH-STR specifies the regexp to match.
-REPLACE is the thing to replace the matched string.
-If REPLACE is a string, it will replace the sub-expression specified by REP-EXP of the match.
+It will save the starting point, so don't replace with something that will be matched again:
+this will cause infinite recursion.
+
+It works by first searching for occurences of MATCH-STR, either in the buffer, or in STR-P, if
+the latter is non-nil. After finding a match, it will replace the REP-EXP sub-match with the
+replace string. The replace string is produced from the SUB-EXP sub-match via REPLACE:
+If REPLACE is a string, it is the replace string.
 If REPLACE is a list whose entries are lists consisting of two strings, then the replacing
 string is (pcase (match-string SUB-EXP) REPLACE).
-If REPLACE is a function, it will be applied to (match-string SUB-EXP) to produce the replacing
-string.
-STR-P means whether or not this operation is done for a string, or for buffer contents.
-If STR-P is non-nil, then it should be a string, the string to search and replace.
-SEARCH-END specifies the end of the search; this only has an effect when STR-P is nil."
+If REPLACE is a function, it will be applied to SUB-EXP sub-match to produce the replace string.
+
+In this process, if it searches the buffer, it will not go past SEARCH-END, if that is non-nil."
   `(save-excursion
      (while (cond
              ((stringp ,str-p)

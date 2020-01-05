@@ -129,7 +129,7 @@
 ;;   (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 ;;   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand)))))
 
-(map! :prefix "g" :m "t" 'evil-goto-line)
+(map! :prefix "g" :m "b" 'evil-goto-line)
 ;; (map! :n (kbd "s-q") 'load-config)
 (map! :n [?\s-q] (lambda! (message "Don't use s-q!")))
 
@@ -208,6 +208,9 @@
 (set-evil-initial-state!
   '(org-agenda-mode magit-status-mode)
   'emacs)
+
+;;* remove org-agenda in motion states
+(setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes))
 
 ;;* dired should start with the normal state
 (set-evil-initial-state!
@@ -294,7 +297,8 @@
 ;; (load! "+ivy.el" doom-private-dir)
 
 ;;* I don't like which-key-mode, as it slows down emacs a lot...
-(which-key-mode -1)
+(when (featurep 'which-key)
+  (which-key-mode -1))
 
 ;;* load my dashboard configurations
 ;; (load! "dashboard.el" doom-private-dir)
@@ -394,3 +398,11 @@
   :ttl 5
   :quit t
   :select t)
+
+;;* consider doom fallback buffer real
+
+(add-to-list 'doom-real-buffer-functions (lambda (buf) (eq buf (doom-fallback-buffer))) t)
+
+;;* workspace switch to
+
+(define-key doom-leader-workspace-map [?t] '+workspace/switch-to)

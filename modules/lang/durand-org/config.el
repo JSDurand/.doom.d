@@ -326,6 +326,7 @@ This should be setted by the PERIOD-FUNC argument.")
                    (org-agenda-overriding-header "TO-THINK"))))
            ((org-agenda-block-separator nil)))))
   :config
+  (advice-add 'org-agenda-log-mode :after 'evil-emacs-state)
   (add-hook 'org-agenda-mode-hook #'org-agenda-first-block)
   (org-super-agenda-mode))
 
@@ -360,6 +361,15 @@ This should be setted by the PERIOD-FUNC argument.")
 	    (interactive)
 	    (setq-local fill-column 90)
 	    (auto-fill-mode 1)))
+
+;; major mode for durand-org-view-notes
+
+;;;###autoload
+(define-derived-mode durand-org-notes-mode org-mode "Durand View Notes"
+  "A mode for viewing notes.")
+
+(map! :map durand-org-notes-mode-map
+      :n [?q] 'quit-window)
 
 ;; pop up rule for durand-org-view-notes
 (set-popup-rule! "\\*durand-org-view-notes\\*"

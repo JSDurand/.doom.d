@@ -188,6 +188,21 @@ Don't bind it to a key in `general-hydra/heads'"
                  (mapconcat #'identity (cdr c) "="))))
             (split-string query "&")))))
 
+;;;###autoload
+(defadvice! durand-org-protocol-convert-query (query)
+  "Convert QUERY key=value pairs in the URL to a property list.
+Modified by Durand to handle youtube links correctly."
+  :override 'org-protocol-convert-query-to-plist
+  (when query
+    (apply 'append
+           (mapcar
+            (lambda (x)
+              (let ((c (split-string x "=")))
+                (list
+                 (intern (concat ":" (car c)))
+                 (mapconcat #'identity (cdr c) "="))))
+            (split-string query "&")))))
+
 ;; filter out the title
 ;;;###autoload
 (defun org-filter-title ()
@@ -202,6 +217,29 @@ Don't bind it to a key in `general-hydra/heads'"
       (replace-match "\\1" nil nil title))
      (t
       title))))
+
+;;;###autoload
+(defun durand-org-set-store-link (link description selection)
+  "Do the works of `org-store-link' for weblinks.
+Since `org-protocol' does not handle some web links, I decided to
+make my own functions."
+  (let* ((type (substring link
+                          0
+                          (-find-index (lambda (x) (= x ?\:))
+                                       (string-to-list link))))
+         (annotation (org-make-link-string link description))
+         (query (list :template "L"
+                      :url link
+                      :title description
+                      :body selection)))
+    (setf org-store-link-plist
+          (list (list :type type
+                      :link link
+                      :description description
+                      :annotation annotation
+                      :initial ""
+                      :query query)))
+    (push (list link description) org-stored-links)))
 
 ;; filter title in the link
 ;;;###autoload
@@ -1336,12 +1374,13 @@ and whose `caddr' is a list of strings, the content of the note."
                       "\n")))
          (insert "No notes found!")))
      (goto-char (point-min))
-     (org-mode)
-     (let ((temp-map (make-sparse-keymap)))
-       (set-keymap-parent temp-map org-mode-map)
-       (map! :map temp-map
-             :n [?q] 'quit-window)
-       (use-local-map temp-map)))
+     (durand-org-notes-mode)
+     ;; (let ((temp-map (make-sparse-keymap)))
+     ;;   (set-keymap-parent temp-map org-mode-map)
+     ;;   (map! :map temp-map
+     ;;         :n [?q] 'quit-window)
+     ;;   (use-local-map temp-map))
+     )
     (message "%s note%s found" (if (= 0 len) "No" (number-to-string len))
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
@@ -1832,10 +1871,11 @@ The two lists should have the same lengths."
   (interactive)
   (org-agenda-goto-with-fun 'durand-org-view-notes)
   (temp-buffer-window-show "*durand-org-view-notes*")
-  (save-selected-window
-    (pop-to-buffer "*durand-org-view-notes*")
-    (goto-char (point-min))
-    (fit-window-to-buffer nil temp-buffer-max-height)))
+  ;; (save-selected-window
+  ;;   (pop-to-buffer "*durand-org-view-notes*")
+  ;;   (goto-char (point-min))
+  ;;   (fit-window-to-buffer nil temp-buffer-max-height))
+  )
 
 ;; Go to the first block in block agenda view
 ;;;###autoload
@@ -1988,6 +2028,14 @@ If ARG is `youtube' or `all', then return (text list point)"
 See the documentation of the function for more details.")
 
 ;;;###autoload
+(defvar durand-choose-list-det nil
+  "This variable controls whether `durand-choose-list' determines the candidates.")
+
+;;;###autoload
+(defvar durand-choose-list-exc nil
+  "This variable controls whether `durand-choose-list' wants to exclude some candidate.")
+
+;;;###autoload
 (defun durand-choose-list (cands &optional all texte non-quick display-cadr)
   "Choose from an alist. Multiple selection is supported.
 If ALL is non-nil, add a choice to select all of them.
@@ -1996,9 +2044,10 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
   (if (and (= (length cands) 1) (null non-quick))
       (list (caar cands))
     (let ((cands (if all (cons '("all") cands) cands))
-          (question (or texte "Chois un: "))
-          det exc)
-      (setf durand-choose-list-result nil)
+          (question (or texte "Chois un: ")))
+      (setf durand-choose-list-result nil
+            durand-choose-list-det nil
+            durand-choose-list-exc nil)
       (setf ivy--index 0
             cands (mapcar (lambda (x)
                             (cond
@@ -2011,9 +2060,9 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                              (t
                               (user-error "durand-choose-list: argument not a list: %s" x))))
                           cands))
-      (while (null det)
-        (setf det t
-              exc nil)
+      (while (null durand-choose-list-det)
+        (setf durand-choose-list-det t
+              durand-choose-list-exc nil)
         (let* ((ivy-format-functions-alist
                 '((durand-choose-list . (lambda (cands)
                                           (durand-choose-list-format-function cands durand-choose-list-result)))))
@@ -2022,17 +2071,17 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                               :action '(1
                                         ("o" identity "default")
                                         ("m" (lambda (x)
-                                               (setf det nil))
+                                               (setf durand-choose-list-det nil))
                                          "continue")
                                         ("e" (lambda (x)
-                                               (setf det nil
+                                               (setf durand-choose-list-det nil
                                                      ivy--index 0
-                                                     exc t))
+                                                     durand-choose-list-exc t))
                                          "exclude"))
                               :preselect ivy--index
                               :caller 'durand-choose-list)))
-          (unless exc (push ele durand-choose-list-result))
-          (when exc
+          (unless durand-choose-list-exc (push ele durand-choose-list-result))
+          (when durand-choose-list-exc
             (setf cands
                   (cl-remove-if
                    (lambda (y)

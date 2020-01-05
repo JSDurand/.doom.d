@@ -3,7 +3,8 @@
 ;;* buffer file name style
 
 ;;;###autoload
-(setf doom-modeline-buffer-file-name-style 'buffer-name)
+(setf doom-modeline-buffer-file-name-style 'buffer-name
+      doom-modeline-persp-name t)
 
 (after! doom-modeline
   (add-to-list 'doom-modeline-fn-alist (cons 'buffer-info-durand 'doom-modeline-segment--buffer-info-durand))
@@ -26,7 +27,7 @@
       )
     '(;; objed-state
       misc-info
-      ;; persp-name
+      persp-name
       ;; battery
       ;; grip
       ;; irc

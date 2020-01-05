@@ -6,6 +6,10 @@
   (lispy-set-key-theme '(special lispy)))
 
 (after! evil
+  ;; NOTE: evil search may not highlight the match. If that occurs, do the
+  ;; following as a temporary fix.
+  ;;
+  ;; (setq 'evil-ex-interactive-search-highlight 'all-windows)
   (setf evil-normal-state-cursor 'box
         evil-emacs-state-cursor '(bar . 7)
         evil-insert-state-cursor 'bar
