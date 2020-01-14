@@ -69,8 +69,7 @@
 ;;* dollar map is a little strange
 
 (after! org
-  (when (and (boundp 'durand-evil-dollar-map)
-             (keymapp 'durand-evil-dollar-map))
+  (when (keymapp 'durand-evil-dollar-map)
     (map! :map durand-evil-dollar-map
           [?b] (lambda! (recenter -1))
           [?k] 'outline-previous-visible-heading)))
@@ -406,3 +405,40 @@
 ;;* workspace switch to
 
 (define-key doom-leader-workspace-map [?t] '+workspace/switch-to)
+
+;;* kill karabiner
+
+(defun kill-karabiner ()
+  "Kill karabiner elements so that it can function again."
+  (interactive)
+  (shell-command (concat
+                  "echo "
+                  (shell-quote-argument (read-passwd "Password? "))
+                  " | sudo -S killall karabiner_grabber karabiner_observer")))
+
+(map! :leader :n [?v ?k] 'kill-karabiner)
+
+;; it turns out that I have to kill karabiner every day.
+
+(defvar durand-kill-karabiner-timer nil
+  "A timer that kills karabiner every day.")
+
+(setf durand-kill-karabiner-timer
+      (unless (timerp durand-kill-karabiner-timer)
+        (let* ((cur-time (decode-time (current-time)))
+               (cur-year (nth 5 cur-time))
+               (cur-month (nth 4 cur-time))
+               (cur-day (nth 3 cur-time))
+               (cur-hour (nth 2 cur-time)))
+          (run-with-timer
+           (float-time
+            (time-subtract
+             (cond
+              ((>= cur-hour 9)
+               (encode-time 0 0 9 (1+ cur-day) cur-month cur-year))
+              (t
+               (encode-time 0 0 9 cur-day cur-month cur-year)))
+             nil))
+           ;; a day
+           (* 24 60 60)
+           'kill-karabiner))))

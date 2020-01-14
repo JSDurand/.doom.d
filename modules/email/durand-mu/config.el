@@ -4,6 +4,16 @@
   :after-call (durand-mu4e)
   ;; :defer 3
   :config
+
+  (require 'org-mu4e)
+
+  (setq org-mu4e-link-query-in-headers-mode nil)
+
+  (org-link-set-parameters
+   "mu4e"
+   :follow #'org-mu4e-open
+   :store #'org-mu4e-store-link)
+
   (setf mu4e-confirm-quit nil)
   (setq mu4e-maildir (expand-file-name "~/mbsync"))
   (setq mu4e-get-mail-command "mbsync gmail") ; mbsync works a lot better!

@@ -267,10 +267,9 @@ if STR starts with a space, then consider also hidden buffers."
                           (funcall matcher re-str
                                    (ivy-rich-switch-buffer-path nom)))))
                    (t (funcall matcher re-str nom))))
-           when (cond ((and (featurep! :ui workspaces)
-                            (/= (aref (buffer-name buffer) 0) 42)
-                            (/= (aref (buffer-name buffer) 0) 32))
-                       (+ivy--is-workspace-buffer-p (list buffer)))
+           when (cond ((= (aref (buffer-name buffer) 0) 32) t)
+                      ((featurep! :ui workspaces)
+                       (+workspace-contains-buffer-p buffer))
                       (t t))
            collect (buffer-name buffer)))
 
@@ -643,9 +642,9 @@ Also open message in `mu4e-headers-mode' without forwarding to links even if no 
 
 ;;;###autoload
 (defun durand-open-browser (&optional arg)
-  "Open Safari.
+  "Open browser.
 With ARG \\[universal-argument], prompt for some frequently visited websites.
-With ARG \\[universal-argument]\\[universal-argument], close safari."
+With ARG \\[universal-argument]\\[universal-argument], close Safari."
   (interactive "P")
   (let* ((cands '(("google" . "https://google.com")
                   ("math" . "https://math.stackexchange.com/questions")
@@ -760,7 +759,8 @@ Otherwise execute `narrow-to-defun'."
 REG is additonal regexp to match as not needed."
   (let ((name (buffer-name buf)))
     (and
-     (or (= ?* (aref name 0))
+     (or (string= " *server*" name)
+         (= ?* (aref name 0))
          (string-match "^magit" name)
          (string-match "^TAGS\\(<.*>\\)?$" name)
          (when (stringp reg)

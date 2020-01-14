@@ -15,9 +15,14 @@
 
 ;; workspaced version is in `SPC b b'.
 ;; (map! :map doom-leader-buffer-map "b" #'durand-switch-buffer)
-(map! :leader
-      "," 'durand-switch-buffer
-      :n [?b ?v] 'ivy-switch-buffer)
+
+(use-package! persp-mode
+  :after-call durand-switch-buffer
+  :config
+
+  (map! :leader
+        "," 'durand-switch-buffer
+        :n [?b ?v] 'ivy-switch-buffer))
 
 (map! :leader "wa" #'ace-window)
 

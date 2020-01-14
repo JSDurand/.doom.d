@@ -1,12 +1,20 @@
 ;;; ui/durand-dashboard/autoload.el -*- lexical-binding: t; -*-
 
 ;;;###autoload
-(defun durand-open-terminal ()
+(defun durand-open-terminal (&optional arg)
   "Open terminal at the current directory."
-  (interactive)
-  (make-process :name "terminal" :command
-                `("open" "-a" "terminal" ,(file-relative-name default-directory))
-                :buffer nil))
+  (interactive "P")
+  (cond
+   ((null arg)
+    (make-process
+     :name "terminal"
+     :command `("open" "-a" "terminal" ,(file-relative-name default-directory))
+     :buffer nil))
+   (t
+    (make-process
+     :name "close terminal"
+     :buffer nil
+     :command '("osascript" "-e" "tell application \"Terminal\" to quit")))))
 
 ;;;###autoload
 (defun durand-open-dashboard ()
@@ -29,3 +37,49 @@ With ARG \\[universal-argument], close discord."
      :buffer nil))
   (when (equal arg '(4))
     (message "Discord closed.")))
+
+;; NOTE: I think I should have a new module for this functionality.
+;; ;;;###autoload
+;; (defun durand-dashboard-widget-banner ()
+;;   "Besides the original banner, also add some points recording the current efforts."
+;;   (let ((point (point)))
+;;     (mapc (lambda (line)
+;;             (insert (propertize (+doom-dashboard--center +doom-dashboard--width line)
+;;                                 'face 'doom-dashboard-banner) " ")
+;;             (insert "\n"))
+;;           '("=================     ===============     ===============   ========  ========"
+;;             "\\\\ . . . . . . .\\\\   //. . . . . . .\\\\   //. . . . . . .\\\\  \\\\. . .\\\\// . . //"
+;;             "||. . ._____. . .|| ||. . ._____. . .|| ||. . ._____. . .|| || . . .\\/ . . .||"
+;;             "|| . .||   ||. . || || . .||   ||. . || || . .||   ||. . || ||. . . . . . . ||"
+;;             "||. . ||   || . .|| ||. . ||   || . .|| ||. . ||   || . .|| || . | . . . . .||"
+;;             "|| . .||   ||. _-|| ||-_ .||   ||. . || || . .||   ||. _-|| ||-_.|\\ . . . . ||"
+;;             "||. . ||   ||-'  || ||  `-||   || . .|| ||. . ||   ||-'  || ||  `|\\_ . .|. .||"
+;;             "|| . _||   ||    || ||    ||   ||_ . || || . _||   ||    || ||   |\\ `-_/| . ||"
+;;             "||_-' ||  .|/    || ||    \\|.  || `-_|| ||_-' ||  .|/    || ||   | \\  / |-_.||"
+;;             "||    ||_-'      || ||      `-_||    || ||    ||_-'      || ||   | \\  / |  `||"
+;;             "||    `'         || ||         `'    || ||    `'         || ||   | \\  / |   ||"
+;;             "||            .===' `===.         .==='.`===.         .===' /==. |  \\/  |   ||"
+;;             "||         .=='   \\_|-_ `===. .==='   _|_   `===. .===' _-|/   `==  \\/  |   ||"
+;;             "||      .=='    _-'    `-_  `='    _-'   `-_    `='  _-'   `-_  /|  \\/  |   ||"
+;;             "||   .=='    _-'          '-__\\._-'         '-_./__-'         `' |. /|  |   ||"
+;;             "||.=='    _-'                                                     `' |  /==.||"
+;;             "=='    _-'                         E M A C S                          \\/   `=="
+;;             "\\   _-'                                                                `-_   /"
+;;             " `''                                                                      ``'"))
+;;     (when (and (display-graphic-p)
+;;                (stringp fancy-splash-image)
+;;                (file-readable-p fancy-splash-image))
+;;       (let ((image (create-image (fancy-splash-image-file))))
+;;         (add-text-properties
+;;          point (point) `(display ,image rear-nonsticky (display)))
+;;         (save-excursion
+;;           (goto-char point)
+;;           (insert (make-string
+;;                    (truncate
+;;                     (max 0 (+ 1 (/ (- +doom-dashboard--width
+;;                                       (car (image-size image nil)))
+;;                                    2))))
+;;                    ? ))))
+;;       ;; (insert "bonjour!")
+;;       (insert (make-string (or (cdr +doom-dashboard-banner-padding) 0)
+;;                            ?\n)))))

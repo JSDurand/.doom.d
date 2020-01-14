@@ -218,8 +218,8 @@
 (defun mu4e-update-advice (run-in-background)
   "Log it after the update."
   (if run-in-background
-      (message "Update in background finished.")
-    (message "Update finished.")))
+      (message "Update in background begins.")
+    (message "Update begins.")))
 
 ;;;###autoload
 (defun mu4e-contacts-show-time (&rest args)

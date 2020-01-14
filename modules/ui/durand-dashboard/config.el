@@ -39,7 +39,7 @@
         ;;  :icon (all-the-icons-octicon "tools" :face 'font-lock-keyword-face)
         ;;  :when (file-directory-p doom-private-dir)
         ;;  :action doom/open-private-config)
-        ("Open Safari"
+        ("Open Browser"
          :icon (all-the-icons-octicon "browser" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-browser)
          :action durand-open-browser)
@@ -57,3 +57,7 @@
         ))
 
 (map! :leader :n "vd" #'durand-open-dashboard)
+
+;; ;; use my own dashboard widget
+
+;; (advice-add 'doom-dashboard-widget-banner :override 'durand-dashboard-widget-banner)

@@ -385,6 +385,12 @@ This should be setted by the PERIOD-FUNC argument.")
 (after! org-agenda
   (add-hook 'org-agenda-mode-hook (lambda () (hl-line-mode 1))))
 
+;;; my browser of choice
+
+;;;###autoload
+(defvar durand-browser "Safari"
+  "The browser that I use to browse url.")
+
 ;; org clock
 (setq org-clock-mode-line-total 'current)
 ;; (setq org-clock-persist t)

@@ -270,7 +270,9 @@ make my own functions."
        (string-match "https?://math.stackexchange.com" link)
        (string-match "https?://mathoverflow.net/" link))
       ":stack:web_link:")
-     ((string-match "https?://www.uukanshu.com" link)
+     ((or
+       (string-match "https?://www.uukanshu.com" link)
+       (string-match "https?://www.ptwxz.com" link))
       ":roman:")
      ((string-match "https?://stacks.math.columbia.edu/" link)
       ":web_link:stack:")
@@ -1303,11 +1305,14 @@ and whose `caddr' is a list of strings, the content of the note."
           (nreverse res-list))))))
 
 (after! org
+  (require 'org-element)
 ;;;###autoload
+  (defvar org-note-regexp nil
+    "The regexp for notes in a org heading.")
   (setq org-note-regexp (concat
-			 "^\\([ \t]+\\)- Note taken on \\("
-			 org-element--timestamp-regexp
-			 "\\).*$")))
+			                   "^\\([ \t]+\\)- Note taken on \\("
+			                   org-element--timestamp-regexp
+			                   "\\).*$")))
 
 ;;;###autoload
 (defun durand-org-get-logs ()
@@ -1385,30 +1390,45 @@ and whose `caddr' is a list of strings, the content of the note."
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
 ;;;###autoload
-(defun durand-org-view-all-logs (&optional match)
-  "View all logs recorded in \"aujourdhui.org\" and
-\"aujourdhui.org_archive\" matched bt MATCH."
+(defun durand-org-view-all-logs (&optional match file)
+  "View all logs recorded in FILE, including archived files matched bt MATCH.
+If FILE is nil or omitted, then it defaults to \"aujourdhui.org\"."
   (interactive)
-  (let* ((match (progn
-                  (unless (stringp (or match "run"))
-                    (user-error "MATCH should be a stirng."))
-                  (or match "run")))
+  (unless (stringp (or match "run"))
+    (user-error "MATCH should be a stirng."))
+  (let* ((match (or match "run"))
          (log-buffer-name (concat "*logs: " match " *"))
+         (archive-number -1)
+         (file (or file "/Users/durand/org/aujourdhui.org"))
          logs)
-    (with-current-file "~/org/aujourdhui.org_archive" nil
-      (setf logs
-            (append logs
-                    (apply #'append
-                           (org-map-entries #'durand-org-get-logs match)))))
-    (with-current-file "~/org/aujourdhui.org" nil
-      (setf logs
-            (append logs
-                    (apply
-                     #'append
-                     (org-map-entries #'durand-org-get-logs match)))))
+    (let ((archive-file
+           (format (if (> archive-number -1)
+                       (car (split-string org-archive-location "::"))
+                     "%s")
+                   (concat
+                    (file-name-sans-extension file)
+                    (when (> archive-number 0) (format "(%d)" archive-number))
+                    "."
+                    (file-name-extension file)))))
+      (while (file-exists-p archive-file)
+        (message "%d, %s" archive-number archive-file)
+        (with-current-file archive-file nil
+          (setf logs (append logs
+                             (apply 'append
+                                    (org-map-entries 'durand-org-get-logs match)))))
+        (setf archive-number (+ archive-number 1)
+              archive-file (format (if (> archive-number -1)
+                                       (car (split-string org-archive-location "::"))
+                                     "%s")
+                                   (concat
+                                    (file-name-sans-extension file)
+                                    (when (> archive-number 0) (format "(%d)" archive-number))
+                                    "."
+                                    (file-name-extension file))))))
+    (setf logs (cl-sort logs 'time-less-p))
     (switch-to-buffer log-buffer-name)
     (durand-draw-calendar-days logs)
-    (org-mode)))
+    (durand-org-notes-mode)))
 
 ;;;###autoload
 (defun durand-draw-calendar-days (days-list)
@@ -2096,6 +2116,14 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
       durand-choose-list-result)))
 
 ;;;###autoload
+(defun durand-browse-url (url)
+  "Browse URL with the browser `durand-browser'."
+  (make-process
+   :name "durand browser"
+   :buffer nil
+   :command (list "open" "-a" durand-browser url)))
+
+;;;###autoload
 (defun org-open-novels (&optional arg)
   "Choose novel to open.
 Choose first an action to perform:
@@ -2133,7 +2161,7 @@ open all: offer every link to open."
                                           (string-match "qidian" (car element)))
                                         (assoc-default ele cands))
                                        t "Chois un lien: " nil t)))))))
-          (mapc #'browse-url liste-de-choix))))
+          (mapc #'durand-browse-url liste-de-choix))))
      ((eq action 'update)
       (org-update-novels))
      ((eq action 'all)
@@ -2148,7 +2176,7 @@ open all: offer every link to open."
                                       (durand-choose-list
                                        (assoc-default ele cands)
                                        t "Chois un lien: " nil t)))))))
-          (mapc #'browse-url liste-de-choix))))
+          (mapc #'durand-browse-url liste-de-choix))))
      ((eq action 'qidian)
       (message "Opening novels' qidian pages...")
       (let* (cands)
@@ -2165,7 +2193,7 @@ open all: offer every link to open."
                                           (string-match "^qidian" (cadr x)))
                                         (assoc-default roman cands #'string=))
                          append (car element))))
-          (mapc #'browse-url (-filter #'stringp choix-de-liens))))
+          (mapc #'durand-browse-url (-filter #'stringp choix-de-liens))))
       (message "Opening novels' qidian pages...DONE")))))
 
 ;;;###autoload

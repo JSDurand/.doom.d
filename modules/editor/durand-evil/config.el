@@ -164,6 +164,8 @@ articles, bookmarks, youtube links, novels, or weblinks.")
         :m [?Q] 'durand-quit-window)
 
   (map! :n [home] 'evil-emacs-state
+        :n [?,] 'evil-repeat-find-char-reverse
+        :n [?\;] 'evil-repeat-find-char
         :n [?X] (lambda ()
                   (interactive)
                   (pcase major-mode
