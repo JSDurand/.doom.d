@@ -31,11 +31,15 @@
       ;; org-agenda-block-separator ?\—
       org-pretty-entities t)
 
+;; I don't want to toggle. I want to cycle!
+(after! evil-org
+  (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
+
 (unless (boundp 'abbrev-prefix-map)
   (define-prefix-command 'abbrev-prefix-map))
 
 ;; org tab command!
-;; (map! :map org-mode-map :n [tab] 'org-cycle)
+(map! :map org-mode-map :n [tab] 'org-cycle)
 
 ;; org open at point
 (after! org
@@ -164,8 +168,8 @@
 (after! org-capture
   (setq org-capture-templates
         '(("m" "Account records" entry
-           (file+datetree "~/org/account/account.org")
-           "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %^{COST|0}\n  :FROM: %^{FROM|Cash}\n  :RECORD_TIME: %U\n  :END:\n  %?\n\n  - "
+           (file+olp+datetree "~/org/account/account.org")
+           "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %^{COST|0}\n  :FROM: %^{FROM|Cash|etique}\n  :RECORD_TIME: %U\n  :END:\n  %(durand-org-complete-capture-account)%?"
            :jump-to-captured t)
           ("d" "Record Diaries" entry
            (file+datetree "~/org/diary.org")
@@ -204,7 +208,7 @@
            :immediate-finish t)
           ("c" "Chansons" entry
            (file+headline "~/org/wiki.org" "Liste de Chansons")
-           "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: %A\n  :END:\n  %?"
+           "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: [[%^{link}][%^{description}]]\n  :END:\n  %?"
            :jump-to-captured t)
           ("f" "français" entry
            (file+headline "~/org/français/français.org" "Liste de mots français")
@@ -220,6 +224,25 @@
 (defvar durand-account-report-period-str "LAST DAY"
   "The string to show in report buffer.
 This should be setted by the PERIOD-FUNC argument.")
+
+;;; completion in account capture
+
+;;;###autoload
+(defvar durand-frequent-shops nil
+  "Shops I frequently visit.")
+
+(setq durand-frequent-shops (list
+                             "即食樂"
+                             "來吃麵"
+                             "鍋兵鍋將"
+                             "羅胖子"
+                             "牛魔王"
+                             "光華夜市鱔魚意麵"
+                             "光華夜市酵素臭豆腐"))
+
+;;;###autoload
+(defvar durand-complete-shop-history nil
+  "History variable for completing shops.")
 
 ;; account report pop up rule
 (set-popup-rule! "\\*ACCOUNT REPORT\\*"
@@ -241,7 +264,8 @@ This should be setted by the PERIOD-FUNC argument.")
       [?n] #'durand-view-go-to-next-day
       [?p] #'durand-view-go-to-previous-day
       [?v] #'durand-view-entry
-      [?x] #'durand-kill-buffer)
+      [?x] #'kill-current-buffer
+      [?q] #'kill-current-buffer)
 
 ;;;###autoload
 (setq account-mode-map (make-sparse-keymap))
@@ -384,6 +408,15 @@ This should be setted by the PERIOD-FUNC argument.")
 
 (after! org-agenda
   (add-hook 'org-agenda-mode-hook (lambda () (hl-line-mode 1))))
+
+;;; novel addresses
+;;;###autoload
+(defvar durand-novel-addresses-regexp '("uukanshu"
+                                        "ptwxz"
+                                        "piaotian"
+                                        "101novel"
+                                        "booktxt")
+  "Regexp for matching a novel website.")
 
 ;;; my browser of choice
 

@@ -10,6 +10,9 @@
 (disable-packages! evil-snipe which-key)
 ;; (package! org-pdfview)
 
+(package! durand-cat :recipe (:local-repo "/Users/durand/elisp_packages/durand-cat/"))
+
+
 (package! wrap-region)
 
 (package! outline-magic :recipe (:host github :repo "tj64/outline-magic"))

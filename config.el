@@ -408,37 +408,101 @@
 
 ;;* kill karabiner
 
-(defun kill-karabiner ()
-  "Kill karabiner elements so that it can function again."
-  (interactive)
-  (shell-command (concat
-                  "echo "
-                  (shell-quote-argument (read-passwd "Password? "))
-                  " | sudo -S killall karabiner_grabber karabiner_observer")))
-
 (map! :leader :n [?v ?k] 'kill-karabiner)
 
-;; it turns out that I have to kill karabiner every day.
+;; ;; it turns out that I have to kill karabiner every day.
 
-(defvar durand-kill-karabiner-timer nil
-  "A timer that kills karabiner every day.")
+;; (defvar durand-kill-karabiner-timer nil
+;;   "A timer that kills karabiner every day.")
 
-(setf durand-kill-karabiner-timer
-      (unless (timerp durand-kill-karabiner-timer)
-        (let* ((cur-time (decode-time (current-time)))
-               (cur-year (nth 5 cur-time))
-               (cur-month (nth 4 cur-time))
-               (cur-day (nth 3 cur-time))
-               (cur-hour (nth 2 cur-time)))
-          (run-with-timer
-           (float-time
-            (time-subtract
-             (cond
-              ((>= cur-hour 9)
-               (encode-time 0 0 9 (1+ cur-day) cur-month cur-year))
-              (t
-               (encode-time 0 0 9 cur-day cur-month cur-year)))
-             nil))
-           ;; a day
-           (* 24 60 60)
-           'kill-karabiner))))
+;; (setf durand-kill-karabiner-timer
+;;       (unless (timerp durand-kill-karabiner-timer)
+;;         (let* ((cur-time (decode-time (current-time)))
+;;                (cur-year (nth 5 cur-time))
+;;                (cur-month (nth 4 cur-time))
+;;                (cur-day (nth 3 cur-time))
+;;                (cur-hour (nth 2 cur-time)))
+;;           (run-with-timer
+;;            (float-time
+;;             (time-subtract
+;;              (cond
+;;               ((>= cur-hour 9)
+;;                (encode-time 0 0 9 (1+ cur-day) cur-month cur-year))
+;;               (t
+;;                (encode-time 0 0 9 cur-day cur-month cur-year)))
+;;              nil))
+;;            ;; a day
+;;            (* 24 60 60)
+;;            'kill-karabiner))))
+
+;;* interchange pp-eval-expression and eval-expression
+
+(map! [remap pp-eval-expression] 'eval-expression
+      [remap eval-expression] 'pp-eval-expression)
+
+;;* remove semantic from completion-at-point-functions
+
+;; (after! semantic
+;;   (remove-hook! (semantic-mode emacs-lisp-mode)
+;;     (cl-loop for fun in (default-value 'completion-at-point-functions)
+;;              when (string-prefix-p "semantic-" (symbol-name fun))
+;;              do (remove-hook 'completion-at-point-functions fun))))
+
+;;* it seems to be a better idea to advice rather than remove
+
+(defadvice! semantic-company-a (orig-fun &rest args)
+  "Do nothing when inside a string or a comment."
+  :around '(semantic-analyze-completion-at-point-function
+            semantic-analyze-notc-completion-at-point-function
+            semantic-analyze-nolongprefix-completion-at-point-function)
+  (when (not (or (nth 3 (syntax-ppss))
+                 (nth 4 (syntax-ppss))))
+    (apply orig-fun args)))
+
+;;; my durand-cat package
+
+(use-package! durand-cat
+  :commands (durand-cat-profile-display-dashboard)
+  :bind (:map durand-view-map
+          ([?c] . durand-cat-profile-display-dashboard))
+  :config
+  (map! :map durand-cat-mode-map
+        :n [?\(] 'durand-cat-toggle-details
+        :n [?s] 'durand-cat-switch-profile
+        :n [?q] 'kill-current-buffer
+        :n [tab] 'durand-cat-show-every-item
+        :map durand-cat-every-item-mode-map
+        :n [tab] 'durand-cat-every-item-jump
+        :n [?q] 'durand-cat-every-item-quit)
+  (define-key! durand-cat-mode-map
+    [left-margin mouse-1] #'ignore
+    [remap forward-button] #'durand-cat-next-activity
+    [remap backward-button] #'durand-cat-previous-activity
+    "n" #'durand-cat-down-activity
+    "p" #'durand-cat-up-activity
+    "C-n" #'durand-cat-down-activity
+    "C-p" #'durand-cat-up-activity
+    [down] #'durand-cat-down-activity
+    [up] #'durand-cat-up-activity
+    [left] 'durand-cat-left-activity
+    [right] 'durand-cat-right-activity
+
+    ;; Evil remaps
+    [remap evil-next-line] #'durand-cat-down-activity
+    [remap evil-previous-line] #'durand-cat-up-activity
+    [remap evil-next-visual-line] #'durand-cat-down-activity
+    [remap evil-previous-visual-line] #'durand-cat-up-activity
+    [remap evil-forward-char] #'durand-cat-right-activity
+    [remap evil-backward-char] #'durand-cat-left-activity
+    [remap evil-paste-pop-next] #'durand-cat-down-activity
+    [remap evil-paste-pop] #'durand-cat-up-activity
+    [remap evil-delete] #'ignore
+    [remap evil-delete-line] #'ignore
+    [remap evil-insert] #'ignore
+    [remap evil-append] #'ignore
+    [remap evil-replace] #'ignore
+    [remap evil-replace-state] #'ignore
+    [remap evil-change] #'ignore
+    [remap evil-change-line] #'ignore
+    [remap evil-visual-char] #'ignore
+    [remap evil-visual-line] #'ignore))

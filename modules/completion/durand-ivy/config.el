@@ -105,6 +105,7 @@
   (after! ivy-posframe
     (cl-loop for fn in '(;; durand-switch-buffer
                          ;; ivy-switch-buffer
+                         durand-org-complete-capture-account
                          counsel-describe-function
                          counsel-describe-variable
                          doom/help-search-headings

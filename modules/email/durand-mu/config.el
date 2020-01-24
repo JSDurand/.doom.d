@@ -131,7 +131,10 @@
   ;; Je ne veux pas quitter mu4e quand je touche "q".
   (map! :map mu4e-main-mode-map
         :n [?q] 'bury-buffer
-        :n [?u] 'mu4e-update-mail-and-index)
+        :n [?u] 'mu4e-update-mail-and-index
+        :map mu4e-view-mode-map
+        :n [tab] 'durand-forward-link
+        :n [backtab] 'durand-backward-link)
   (add-hook! mu4e-main-mode :append 'mu4e-clear-quit))
 
 (after! evil

@@ -91,3 +91,27 @@ If ARG is non-nil, show the full name of the buffer."
      :name "*Instruments*"
      :buffer nil
      :command '("open" "/Applications/Xcode.app/Contents/Applications/Instruments.app"))))
+
+;;; kill karabiner
+
+;;;###autoload
+(defun kill-karabiner ()
+  "Kill karabiner elements so that it can function again."
+  (interactive)
+  (shell-command
+   (concat
+    "echo "
+    (shell-quote-argument (read-passwd "Password? "))
+    " | sudo -S killall karabiner_grabber karabiner_observer")))
+
+;;; get advice of a function
+
+;;;###autoload
+(defun durand-get-advices (fun)
+  "Return the advices of FUN."
+  (let (res)
+    (advice-mapc
+     (lambda (x y)
+       (push (list x y) res))
+     fun)
+    res))

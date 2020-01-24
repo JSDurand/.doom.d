@@ -26,6 +26,13 @@
   (evil-emacs-state)
   (org-agenda-first-block))
 
+;; fix the issue that org does not kill a buffer if I touched it.
+
+(defadvice! durand-org-readd-buffer-to-kill (&rest _args)
+  "Re-add the buffer to be killed."
+  :after '+org--restart-mode-h
+  (push (current-buffer) org-agenda-new-buffers))
+
 ;; fix org-agenda-later
 ;;;###autoload
 (defun org-agenda-later (arg)
@@ -65,6 +72,8 @@ With prefix ARG, go forward that many times the current span."
            (get-text-property (min (1- (point-max)) (point)) 'org-series-cmd))
           (org-agenda-overriding-arguments
            (list (car args) sd span)))
+      (ignore org-agenda-overriding-cmd
+              org-agenda-overriding-arguments)
       (org-agenda-redo)
       ;; I added the following line.
       (org-agenda-first-block)
@@ -102,10 +111,65 @@ Don't bind it to a key in `general-hydra/heads'"
 
 ;; Recenter to top
 ;;;###autoload
-(defun recenter-to-top (&rest some)
+(defun recenter-to-top (&rest _some)
   "Recenter to top"
   (interactive)
   (recenter 0))
+
+;;; completion for accounts
+
+;;;###autoload
+(defun durand-org-complete-capture-account ()
+  "Offer completion for shops and items when capturing accounts."
+  (with-current-file (expand-file-name "account/account.org" org-directory) nil
+    (let* ((shops-list (save-excursion
+                         (save-restriction
+                           (widen)
+                           (goto-char (point-min))
+                           (cl-loop while (re-search-forward org-heading-regexp nil t)
+                                    when (= (car (org-heading-components)) 4)
+                                    for title = (save-excursion
+                                                  (org-end-of-meta-data)
+                                                  (org-skip-whitespace)
+                                                  (buffer-substring-no-properties
+                                                   (point) (line-end-position)))
+                                    when (not (string= title ""))
+                                    collect title))))
+           (shops-list (append
+                        durand-frequent-shops
+                        (cl-remove-duplicates
+                         (remove nil (reverse shops-list))
+                         :key 'upcase
+                         :test 'string=)))
+           (chosen-shop (ivy-read "Chois un magasin: " shops-list
+                                  :preselect (car durand-frequent-shops)
+                                  :caller 'durand-org-complete-capture-account
+                                  :history durand-complete-shop-history))
+           (items-list (save-excursion
+                         (save-restriction
+                           (widen)
+                           (goto-char (point-min))
+                           (cl-loop while (re-search-forward org-heading-regexp nil t)
+                                    when (= (car (org-heading-components)) 4)
+                                    for title = (save-excursion
+                                                  (org-end-of-meta-data)
+                                                  (org-skip-whitespace)
+                                                  (buffer-substring-no-properties
+                                                   (point) (line-end-position)))
+                                    when (and title (not (string= title "")))
+                                    when (string= (upcase title)
+                                                  (upcase chosen-shop))
+                                    append (let ((limite (save-excursion (outline-next-heading) (point))))
+                                             (cl-loop
+                                              while (re-search-forward "- " limite t)
+                                              collect (buffer-substring-no-properties
+                                                       (point)
+                                                       (line-end-position))))))))
+           (chosen-items (durand-choose-list (mapcar 'list items-list) nil "Chois une chose: " t nil t)))
+      (concat chosen-shop
+              "\n\n"
+              (cl-loop for item in chosen-items
+                       concat (concat "- " item "\n"))))))
 
 ;; Find the next link
 ;;;###autoload
@@ -270,14 +334,26 @@ make my own functions."
        (string-match "https?://math.stackexchange.com" link)
        (string-match "https?://mathoverflow.net/" link))
       ":stack:web_link:")
-     ((or
-       (string-match "https?://www.uukanshu.com" link)
-       (string-match "https?://www.ptwxz.com" link))
+     ((cl-some
+       (lambda (re) (string-match re link))
+       durand-novel-addresses-regexp)
       ":roman:")
      ((string-match "https?://stacks.math.columbia.edu/" link)
       ":web_link:stack:")
      (t
       ":web_link:"))))
+
+;;; kill server buffer
+;;;
+;;; FIXME: This does not work. It even hinders the execution of the external
+;;; command.
+
+;;;###autoload
+;; (defadvice! durand-bury-server-buffer ()
+;;   "Bury the server buffer to avoid annoiance."
+;;   :after 'org-update-novels
+;;   (when (get-buffer " *server*")
+;;     (bury-buffer (get-buffer " *server*"))))
 
 ;; automatically update account when capturing
 ;;;###autoload
@@ -296,7 +372,7 @@ make my own functions."
   (when (= (car (org-heading-components)) 4)
     ;; It is possible to be called inside `org-map-entries'.
     (let* ((date-string (if (save-excursion
-                              (outline-up-heading 1)
+                              (outline-up-heading 1 t)
                               (re-search-forward org-date-tree-headline-regexp (line-end-position) t))
                             (match-string-no-properties 1)
                           (user-error "No matching date found!")))
@@ -506,9 +582,7 @@ or a custom specifier of time period."
 ;;;###autoload
 (cl-defun durand-change-parameter (&key unit report-mode sum-type exclude-type)
   "general function to change the parameters of account reporting"
-  (let* ((this-buffer (current-buffer))
-         (this-window (selected-window))
-         (account-buffer-name "account.org")
+  (let* ((account-buffer-name "account.org")
          cur-u cur-rm cur-st cur-et)
     (when (get-buffer "*ACCOUNT REPORT*")
       (switch-to-buffer "*ACCOUNT REPORT*")
@@ -1004,6 +1078,7 @@ If this information is not given, the function uses the tree at point."
                          n (buffer-name buffer))))
            (error "Abort"))
       (let ((org-agenda-buffer-name bufname-orig))
+        (ignore org-agenda-buffer-name)
         (org-remove-subtree-entries-from-agenda buffer dbeg dend))
       (with-current-buffer buffer (delete-region dbeg dend))
       (message "Agenda item and source killed"))))
@@ -1040,7 +1115,7 @@ If this information is not given, the function uses the tree at point."
 
 ;; custom functionalities
 ;;;###autoload
-(defun org-agenda-goto-with-fun (fun &optional highlight)
+(defun org-agenda-goto-with-fun (fun &optional _highlight)
   "Go to the entry at point in the corresponding Org file, and execute FUN."
   (interactive)
   (save-window-excursion
@@ -1327,22 +1402,18 @@ and whose `caddr' is a list of strings, the content of the note."
           (cond
            ((re-search-forward ":LOGBOOK:" limit t)
             (forward-line 1)
-            (let ((ending (save-excursion (re-search-forward ":END:" limit t) (point)))
-                  res-list)
-              (while (re-search-forward
-                      (mapconcat #'identity `("state" ,org-ts-regexp3) ".*")
-                      ending
-                      t)
-                (push (list
-                       (string-to-number (match-string 2))
-                       (string-to-number (match-string 3))
-                       (string-to-number (match-string 4))
-                       (string-to-number (match-string 7))
-                       (string-to-number (match-string 8)))
-                      res-list))
-              (mapcar (lambda (x)
-                        (encode-time 0 (nth 4 x) (nth 3 x) (caddr x) (cadr x) (car x)))
-                      res-list)))))))))
+            (let ((ending (save-excursion (re-search-forward ":END:" limit t) (point))))
+              (cl-loop
+               while (re-search-forward
+                      (concat "\\(?:State\\|CLOSING NOTE\\)" ".*" org-ts-regexp3)
+                      ending t)
+               collect (encode-time
+                        0
+                        (string-to-number (match-string 8))
+                        (string-to-number (match-string 7))
+                        (string-to-number (match-string 4))
+                        (string-to-number (match-string 3))
+                        (string-to-number (match-string 2))))))))))))
 
 ;;;###autoload
 (defun durand-org-view-notes ()
@@ -1350,6 +1421,7 @@ and whose `caddr' is a list of strings, the content of the note."
   (interactive)
   (let* ((notes (durand-org-get-notes))
          (logs (durand-org-get-logs))
+         (logs (cl-sort logs 'time-less-p))
          (len (length notes)))
     (with-current-buffer-window
      "*durand-org-view-notes*"
@@ -1430,6 +1502,8 @@ If FILE is nil or omitted, then it defaults to \"aujourdhui.org\"."
     (durand-draw-calendar-days logs)
     (durand-org-notes-mode)))
 
+;; FIXME: The `cl-mapcar' at the end is an anti-pattern. I shall use a macro for
+;; handling a variable number of elements to draw on one row.
 ;;;###autoload
 (defun durand-draw-calendar-days (days-list)
   "Draw days in calendar format.
@@ -1690,6 +1764,7 @@ Also give colors to \vert and \ast differently."
             (let ((dy (nth 5 (decode-time date)))
                   (dm (nth 4 (decode-time date)))
                   (dd (nth 3 (decode-time date))))
+              (ignore dd)
               (pcase type
                 ('year
                  (cond
@@ -1799,8 +1874,10 @@ Also give colors to \vert and \ast differently."
                             (separator "|")
                             (pre-padding (make-string 1 32))
                             (post-padding (make-string 1 32)))
+                       (ignore day-number)
                        (concat separator pre-padding day-string post-padding)))
                    (list-days-between starting-date ct))))))
+    (ignore cd cm day-number dd sd)
     orig))
 
 ;;;###autoload
@@ -1993,7 +2070,7 @@ The two lists should have the same lengths."
   (let* ((cands (with-current-file "/Users/durand/org/notes.org" nil
                   (org-map-entries #'durand-org-link-info "bookmarks")))
          (choice (durand-choose-list cands nil "Chois un lien: ")))
-    (mapcar
+    (mapc
      (lambda (x)
        (mapc #'durand-org-open-link
              (assoc-default x cands #'string-match)))
@@ -2007,19 +2084,14 @@ If ARG is t, then return (text . point).
 If ARG is `youtube' or `all', then return (text list point)"
   (let* ((pt (point))
          (texte (nth 4 (org-heading-components)))
-         (limite (save-excursion
-                   (outline-next-heading)
-                   (point)))
-         (liste (let (res)
-                  (while (re-search-forward org-link-any-re limite t)
-                    (push (list (match-string-no-properties 2)
-                                (match-string-no-properties 3))
-                          res))
-                  (cl-remove-if
-                   (lambda (ls)
-                     (or (null (car ls))
-                         (null (cadr ls))))
-                   res))))
+         (limite (save-excursion (outline-next-heading) (point)))
+         (liste
+          (cl-loop while (re-search-forward org-link-any-re limite t)
+                   when (and (match-string-no-properties 2)
+                             (match-string-no-properties 3))
+                   collect (list
+                            (match-string-no-properties 2)
+                            (match-string-no-properties 3)))))
     (cond
      ((null arg)
       (cons texte liste))
@@ -2056,11 +2128,12 @@ See the documentation of the function for more details.")
   "This variable controls whether `durand-choose-list' wants to exclude some candidate.")
 
 ;;;###autoload
-(defun durand-choose-list (cands &optional all texte non-quick display-cadr)
+(defun durand-choose-list (cands &optional all texte non-quick display-cadr no-require-match)
   "Choose from an alist. Multiple selection is supported.
 If ALL is non-nil, add a choice to select all of them.
 If NON-QUICK is non-nil, then offer the selection even when there is only one candidate.
-If DISPLAY-CADR is non-nil, then display cadr rather than car."
+If DISPLAY-CADR is non-nil, then display cadr rather than car.
+If NO-REQUIRE-MATCH is t, then don't require the selection to match."
   (if (and (= (length cands) 1) (null non-quick))
       (list (caar cands))
     (let ((cands (if all (cons '("all") cands) cands))
@@ -2087,7 +2160,7 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                 '((durand-choose-list . (lambda (cands)
                                           (durand-choose-list-format-function cands durand-choose-list-result)))))
                (ele (ivy-read question cands
-                              :require-match t
+                              :require-match (not no-require-match)
                               :action '(1
                                         ("o" identity "default")
                                         ("m" (lambda (x)
@@ -2100,6 +2173,7 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                                          "exclude"))
                               :preselect ivy--index
                               :caller 'durand-choose-list)))
+          (ignore ivy-format-functions-alist)
           (unless durand-choose-list-exc (push ele durand-choose-list-result))
           (when durand-choose-list-exc
             (setf cands
@@ -2110,9 +2184,13 @@ If DISPLAY-CADR is non-nil, then display cadr rather than car."
                    cands)))))
       (when (member "all" durand-choose-list-result) (setf durand-choose-list-result (mapcar #'car (cdr cands))))
       (setf durand-choose-list-result (cl-remove-duplicates durand-choose-list-result :test #'string=)
-            durand-choose-list-result (mapcar (lambda (x)
-                                                (cadr (assoc x cands #'string=)))
-                                              durand-choose-list-result))
+            durand-choose-list-result
+            (mapcar
+             (lambda (x)
+               (cond ((assoc x cands #'string=)
+                      (cadr (assoc x cands #'string=)))
+                     (t x)))
+             durand-choose-list-result))
       durand-choose-list-result)))
 
 ;;;###autoload
@@ -2483,6 +2561,7 @@ If BUFFER-NAME is nil, then it defaults to the name of the file without director
           (nom_du_tampon (or ,buffer-name (file-name-nondirectory ,file-name)))
           (déjà_ouvert (get-buffer nom_du_tampon))
           (inhibit-messages t))
+     (ignore inhibit-messages)
      (find-file ,file-name)
      (switch-to-buffer nom_du_tampon_actuel)
      (unwind-protect
@@ -2515,8 +2594,8 @@ If ARG is (64), then execute `(durand-update-article t)'."
                  (mapc (lambda (x)
                          (setf temp (append temp
                                             (durand-choose-list
-                                             (mapcar (lambda (x) (cons x '("1"))) (assoc-default x cands))
-                                             t "Chois un lien: "))))
+                                             (assoc-default x cands)
+                                             t "Chois un lien: " nil t))))
                        sel)
                  temp))))
         (mapc #'durand-org-open-link liste-de-choix)
@@ -2535,21 +2614,45 @@ recently stored link, so choose carefully the target to update.
 If ALL is non-nil, then the range is articles with TO-THINK TODO
 keyword but not archived, instead of A_VOIR."
   (interactive)
-  (let* ((tag (if all "math-a_voir-ARCHIVE" "TODO=\"TO-THINK\"-ARCHIVE")) cands)
+  (let* ((predicate
+          (cond
+           (all
+            (lambda ()
+              (let ((tags (cond ((stringp (org-get-tags (point) t))
+                                 (org-get-tags (point) t))
+                                (t (list "")))))
+                (and
+                 (cl-member "math" tags :test 'string=)
+                 (not (cl-member "a_voir" tags :test 'string=))
+                 (not (cl-member "ARCHIVE" tags :test 'string=))))))
+           (t
+            (lambda ()
+              (let ((tags (cond ((stringp (org-get-tags (point) t))
+                                 (org-get-tags (point) t))
+                                (t (list ""))))
+                    (todo (cond ((stringp (org-get-todo-state))
+                                 (substring-no-properties (org-get-todo-state)))
+                                (t ""))))
+                (and
+                 (string= "TO-THINK" todo)
+                 (not (cl-member "ARCHIVE" tags :test 'string=))))))))
+         cands)
     (with-current-file "/Users/durand/org/notes.org" nil
-      (setf cands (org-map-entries
-                   (lambda () (durand-org-link-info t))
-                   tag)
-            cands (mapcar (lambda (x)
-                            (cons (durand-org-filter-dates (car x)) (cdr x)))
-                          cands)
-            cands (reverse cands)))
-    (let* ((choix (ivy-read "Chois un lien à mettre à jour: " cands
+      (setf cands
+            (save-excursion
+              (goto-char (point-min))
+              (reverse
+               (cl-loop while (re-search-forward org-heading-regexp nil t)
+                        when (funcall predicate)
+                        collect (cl-destructuring-bind (title . position) (durand-org-link-info t)
+                                  (cons (durand-org-filter-dates title)
+                                        position)))))))
+    (let* ((choix (ivy-read "Chois un titre à mettre à jour: " cands
                             :require-match t))
-           (item (cl-assoc choix cands :test #'equal)))
+           (item (cl-assoc choix cands :test #'string=)))
       (with-current-file "/Users/durand/org/notes.org" nil
         (goto-char (cdr item))
-        (org-update-link nil t)))))
+        (org-update-link)))))
 
 ;;;###autoload
 (defun org-open-weblink (&optional arg)
@@ -2980,7 +3083,7 @@ with `C-uC-u' prefix argument, update all accounts."
      (delete-region (region-beginning) (region-end)))))
 
 ;;;###autoload
-(defun org-set-account-according-to-date (date &optional month year)
+(defun org-set-account-according-to-date (date &optional _month _year)
   "Update accounts tag according to DATE.
   DATE is an integer representing a date in month MONTH and year YEAR.
   MONTH and YEAR default to the current ones.
@@ -3062,7 +3165,7 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
           (outline-hide-body))))
 
 ;;;###autoload
-(defun org-delete-item-price-note (row-num &optional total-num)
+(defun org-delete-item-price-note (row-num &optional _total-num)
   (interactive (let* ((total-num (save-excursion
                                    (goto-char (point-max))
                                    (outline-show-all)
