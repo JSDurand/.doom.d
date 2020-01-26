@@ -248,7 +248,7 @@ This should be setted by the PERIOD-FUNC argument.")
 (set-popup-rule! "\\*ACCOUNT REPORT\\*"
   :side 'bottom
   :height 0.5
-  :quit nil
+  :quit t
   :select t)
 
 (map! :map account-report-mode-map
@@ -468,3 +468,17 @@ This should be setted by the PERIOD-FUNC argument.")
 
 (use-package! org-pdfview
   :after-call org-open-articles)
+
+;;; subtree map
+(defvar durand-org-subtree-map (make-sparse-keymap)
+  "A keymap for subtree operations in org-mode buffers.")
+
+(after! org
+  (define-key durand-org-subtree-map [?a] 'org-archive-subtree)
+  (define-key durand-org-subtree-map [?c] 'org-copy-subtree)
+  (define-key durand-org-subtree-map [?k] 'org-cut-subtree)
+  (define-key durand-org-subtree-map [?p] 'org-paste-subtree)
+  (map! :map org-mode-map
+        :localleader
+        :n [?s] durand-org-subtree-map
+        :n [?S] 'org-schedule))
