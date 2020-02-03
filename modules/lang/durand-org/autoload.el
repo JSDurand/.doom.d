@@ -165,6 +165,7 @@ Don't bind it to a key in `general-hydra/heads'"
                                               collect (buffer-substring-no-properties
                                                        (point)
                                                        (line-end-position))))))))
+           (items-list (cl-remove-duplicates items-list :test 'string=))
            (chosen-items (durand-choose-list (mapcar 'list items-list) nil "Chois une chose: " t nil t)))
       (concat chosen-shop
               "\n\n"
