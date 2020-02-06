@@ -389,7 +389,7 @@ This should be setted by the PERIOD-FUNC argument.")
 ;; major mode for durand-org-view-notes
 
 ;;;###autoload
-(define-derived-mode durand-org-notes-mode org-mode "Durand View Notes"
+(define-derived-mode durand-org-notes-mode fundamental-mode "Durand View Notes"
   "A mode for viewing notes.")
 
 (map! :map durand-org-notes-mode-map

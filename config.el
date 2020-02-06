@@ -506,3 +506,8 @@
     [remap evil-change-line] #'ignore
     [remap evil-visual-char] #'ignore
     [remap evil-visual-line] #'ignore))
+
+;;; input method
+
+(map! :map doom-leader-toggle-map
+      [?i] 'toggle-input-method)

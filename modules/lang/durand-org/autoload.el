@@ -2300,35 +2300,51 @@ If DESC is non-`nil', then it is the description of the new link."
         (org-update-link lien nil nil desc)))))
 
 ;;;###autoload
-(defun org-open-youtube (&optional arg)
+(defun org-open-youtube ()
   "Choose youtube link to open.
 With \\[universal-argument], just kill the entry.
 With \\[universal-argument] \\[universal-argument], don't kill the entry."
-  (interactive "P")
-  (cond
-   ((or (null arg) (equal arg '(16)))
-    (let* (cands)
+  (interactive)
+  (let (cands)
+    (with-current-file "/Users/durand/org/notes.org" nil
+      (setf cands (org-map-entries
+                   (lambda () (durand-org-link-info 'youtube))
+                   "youtube-ARCHIVE")))
+    (let* ((sel (durand-choose-list
+                 cands t "Chois une vidéo pour l'action:" t))
+           (action (ivy-read "Quoi faire?"
+                             '("voir et supprimer"
+                               "voir sans supprimer"
+                               "juste inspecter"
+                               "supprimer seulement")
+                             :require-match t
+                             :caller 'org-open-youtube))
+           (to-view (string-match "voir" action))
+           (to-kill (and (string-match "supprimer" action)
+                         (not (string-match "sans" action))))
+           (to-inspect (string-match "inspecter" action))
+           (download-or-not (when to-view (y-or-n-p "Download or not?"))))
+      (setf sel (sort sel (lambda (x y)
+                            (< (cadr (assoc-default x cands))
+                               (cadr (assoc-default y cands))))))
       (with-current-file "/Users/durand/org/notes.org" nil
-        (setf cands (org-map-entries
-                     (lambda () (durand-org-link-info 'youtube))
-                     "youtube-ARCHIVE")))
-      (let* ((sel (durand-choose-list cands t "Chois une vidéo: " t))
-             (download-or-not (y-or-n-p "Download or not?")))
-        (setf sel (sort sel (lambda (x y)
-                              (< (cadr (assoc-default x cands))
-                                 (cadr (assoc-default y cands))))))
-        (with-current-file "/Users/durand/org/notes.org" nil
-          (dolist (x (nreverse sel))
-            (goto-char (cadr (assoc-default x cands)))
-            (unless arg (org-cut-subtree))
+        (dolist (x (reverse sel))
+          (goto-char (cadr (assoc-default x cands)))
+          (when to-kill (org-cut-subtree))
+          (when to-view
             (dolist (y (car (assoc-default x cands)))
               (if download-or-not
                   (durand-download-youtube
                    (car y)
                    (concat x (durand-take-param (car y))))
-                (browse-url (car y)))))))))
-   (t
-    (org-kill-youtube))))
+                (browse-url (car y)))))))
+      (when to-inspect
+        (message "Les liens séléctionnés: %s" (concat
+                                               (string-join
+                                                (reverse (cdr (reverse sel)))
+                                                ", ")
+                                               ", et "
+                                               (-last-item sel)))))))
 
 ;;;###autoload
 (defun durand-take-param (url)
