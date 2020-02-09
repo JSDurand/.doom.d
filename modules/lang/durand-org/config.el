@@ -482,3 +482,14 @@ This should be setted by the PERIOD-FUNC argument.")
         :localleader
         :n [?s] durand-org-subtree-map
         :n [?S] 'org-schedule))
+
+;;; use xelatex as engine
+
+(after! ox-latex
+  (when (boundp 'org-latex-pdf-process)
+    (setf org-latex-pdf-process
+          (mapcar
+           (lambda (s)
+             (replace-regexp-in-string
+              "%latex" "xelatex" s))
+           org-latex-pdf-process))))

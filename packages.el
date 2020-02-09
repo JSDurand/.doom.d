@@ -7,10 +7,10 @@
 ;; (package! builtin-package :disable t)
 
 ;; (package! evil-snipe :disable t)
-(disable-packages! evil-snipe which-key)
+(disable-packages! evil-snipe which-key org-bookmark-heading)
 ;; (package! org-pdfview)
 
-(package! durand-cat :recipe (:local-repo "/Users/durand/elisp_packages/durand-cat/"))
+(package! durand-cat :recipe (:host github :repo "JSDurand/durand-cat"))
 
 
 (package! wrap-region)

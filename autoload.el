@@ -115,3 +115,26 @@ If ARG is non-nil, show the full name of the buffer."
        (push (list x y) res))
      fun)
     res))
+
+;;; meditating timer
+
+;;;###autoload
+(defvar durand-meditation-timer nil
+  "Timer for meditating")
+
+;;;###autoload
+(defun durand-start-meditating (&optional custom-time)
+  "Start counting for meditating.
+When it times out, it will execute the function `durand-come-back'.
+If CUSTOM-TIME is non-nil, then it will ask for the number of minutes to count.
+The default is 25 minutes."
+  (interactive "P")
+  (run-with-timer
+   (*
+    (cond
+     ((null custom-time) 25)
+     (t (read-number "Le nombre de minutes de méditation: " 25)))
+    60)
+   nil
+   'durand-come-back)
+  (list-timers))

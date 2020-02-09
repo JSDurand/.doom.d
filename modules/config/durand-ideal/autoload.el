@@ -48,7 +48,7 @@ When ARG is non-nil, show it in a pop-up window."
         ;;                   (search-forward "defhydra" nil 'go 2)
         ;;                   (forward-line 0)
         ;;                   (recenter 0))))
-        ("\\(diary\\|notes\\).org" . (lambda ()
+        ("^\\(diary\\|notes\\).org$" . (lambda ()
                                        (goto-char (point-max))
                                        (org-show-context)
                                        (recenter -3)))))

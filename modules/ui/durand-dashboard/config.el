@@ -1,7 +1,9 @@
 ;;; ui/durand-dashboard/config.el -*- lexical-binding: t; -*-
 
 ;; dashboard banner directory
-(setf +doom-dashboard-banner-dir (expand-file-name "banners" doom-private-dir))
+;; (setf +doom-dashboard-banner-dir (expand-file-name "banners" doom-private-dir))
+(setf fancy-splash-image "/Users/durand/.doom.d/banners/default.png")
+
 
 (setf +doom-dashboard-pwd-policy doom-private-dir)
 
@@ -43,10 +45,10 @@
          :icon (all-the-icons-octicon "browser" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-browser)
          :action durand-open-browser)
-        ("Open Discord"
-         :icon (all-the-icons-material "account_circle" :face 'font-lock-keyword-face)
-         :when (fboundp 'durand-open-discord)
-         :action durand-open-discord)
+        ;; ("Open Discord"
+        ;;  :icon (all-the-icons-material "account_circle" :face 'font-lock-keyword-face)
+        ;;  :when (fboundp 'durand-open-discord)
+        ;;  :action durand-open-discord)
         ("Open Terminal"
          :icon (all-the-icons-octicon "terminal" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-open-terminal)
