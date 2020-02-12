@@ -137,10 +137,11 @@ Don't bind it to a key in `general-hydra/heads'"
                                     collect title))))
            (shops-list (append
                         durand-frequent-shops
-                        (cl-remove-duplicates
-                         (remove nil (reverse shops-list))
-                         :key 'upcase
-                         :test 'string=)))
+                        (reverse
+                         (cl-remove-duplicates
+                          (remove nil shops-list)
+                          :key 'upcase
+                          :test 'string=))))
            (chosen-shop (ivy-read "Chois un magasin: " shops-list
                                   :preselect (car durand-frequent-shops)
                                   :caller 'durand-org-complete-capture-account
@@ -366,6 +367,30 @@ make my own functions."
       (org-update-account)
       (ignore-errors (save-buffer 0))
       (durand-show-account-report))))
+
+;;;###autoload
+(defvar durand-capture-wconf nil
+  "Window configuration to return to after capture process")
+
+;;;###autoload
+(defvar durand-capture-go-to-buffer nil
+  "buffer to go to after capture process")
+
+;;;###autoload
+(defun durand-capture-set-window-conf ()
+  "Set up the window configuration and buffer for later use."
+  (setf durand-capture-wconf (org-capture-get :return-to-wconf 'local)
+        durand-capture-go-to-buffer (org-capture-get :buffer 'local)))
+
+;;;###autoload
+(defun durand-capture-reposition-windows ()
+  "Reposition the windows so that there are no pop-ups anymore."
+  (let ((conf durand-capture-wconf)
+        (buf durand-capture-go-to-buffer))
+    (when (ignore-errors (window-configuration-p conf))
+      (set-window-configuration conf))
+    (when (ignore-errors (bufferp buf))
+      (switch-to-buffer buf))))
 
 ;;;###autoload
 (defun durand-collect-shop-infos ()
@@ -1410,8 +1435,12 @@ and whose `caddr' is a list of strings, the content of the note."
                       ending t)
                collect (encode-time
                         0
-                        (string-to-number (match-string 8))
-                        (string-to-number (match-string 7))
+                        (string-to-number (cond ((stringp (match-string 8))
+                                                 (match-string 8))
+                                                (t "0")))
+                        (string-to-number (cond ((stringp (match-string 7))
+                                                 (match-string 7))
+                                                (t "0")))
                         (string-to-number (match-string 4))
                         (string-to-number (match-string 3))
                         (string-to-number (match-string 2))))))))))))
@@ -2635,7 +2664,7 @@ keyword but not archived, instead of A_VOIR."
           (cond
            (all
             (lambda ()
-              (let ((tags (cond ((stringp (org-get-tags (point) t))
+              (let ((tags (cond ((cl-every 'stringp (org-get-tags (point) t))
                                  (org-get-tags (point) t))
                                 (t (list "")))))
                 (and
@@ -2644,7 +2673,7 @@ keyword but not archived, instead of A_VOIR."
                  (not (cl-member "ARCHIVE" tags :test 'string=))))))
            (t
             (lambda ()
-              (let ((tags (cond ((stringp (org-get-tags (point) t))
+              (let ((tags (cond ((cl-every 'stringp (org-get-tags (point) t))
                                  (org-get-tags (point) t))
                                 (t (list ""))))
                     (todo (cond ((stringp (org-get-todo-state))
@@ -2674,31 +2703,14 @@ keyword but not archived, instead of A_VOIR."
 ;;;###autoload
 (defun org-open-weblink (&optional arg)
   "Open all weblink, that is, entries in \"notes.org\" with \"web_link\" tag.
-If ARG is '(4), then execute `durand-update-weblink'.
-If ARG is '(16), then execute `durand-mark-weblink'"
+If ARG is nil, then execute `durand-mark-weblink'
+If ARG is '(4), then execute `durand-update-weblink'."
   (interactive "P")
   (cond
    ((null arg)
-    (let* ((tag "web_link-special-personnes-ARCHIVE") cands)
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (setf cands (org-map-entries #'durand-org-link-info tag)))
-      (setf cands
-            (mapcar (lambda (x) (cons (durand-org-filter-dates (car x)) (cdr x))) cands))
-      (setf cands (reverse cands))
-      (let ((liste-de-choix
-             (let (temp)
-               (let* ((sel (durand-choose-list cands nil "Chois un lien de web: ")))
-                 (dolist (x sel temp)
-                   (setf temp (append temp
-                                      (durand-choose-list
-                                       (assoc-default x cands)
-                                       t "Chois un lien: " nil t))))))))
-        (mapc #'durand-org-open-link liste-de-choix)
-        (delete-other-windows))))
+    (durand-mark-weblink))
    ((equal arg '(4))
     (durand-update-weblink))
-   ((equal arg '(16))
-    (durand-mark-weblink))
    (t
     (message "This ARG is not supported: %s" arg))))
 
@@ -2750,6 +2762,7 @@ the link comes from the most recently stored link, so choose carefully the targe
 ;;;###autoload
 (defun durand-mark-links ()
   "Mark the links in a heading.
+visiter: visit the link.
 marquer: mark as seen.
 presque marquer: mark as mostly seen.
 unmarquer: remove the seen and the mostly seen mark.
@@ -2759,18 +2772,20 @@ tuer: delete the link."
                                   (outline-next-heading)
                                   (point)))
          (contained-links (save-excursion
-                            (nreverse
-                             (cl-loop while (re-search-forward org-link-any-re next-heading-position t)
-                                      collect (list (match-string-no-properties 2)
-                                                    (match-string-no-properties 3)
-                                                    (match-beginning 0)
-                                                    (match-end 0))))))
+                            (cl-loop while (re-search-forward org-link-any-re next-heading-position t)
+                                     collect (list (match-string-no-properties 2)
+                                                   (match-string-no-properties 3)
+                                                   (match-beginning 0)
+                                                   (match-end 0)))))
          (chosen-links (durand-choose-list contained-links t "Chois un lien: " t t))
-         (action-list (list "marquer" "presque marquer" "unmarquer" "tuer"))
+         (action-list (list "visiter" "marquer" "presque marquer" "unmarquer" "tuer"))
          (chosen-elements (cl-loop for link in chosen-links
                                    collect (cl-assoc link contained-links :test #'string=)))
          (chosen-action (ivy-read "Quoi faire? " action-list :require-match t)))
     (cond
+     ((string= chosen-action "visiter")
+      (cl-loop for element in chosen-elements
+               do (durand-org-open-link (car element))))
      ((string= chosen-action "unmarquer")
       (cl-loop for element in (cl-sort chosen-elements
                                        (lambda (x y)
@@ -3355,3 +3370,21 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
          :type "pdfview"
          :link link
          :description path)))))
+
+;;; archive advise
+
+;;;###autoload
+(defadvice! durand-archive-save-and-kill (old-fun &optional find-done)
+  "Save and kill the buffer after archiving."
+  :around 'org-archive-subtree
+  (let* ((location (org-archive--compute-location
+                    (or (org-entry-get nil "ARCHIVE" 'inherit)
+                        org-archive-location)))
+         (archive-buffer-name (file-name-nondirectory (car location)))
+         (opened (get-buffer archive-buffer-name)))
+    (funcall old-fun find-done)
+    (unless opened
+      (when (get-buffer archive-buffer-name)
+        (with-current-buffer archive-buffer-name
+          (ignore-errors (save-buffer 0)))
+        (kill-buffer archive-buffer-name)))))

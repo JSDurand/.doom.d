@@ -219,7 +219,10 @@
                                      "Activate account minor mode if in capturing accounts"
                                      (when (s-suffix? "account.org" (buffer-name))
                                        (account-mode))))
-  (add-hook 'org-capture-after-finalize-hook 'durand-capture-update-account))
+  (add-hook 'org-capture-after-finalize-hook 'durand-capture-update-account)
+  (add-hook 'org-capture-prepare-finalize-hook 'durand-capture-set-window-conf)
+  (advice-add 'org-capture-goto-last-stored :after 'durand-capture-reposition-windows)
+  )
 
 (defvar durand-account-report-period-str "LAST DAY"
   "The string to show in report buffer.
