@@ -1411,7 +1411,7 @@ and whose `caddr' is a list of strings, the content of the note."
   (defvar org-note-regexp nil
     "The regexp for notes in a org heading.")
   (setq org-note-regexp (concat
-			                   "^\\([ \t]+\\)- Note taken on \\("
+			                   "^\\([ \t]*\\)- \\(?:Note taken on\\|CLOSING NOTE\\) \\("
 			                   org-element--timestamp-regexp
 			                   "\\).*$")))
 

@@ -28,13 +28,23 @@
 (defun durand-file-size (&optional arg)
   "Show the buffer size in echo area.
 If ARG is non-nil, show raw file size;
+If in pdf-view-mode, show current page/total pages.
 if ARG is nil, then show human-readable format."
   (interactive "P")
   (message
    "%s"
    (cond
     (arg
-     (- (point-max) (point-min)))
+     (concat
+      (number-to-string
+       (- (point-max) (point-min)))
+      ", i.e. "
+      (file-size-human-readable
+       (- (point-max) (point-min)))))
+    ((derived-mode-p 'pdf-view-mode)
+     (format "P%d/%d"
+             (pdf-view-current-page)
+             (pdf-info-number-of-pages)))
     (t
      (file-size-human-readable
       (- (point-max) (point-min)))))))
