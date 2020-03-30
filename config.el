@@ -509,6 +509,10 @@
 
 ;;; input method
 
-(setf default-input-method "devanagari-itrans")
+;; (setf default-input-method "devanagari-itrans")
 (map! :map doom-leader-toggle-map
       [?i] 'toggle-input-method)
+
+;; bind indent operator
+
+(map! :n [?g ?i] 'evil-indent)
