@@ -512,7 +512,38 @@
 ;; (setf default-input-method "devanagari-itrans")
 (map! :map doom-leader-toggle-map
       [?i] 'toggle-input-method)
+;;; I am trying pyim now
+(setf pyim-page-tooltip 'popup)
+
+(after! pyim (pyim-basedict-enable))
+
+(map! :map pyim-mode-map
+      [?,] (lambda! (pyim-page-select-word-by-number 2))
+      [?\;] (lambda! (pyim-page-select-word-by-number 3))
+      [?:] (lambda! (pyim-page-select-word-by-number 4))
+      [?=] (lambda! (pyim-page-select-word-by-number 5))
+      [?\&] (lambda! (pyim-entered-backward-point))
+      [?\é] (lambda! (pyim-entered-forward-point))
+      [?\"] (lambda! (pyim-page-previous-page 1))
+      [?\'] (lambda! (pyim-page-next-page 1)))
+
+;; But it still too slow for me to use fluently: mainly because of the dearth of
+;; a sufficiently large dictionary. It is kind of OK to input Chinese words by
+;; pinyin, but it is very important to select Chinese words by phrases, instead
+;; of picking them word by word in a million possibilities. Therefore this still
+;; needs huge improvements as of now.
 
 ;; bind indent operator
 
 (map! :n [?g ?i] 'evil-indent)
+
+;; opencc
+
+(use-package! opencc
+  :after pyim
+  :config
+  (setf pyim-magic-converter 'sim-2-tw-chinese))
+
+;; bind a key to merge both variants of a conflict without markers
+
+(add-hook 'ediff-keymap-setup-hook 'add-d-to-ediff-mode-map)

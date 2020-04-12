@@ -631,6 +631,8 @@ Also open message in `mu4e-headers-mode' without forwarding to links even if no 
           ('help-mode
            (when (equal (push-button) nil)
              (durand-forward-link)))
+          ('Info-mode
+           (Info-follow-nearest-node))
           ('mu4e-headers-mode
            (mu4e-headers-view-message))
           ('mu4e-main-mode

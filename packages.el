@@ -10,10 +10,11 @@
 (disable-packages! evil-snipe which-key org-bookmark-heading)
 ;; (package! org-pdfview)
 
-(package! durand-cat :recipe (:host github :repo "JSDurand/durand-cat"))
-
+;; (package! durand-cat :recipe (:host github :repo "JSDurand/durand-cat"))
 
 (package! wrap-region)
+
+(package! emacs-opencc :recipe (:host github :repo "xuchunyang/emacs-opencc"))
 
 (package! outline-magic :recipe (:host github :repo "tj64/outline-magic"))
 

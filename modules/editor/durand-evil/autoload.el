@@ -43,8 +43,7 @@ This is defined in \"evil-setting.el\""
 
 ;;;###autoload
 (defun durand-wifi ()
-  "Check if WIFI is enabled, then ask for confirmation to toggle WIFI.
-This is defined in \"custom.el\""
+  "Check if WIFI is enabled, then ask for confirmation to toggle WIFI. "
   (interactive)
   (make-process
    :name "durand-wifi"
@@ -52,6 +51,7 @@ This is defined in \"custom.el\""
    :command '("networksetup" "-getairportpower" "en0")
    :filter #'durand-wifi-filter
    :sentinel #'ignore)
+  (accept-process-output (get-process "durand-wifi"))
   (let* ((prompt (format "WIFI is %s. Do you want to turn WIFI %s"
                          (if durand-wifi-on-p "on" "off")
                          (if durand-wifi-on-p "off?" "on?")))

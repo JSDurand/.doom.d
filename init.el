@@ -30,6 +30,7 @@
        doom-dashboard         ; a nifty splash screen for Emacs
        durand-dashboard       ; my dashboard configs
        doom-quit              ; DOOM quit-message prompts when you quit Emacs
+       transpose-frame        ; transpose windows in a frame
        ;; fill-column       ; a `fill-column' indicator
        hl-todo                ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
        hydra
