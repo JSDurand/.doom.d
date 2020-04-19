@@ -37,6 +37,7 @@
 \newtheorem{coro}[lem]{Corollary}
 \newtheorem{thm}{Theorem}[section]
 \newtheorem{prop}{Proposition}[section]
+\newtheorem{ex}{Exercise}[section]
 \theoremstyle{definition}
 \newtheorem*{rmk}{Remark}
 \newtheorem{defn}{Definition}[section]

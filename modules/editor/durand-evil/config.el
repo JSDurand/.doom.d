@@ -255,8 +255,8 @@ articles, bookmarks, youtube links, novels, or weblinks.")
 (define-key universal-argument-map [?\(] 'universal-argument-more)
 
 (after! evil
-  (when (and (boundp 'define-and-bind-text-object)
-             (boundp 'define-and-bind-quote-text-object))
+  (when (and (fboundp 'define-and-bind-text-object)
+             (fboundp 'define-and-bind-quote-text-object))
     (define-and-bind-quote-text-object "dollar" "$" ?$)
     (define-and-bind-text-object "slash" "/" "/" "/")
     (define-and-bind-text-object "pipe" "|" "|" "|")

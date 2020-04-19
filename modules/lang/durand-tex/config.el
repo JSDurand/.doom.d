@@ -254,10 +254,41 @@
   (insert "\\[\\]")
   (goto-char (- (point) 2)))
 
+;;;###autoload
+(defvar durand-o-things-list nil
+  "A list of things associated with the \"o\" key.
+Each entry should have the form (key . macro),
+where the macro part is without the backslash.")
+
+(setf durand-o-things-list
+      (list
+       (cons "x" "otimes")
+       (cons "+" "oplus")
+       (cons "o" "circ")))
+
+
+;;;###autoload
+(defun durand-insert-o-things ()
+  "Insert a symbol associated with \"o\" key.
+The list is in the variable `durand-o-things-list'"
+  (interactive)
+  (reset-durand-changed)
+  (reset-durand-headlong)
+  (let ((thing (ivy-read "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
+                         :require-match t
+                         :initial-input "^"
+                         ;; :dynamic-collection t
+                         :unwind 'reset-durand-changed
+                         :update-fn 'durand-self-insert-complete-and-exit
+                         :caller 'durand-insert-o-things
+                         :re-builder 'ivy--regex-plus)))
+    (insert (format "\\%s" (assoc-default thing durand-o-things-list #'string=)))))
+
 (add-hook! 'LaTeX-mode-hook
            'LaTeX-math-mode)
 
-(setq! LaTeX-math-list '((?$ durand-insert-display-equation)))
+(setq! LaTeX-math-list '((?$ durand-insert-display-equation)
+                         (?o durand-insert-o-things)))
 
 ;; solve yasnippet and company conflicts
 ;;;###autoload
@@ -266,6 +297,7 @@
   (interactive)
   (let ((yas-fallback-behavior
          (apply 'company-complete-common-or-cycle nil)))
+    (ignore yas-fallback-behavior)
     (yas-expand)))
 
 (map! :map LaTeX-mode-map

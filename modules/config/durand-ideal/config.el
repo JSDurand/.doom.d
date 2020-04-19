@@ -41,3 +41,5 @@
 (set-evil-initial-state!
   '(durand-pdf-mode)
   'emacs)
+
+(after! ivy-rich (setf ivy-rich-path-style 'absolute))

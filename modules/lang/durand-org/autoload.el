@@ -1492,9 +1492,13 @@ and whose `caddr' is a list of strings, the content of the note."
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
 ;;;###autoload
-(defun durand-org-view-all-logs (&optional match file)
+(defun durand-org-view-all-logs (&optional match file start-date end-date)
   "View all logs recorded in FILE, including archived files matched bt MATCH.
-If FILE is nil or omitted, then it defaults to \"aujourdhui.org\"."
+
+If FILE is nil or omitted, then it defaults to \"aujourdhui.org\".
+
+START-DATE and END-DATE, if non-nil, specify the start and the
+end date of the search, respectively."
   (interactive)
   (unless (stringp (or match "run"))
     (user-error "MATCH should be a stirng."))
@@ -1517,7 +1521,23 @@ If FILE is nil or omitted, then it defaults to \"aujourdhui.org\"."
         (with-current-file archive-file nil
           (setf logs (append logs
                              (apply 'append
-                                    (org-map-entries 'durand-org-get-logs match)))))
+                                    (org-map-entries 'durand-org-get-logs match))))
+          (when start-date
+            (setf logs
+                  (cl-remove-if (lambda (time-value)
+                                  (not
+                                   (time-less-p
+                                    (durand-date-to-time start-date)
+                                    time-value)))
+                                logs)))
+          (when end-date
+            (setf logs
+                  (cl-remove-if (lambda (time-value)
+                                  (not
+                                   (time-less-p
+                                    time-value
+                                    (durand-date-to-time end-date))))
+                                logs))))
         (setf archive-number (+ archive-number 1)
               archive-file (format (if (> archive-number -1)
                                        (car (split-string org-archive-location "::"))

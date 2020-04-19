@@ -74,6 +74,11 @@
           [?b] (lambda! (recenter -1))
           [?k] 'outline-previous-visible-heading)))
 
+(after! dired
+  (map! :map dired-mode-map
+        :n [?z ?j] 'dired-next-subdir
+        :n [?z ?k] 'dired-prev-subdir))
+
 ;;* dictionary mode map
 
 (when (featurep! :tools lookup +dictionary)
