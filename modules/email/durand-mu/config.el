@@ -134,8 +134,11 @@
         :n [?u] 'mu4e-update-mail-and-index
         :map mu4e-view-mode-map
         :n [tab] 'durand-forward-link
-        :n [backtab] 'durand-backward-link)
-  (add-hook! mu4e-main-mode :append 'mu4e-clear-quit))
+        :n [backtab] 'durand-backward-link
+        :leader
+        :n [?b ?n] 'mu4e-view-headers-next
+        :n [?b ?p] 'mu4e-view-headers-prev)
+        (add-hook! mu4e-main-mode :append 'mu4e-clear-quit))
 
 (after! evil
   (set-evil-initial-state!
