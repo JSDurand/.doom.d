@@ -552,3 +552,11 @@
 ;; bind a key to merge both variants of a conflict without markers
 
 (add-hook 'ediff-keymap-setup-hook 'add-d-to-ediff-mode-map)
+
+;;; Bind SPC x to ctl-x-map
+
+(map! :leader
+      :n [?x] ctl-x-map)
+
+(map! :map durand-evil-spc-ret-map
+      [?x] 'doom/open-scratch-buffer)
