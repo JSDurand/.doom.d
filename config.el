@@ -560,3 +560,8 @@
 
 (map! :map durand-evil-spc-ret-map
       [?x] 'doom/open-scratch-buffer)
+
+;;; I don't want aw-keys to be bound to numbers.
+
+(setf aw-keys (cl-loop for i from 0 to 8
+                       collect (+ ?a i)))
