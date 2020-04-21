@@ -18,9 +18,11 @@
 
 ;;;###autoload
 (defun durand-open-dashboard ()
-  "Open the dash board buffer."
+  "Open the dash board buffer.
+Also reset the `mode-line-format' for convenience."
   (interactive)
-  (switch-to-buffer (doom-fallback-buffer)))
+  (switch-to-buffer (doom-fallback-buffer))
+  (durand-refresh-dashboard-modeline))
 
 ;;;###autoload
 (defun durand-open-discord (&optional arg)
@@ -37,6 +39,16 @@ With ARG \\[universal-argument], close discord."
      :buffer nil))
   (when (equal arg '(4))
     (message "Discord closed.")))
+
+;;;###autoload
+(defun durand-refresh-dashboard-modeline ()
+  "Set the mode-line-format to the project mode-line.
+Sometimes the mode-line-format of the fallback buffer is
+accidentally set to `nil', so I want a function to reset it
+automatically."
+  (interactive)
+  (with-current-buffer (doom-fallback-buffer)
+    (setf mode-line-format '("%e" (:eval (doom-modeline-format--project))))))
 
 ;; NOTE: I think I should have a new module for this functionality.
 ;; ;;;###autoload
