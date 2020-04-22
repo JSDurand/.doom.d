@@ -12,6 +12,9 @@
   (add-to-list 'doom-modeline-fn-alist
                (cons 'buffer-position-durand
                      'doom-modeline-segment--buffer-position-durand))
+  (add-to-list 'doom-modeline-fn-alist
+               (cons 'org-agenda
+                     'doom-modeline-segment--org-agenda))
 
   (doom-modeline-def-modeline 'durand
     '(bar
@@ -26,6 +29,7 @@
       ;; selection-info
       )
     '(;; objed-state
+      org-agenda
       misc-info
       persp-name
       ;; battery

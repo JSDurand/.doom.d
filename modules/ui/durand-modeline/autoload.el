@@ -111,3 +111,68 @@ except when in `org-agenda-mode' it uses `org-agenda-show-blocks-number' instead
   (interactive)
   (setf mode-line-format nil)
   (force-mode-line-update))
+
+;;; showing org-agenda tasks on the mode-line
+
+;;;###autoload
+(defvar durand-agenda-mode-line nil
+  "The indicator on the mode-line.
+This is supposed to show how many items are there for today.")
+
+;;;###autoload
+(defun oaam-get-entries-for-date (&optional date include-archive-p files)
+  "Collect entries in FILES for DATE.
+If INCLUDE-ARCHIVE-P is non-nil, then archived entries are also included, else
+they are not counted.
+If DATE is nil, then it defaults to today as returned by
+`calendar-current-date'.
+If FILES is nil, then it defaults to `org-agenda-files'."
+  (let* ((date (or date (calendar-current-date)))
+         (files (or files org-agenda-files))
+         (org-agenda-buffer nil)
+         (raw-entries (cl-loop for file in files
+                               append (org-agenda-get-day-entries
+                                       file date)))
+         (filtered (cl-loop for entry in raw-entries
+                            when (cond
+                                  (include-archive-p t)
+                                  (t (not
+                                      (cl-member
+                                       "archive"
+                                       (get-text-property 0 'tags entry)
+                                       :test 'string=))))
+                            collect (list
+                                     (substring-no-properties entry)
+                                     (get-text-property 0 'org-hd-marker entry)))))
+    (ignore org-agenda-buffer nil)
+    filtered))
+
+;;;###autoload
+(defun doom-modeline-segment--org-agenda ()
+  "Display the number of org-agenda tasks on the mode-line.
+Specifically this depends on the variable
+`durand-agenda-mode-line' to show on the mode-line. And this
+variable is updated after you call `durand-agenda', and every
+morning at 9:00AM."
+  (cond
+   ((and durand-agenda-mode-line
+         (numberp durand-agenda-mode-line)
+         (> durand-agenda-mode-line 0))
+    (let ((keymap (make-sparse-keymap)))
+      (define-key keymap [mode-line mouse-1] 'durand-agenda)
+      (propertize
+       (format "%s %d"
+               (doom-modeline-icon 'faicon "tasks" "📝" "T" 'doom-modeline-warning)
+               durand-agenda-mode-line)
+       'mouse-face 'mode-line-highlight
+       'help-echo "Number of tasks to do.\nClick to call `durand-agenda'."
+       'local-map keymap)))
+   (t "")))
+
+(byte-compile 'doom-modeline-segment--org-agenda)
+
+;;;###autoload
+(defadvice! durand-update-agenda-mode-line (&rest _args)
+  :before 'org-agenda-exit
+  (setf durand-agenda-mode-line
+        (length (oaam-get-entries-for-date))))
