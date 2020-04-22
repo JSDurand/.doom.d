@@ -297,6 +297,9 @@ This should be setted by the PERIOD-FUNC argument.")
 (after! org-agenda
   (setf org-agenda-start-day "+0d"))
 
+(after! calendar
+  (setf diary-file (expand-file-name "diary" org-directory)))
+
 (use-package! org-super-agenda
   :after-call durand-agenda
   :init
