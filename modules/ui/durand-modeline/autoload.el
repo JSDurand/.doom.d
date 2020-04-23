@@ -173,6 +173,7 @@ morning at 9:00AM."
 
 ;;;###autoload
 (defadvice! durand-update-agenda-mode-line (&rest _args)
+  "Update `durand-agenda-mode-line'."
   :before 'org-agenda-exit
   (setf durand-agenda-mode-line
         (length (oaam-get-entries-for-date))))

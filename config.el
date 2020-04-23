@@ -565,3 +565,19 @@
 
 (setf aw-keys (cl-loop for i from 0 to 8
                        collect (+ ?a i)))
+
+;; Bind SPC a to durand-agenda, SPC o t to open terminal, and SPC o s to open
+;; browser.
+
+(map! :leader
+      :n [?a] 'durand-agenda)
+
+(map! :map doom-leader-open-map
+      [?t] 'durand-open-terminal
+      [?s] 'durand-open-browser)
+
+;; bind SPC SPC to `counsel-find-file', and leave `+ivy/projectile-find-file' to
+;; SPC p f.
+
+(map! :leader
+      :n [32] 'counsel-find-file)

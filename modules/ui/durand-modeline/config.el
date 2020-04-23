@@ -29,7 +29,7 @@
       ;; selection-info
       )
     '(;; objed-state
-      org-agenda
+      ;; org-agenda
       misc-info
       persp-name
       ;; battery
@@ -62,3 +62,34 @@
 
 
 (add-hook 'doom-escape-hook 'durand-update-buffer-file-state-icon)
+
+;; add task information to project modeline
+;;
+;; NOTE: For now this seems to be unnecessary information, so I am not using it
+;; for now.
+
+;; (doom-modeline-def-modeline 'project
+;;   '(bar window-number buffer-default-directory)
+;;   '(;; org-agenda
+;;     misc-info mu4e debug major-mode process))
+
+;; add timer to update modeline indicator every day
+
+;; (setf durand-mu4e-open-timer
+;;       (unless (boundp 'durand-mu4e-open-timer)
+;;         (let* ((cur (decode-time (current-time)))
+;;                (cur-year (nth 5 cur))
+;;                (cur-month (nth 4 cur))
+;;                (cur-day (nth 3 cur))
+;;                (cur-hour (nth 2 cur)))
+;;           (run-with-timer
+;;            (float-time
+;;             (time-subtract
+;;              (cond
+;;               ((>= cur-hour 9)
+;;                (encode-time 0 0 9 (1+ cur-day) cur-month cur-year))
+;;               (t
+;;                (encode-time 0 0 9 cur-day cur-month cur-year)))
+;;              nil))
+;;            (* 24 60 60) ;; a day
+;;            #'durand-mu4e-open-if-necessary))))
