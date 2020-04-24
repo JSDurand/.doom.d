@@ -135,9 +135,10 @@
         :map mu4e-view-mode-map
         :n [tab] 'durand-forward-link
         :n [backtab] 'durand-backward-link
-        :leader
-        :n [?b ?n] 'mu4e-view-headers-next
-        :n [?b ?p] 'mu4e-view-headers-prev)
+        :mode 'mu4e-view-mode
+        :localleader
+        :n [?n] 'mu4e-view-headers-next
+        :n [?p] 'mu4e-view-headers-prev)
         (add-hook! mu4e-main-mode :append 'mu4e-clear-quit))
 
 (after! evil
