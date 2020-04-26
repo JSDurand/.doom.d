@@ -2550,16 +2550,21 @@ a link."
        ((eq type 'inline-src-block) (org-babel-open-src-block-result))
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ((eq type 'link)
-	      (let ((type (org-element-property :type context))
-              ;; NOTE: I changed this part.
-	            (path (org-link-decode (org-element-property :path context))))
+	      (let* ((type (org-element-property :type context))
+               ;; NOTE: I changed this part.
+               (path (cond
+                      ((string-prefix-p "http" type)
+                       (concat
+                        "https:"
+                        (org-link-decode (org-element-property :path context))))
+                      (t (org-link-decode (org-element-property :path context))))))
           ;; Switch back to REFERENCE-BUFFER needed when called in
           ;; a temporary buffer through `org-open-link-from-string'.
-	        (with-current-buffer (or reference-buffer (current-buffer))
-	          (cond
-	           ((equal type "file")
-	            (if (string-match "[*?{]" (file-name-nondirectory path))
-		              (dired path)
+          (with-current-buffer (or reference-buffer (current-buffer))
+            (cond
+             ((equal type "file")
+              (if (string-match "[*?{]" (file-name-nondirectory path))
+                  (dired path)
                 ;; Look into `org-link-parameters' in order to find
                 ;; a DEDICATED-FUNCTION to open file.  The function
                 ;; will be applied on raw link instead of parsed link
@@ -2567,53 +2572,53 @@ a link."
                 ;; ("open" function called with a single argument).
                 ;; If no such function is found, fallback to
                 ;; `org-open-file'.
-		            (let* ((option (org-element-property :search-option context))
-		                   (app (org-element-property :application context))
-		                   (dedicated-function
-			                  (org-link-get-parameter
-			                   (if app (concat type "+" app) type)
-			                   :follow)))
-		              (if dedicated-function
-		                  (funcall dedicated-function
-			                         (concat path
-				                               (and option (concat "::" option))))
-		                (apply #'org-open-file
-			                     path
-			                     (cond (arg)
-				                         ((equal app "emacs") 'emacs)
-				                         ((equal app "sys") 'system))
-			                     (cond ((not option) nil)
-				                         ((string-match-p "\\`[0-9]+\\'" option)
-				                          (list (string-to-number option)))
-				                         (t (list nil option))))))))
-	           ((functionp (org-link-get-parameter type :follow))
-	            (funcall (org-link-get-parameter type :follow) path))
-	           ((member type '("coderef" "custom-id" "fuzzy" "radio"))
-	            (unless (run-hook-with-args-until-success
-		                   'org-open-link-functions path)
-		            (if (not arg) (org-mark-ring-push)
-		              (switch-to-buffer-other-window
-		               (org-get-buffer-for-internal-link (current-buffer))))
-		            (let ((destination
-		                   (org-with-wide-buffer
-			                  (if (equal type "radio")
-			                      (org-search-radio-target
-			                       (org-element-property :path context))
-			                    (org-link-search
-			                     (pcase type
-			                       ("custom-id" (concat "#" path))
-			                       ("coderef" (format "(%s)" path))
-			                       (_ path))
+                (let* ((option (org-element-property :search-option context))
+                       (app (org-element-property :application context))
+                       (dedicated-function
+                        (org-link-get-parameter
+                         (if app (concat type "+" app) type)
+                         :follow)))
+                  (if dedicated-function
+                      (funcall dedicated-function
+                               (concat path
+                                       (and option (concat "::" option))))
+                    (apply #'org-open-file
+                           path
+                           (cond (arg)
+                                 ((equal app "emacs") 'emacs)
+                                 ((equal app "sys") 'system))
+                           (cond ((not option) nil)
+                                 ((string-match-p "\\`[0-9]+\\'" option)
+                                  (list (string-to-number option)))
+                                 (t (list nil option))))))))
+             ((functionp (org-link-get-parameter type :follow))
+              (funcall (org-link-get-parameter type :follow) path))
+             ((member type '("coderef" "custom-id" "fuzzy" "radio"))
+              (unless (run-hook-with-args-until-success
+                       'org-open-link-functions path)
+                (if (not arg) (org-mark-ring-push)
+                  (switch-to-buffer-other-window
+                   (org-get-buffer-for-internal-link (current-buffer))))
+                (let ((destination
+                       (org-with-wide-buffer
+                        (if (equal type "radio")
+                            (org-search-radio-target
+                             (org-element-property :path context))
+                          (org-link-search
+                           (pcase type
+                             ("custom-id" (concat "#" path))
+                             ("coderef" (format "(%s)" path))
+                             (_ path))
                            ;; Prevent fuzzy links from matching
                            ;; themselves.
-			                     (and (equal type "fuzzy")
-				                        (+ 2 (org-element-property :begin context)))))
-			                  (point))))
-		              (unless (and (<= (point-min) destination)
-			                         (>= (point-max) destination))
-		                (widen))
-		              (goto-char destination))))
-	           (t (browse-url-at-point))))))
+                           (and (equal type "fuzzy")
+                                (+ 2 (org-element-property :begin context)))))
+                        (point))))
+                  (unless (and (<= (point-min) destination)
+                               (>= (point-max) destination))
+                    (widen))
+                  (goto-char destination))))
+             (t (browse-url-at-point))))))
        (t (user-error "No link found")))))
   (run-hook-with-args 'org-follow-link-hook))
 
