@@ -129,7 +129,7 @@
       '(("j" . counsel-org-goto)
         ("P" . org-set-property)
         ("a" . org-toggle-archive-tag)
-        ("U" . undo-tree-undo)
+        ;; ("U" . undo-tree-undo)
         ("k" . kill-current-buffer)
         ("S" . org-schedule)
         ("v" . orgy-view)
@@ -339,14 +339,22 @@ This should be setted by the PERIOD-FUNC argument.")
                                :log t)))
                      (org-agenda-span 'day)
                      (org-agenda-sorting-strategy '(priority-down time-up))))
-            (tags "plan"
-                  ((org-agenda-files '("~/org/plan.org"))
+            ;; (tags "plan"
+            ;;       ((org-agenda-files '("~/org/plan.org"))
+            ;;        (org-super-agenda-groups
+            ;;         '((:name "Début" :todo "DÉBUT")
+            ;;           (:name "Essaiyer" :todo "ESSAIYER")
+            ;;           (:name "Progresser" :todo "PROGRESSER")
+            ;;           (:name "Complété" :todo "COMPLÉTÉ")))
+            ;;        (org-agenda-overriding-header "PLAN")))
+            ;; NOTE: A reading plan
+            (tags "a_voir+matin|a_voir+après_midi|a_voir+nuit"
+                  ((org-agenda-files '("~/org/notes.org"))
+                   (org-agenda-overriding-header "À Lire")
                    (org-super-agenda-groups
-                    '((:name "Début" :todo "DÉBUT")
-                      (:name "Essaiyer" :todo "ESSAIYER")
-                      (:name "Progresser" :todo "PROGRESSER")
-                      (:name "Complété" :todo "COMPLÉTÉ")))
-                   (org-agenda-overriding-header "PLAN")))
+                    '((:name "Le Matin" :tag "matin")
+                      (:name "L'après-midi" :tag "après_midi")
+                      (:name "La Nuit" :tag "nuit")))))
             (todo "TO-THINK"
                   ((org-super-agenda-groups
                     '((:name "À Voir" :tag "a_voir")

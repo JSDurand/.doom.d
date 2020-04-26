@@ -172,8 +172,8 @@ morning at 9:00AM."
 (byte-compile 'doom-modeline-segment--org-agenda)
 
 ;;;###autoload
-(defadvice! durand-update-agenda-mode-line (&rest _args)
-  "Update `durand-agenda-mode-line'."
-  :before 'org-agenda-exit
-  (setf durand-agenda-mode-line
-        (length (oaam-get-entries-for-date))))
+;; (defadvice! durand-update-agenda-mode-line (&rest _args)
+;;   "Update `durand-agenda-mode-line'."
+;;   :before 'org-agenda-exit
+;;   (setf durand-agenda-mode-line
+;;         (length (oaam-get-entries-for-date))))

@@ -581,3 +581,7 @@
 
 (map! :leader
       :n [32] 'counsel-find-file)
+
+;; bind u to undo-fu
+
+(map! :n [?u] 'undo-fu-only-undo)

@@ -182,8 +182,8 @@ articles, bookmarks, youtube links, novels, or weblinks.")
         :n [?s] 'durand-general-save-buffer
         :n [f10] 'durand-general-save-buffer
         ;; :n [f9] (lambda () (interactive) (when (functionp durand-tex-action) (funcall durand-tex-action)))
-        :n [?U] 'undo-tree-redo
-        :n [f12] #'undo-tree-undo
+        :n [?U] 'undo-fu-only-redo
+        :n [f12] #'undo-fu-only-undo
         :n [?t] 'transpose-chars
         :n [?T] 'durand-show-current-time
         :n "&" 'transpose-chars-back-2
