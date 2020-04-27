@@ -156,6 +156,7 @@
         ;; +ipython         ; ipython/jupyter support for babel
         +pandoc      ; export-with-pandoc support
         ;;+pomodoro        ; be fruitful with the tomato technique
+        +noter
         +present)    ; using org-mode for presentations
        durand-org    ; my org configs
        ;;perl              ; write code no one else can comprehend

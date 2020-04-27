@@ -3413,3 +3413,55 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
         (with-current-buffer archive-buffer-name
           (ignore-errors (save-buffer 0)))
         (kill-buffer archive-buffer-name)))))
+
+;;; fine-tune org-tree-slides
+;;;
+;;; NOTE: Originally the narrowing effect will exclude the first character of
+;;; the sub-tree from the display, so we fix this problem first.
+
+;; first clear the original advice
+
+(use-package! org-tree-slide
+  :commands org-tree-slide-mode
+  :config
+  ;; modify that advice
+;;;###autoload
+  (defadvice! durand-org-present--narrow-to-subtree-a (orig-fn &rest args)
+    "Narrow to the target subtree when you start the presentation."
+    :around #'org-tree-slide--display-tree-with-narrow
+    (advice-remove 'org-tree-slide--display-tree-with-narrow
+                   '+org-present--narrow-to-subtree-a)
+    (cl-letf (((symbol-function #'org-narrow-to-subtree)
+               (lambda ()
+                 (save-excursion
+                   (save-match-data
+                     (org-with-limited-levels
+                      (narrow-to-region
+                       (progn
+                         (when (org-before-first-heading-p)
+                           (org-next-visible-heading 1))
+                         ;; (ignore-errors (org-up-heading-all 99))
+                         ;; (forward-line 1)
+                         ;; (forward-char -1)
+                         (point))
+                       (progn (org-end-of-subtree t t)
+                              (when (and (org-at-heading-p) (not (eobp)))
+                                (backward-char 1))
+                              (point)))))))))
+      (apply orig-fn args)))
+
+;;; Now we tackle the problem of the big font and skipping level.
+
+  ;; It turns out this is controlled by the variable `+org-present-text-scale'.
+
+  (setf +org-present-text-scale 1)
+
+  ;; to set up skipping level correctly we shall use a transient advice
+
+  (defadvice! durand-org-tree-slide-mode-set-var-a (&rest _args)
+    "Set up some settings and remove this advice."
+    :before 'org-tree-slide-mode
+    (setf org-tree-slide-skip-outline-level 4
+          org-tree-slide-modeline-display t)
+    (advice-remove 'org-tree-slide-mode
+                   'durand-org-tree-slide-mode-set-var-a)))
