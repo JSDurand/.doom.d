@@ -51,6 +51,7 @@
                              (lambda (url &optional arg)
                                (browse-url (concat scheme ":" url) arg))))
 
+  (setf org-link-file-path-type 'noabbrev)
 
   (map! :map org-mode-map
         :n [?g ?o] 'org-open-at-point-decoded)
