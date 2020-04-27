@@ -2553,10 +2553,10 @@ a link."
 	      (let* ((type (org-element-property :type context))
                ;; NOTE: I changed this part.
                (path (cond
-                      ((string-prefix-p "http" type)
-                       (concat
-                        "https:"
-                        (org-link-decode (org-element-property :path context))))
+                      ;; ((string-prefix-p "http" type)
+                      ;;  (concat
+                      ;;   "https:"
+                      ;;   (org-link-decode (org-element-property :path context))))
                       (t (org-link-decode (org-element-property :path context))))))
           ;; Switch back to REFERENCE-BUFFER needed when called in
           ;; a temporary buffer through `org-open-link-from-string'.

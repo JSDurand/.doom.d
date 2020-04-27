@@ -43,6 +43,15 @@
 
 ;; org open at point
 (after! org
+  ;; set the link-open function correctly
+
+  (dolist (scheme '("ftp" "http" "https" "mailto" "news"))
+    (org-link-set-parameters scheme
+                             :follow
+                             (lambda (url &optional arg)
+                               (browse-url (concat scheme ":" url) arg))))
+
+
   (map! :map org-mode-map
         :n [?g ?o] 'org-open-at-point-decoded)
 
@@ -50,7 +59,7 @@
         [?\ù] abbrev-prefix-map
         [?\§] (lambda () (interactive) (insert "\\"))
         [?\C-c tab] 'durand-forward-link
-        [?\C-c \S-tab] 'find-previous-link-in-buffer
+        [?\C-c S-tab] 'find-previous-link-in-buffer
         [f8] 'org-account-prefix-map
         [?\C-c ?\C-j] 'counsel-org-goto))
 ;; (define-key org-mode-map [?\ù] abbrev-prefix-map)

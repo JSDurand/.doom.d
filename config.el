@@ -585,3 +585,11 @@
 ;; bind u to undo-fu
 
 (map! :n [?u] 'undo-fu-only-undo)
+
+;; org-noter
+
+(setf org-noter-notes-search-path (list "/Users/durand/org/mes-notes/")
+      org-noter-always-create-frame nil
+      org-noter-kill-frame-at-session-end nil
+      org-noter-notes-window-location 'vertical-split)
+
