@@ -171,15 +171,18 @@ The default is 25 minutes."
 ;; For a specific pdf file, org-noter seems to have some problems managing
 ;; properties, so an advice is needed.
 
-(defadvice! durand-org-noter-kill-pro-noter-a (&rest _args)
-  "Kill some pro notes section."
-  :after 'org-noter
-  (run-at-time
-   "1" nil
-   (lambda ()
-     (org-noter--with-selected-notes-window
-      nil (let ((inhibit-read-only t))
-            (save-excursion
-              (goto-char (point-min))
-              (while (search-forward ":END:\n:PRO:NOTER_PAGE: 1PERTIES:\n\n" nil t)
-                (replace-match ""))))))))
+;; NOTE: This not needed anymore, since I found out the problem: it is with the
+;; function `org-entry-put'.
+;;
+;; (defadvice! durand-org-noter-kill-pro-noter-a (&rest _args)
+;;   "Kill some pro notes section."
+;;   :after 'org-noter
+;;   (run-at-time
+;;    "1" nil
+;;    (lambda ()
+;;      (org-noter--with-selected-notes-window
+;;       nil (let ((inhibit-read-only t))
+;;             (save-excursion
+;;               (goto-char (point-min))
+;;               (while (search-forward ":END:\n:PRO:NOTER_PAGE: 1PERTIES:\n\n" nil t)
+;;                 (replace-match ""))))))))
