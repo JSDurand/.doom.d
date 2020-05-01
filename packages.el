@@ -14,7 +14,7 @@
 
 (package! wrap-region)
 
-(package! emacs-opencc :recipe (:host github :repo "xuchunyang/emacs-opencc"))
+;; (package! emacs-opencc :recipe (:host github :repo "xuchunyang/emacs-opencc"))
 
 (package! outline-magic :recipe (:host github :repo "tj64/outline-magic"))
 

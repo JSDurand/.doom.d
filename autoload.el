@@ -150,9 +150,9 @@ The default is 25 minutes."
   (list-timers))
 
 ;;;###autoload
-(defun sim-2-tw-chinese (str)
-  (require 'opencc)
-  (opencc-string "s2tw" str))
+;; (defun sim-2-tw-chinese (str)
+;;   (require 'opencc)
+;;   (opencc-string "s2tw" str))
 
 ;; in ediff merger two variants without markers
 

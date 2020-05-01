@@ -518,19 +518,19 @@
 (map! :map doom-leader-toggle-map
       [?i] 'toggle-input-method)
 ;;; I am trying pyim now
-(setf pyim-page-tooltip 'popup)
+;; (setf pyim-page-tooltip 'popup)
 
-(after! pyim (pyim-basedict-enable))
+;; (after! pyim (pyim-basedict-enable))
 
-(map! :map pyim-mode-map
-      [?,] (lambda! (pyim-page-select-word-by-number 2))
-      [?\;] (lambda! (pyim-page-select-word-by-number 3))
-      [?:] (lambda! (pyim-page-select-word-by-number 4))
-      [?=] (lambda! (pyim-page-select-word-by-number 5))
-      [?\&] (lambda! (pyim-entered-backward-point))
-      [?\é] (lambda! (pyim-entered-forward-point))
-      [?\"] (lambda! (pyim-page-previous-page 1))
-      [?\'] (lambda! (pyim-page-next-page 1)))
+;; (map! :map pyim-mode-map
+;;       [?,] (lambda! (pyim-page-select-word-by-number 2))
+;;       [?\;] (lambda! (pyim-page-select-word-by-number 3))
+;;       [?:] (lambda! (pyim-page-select-word-by-number 4))
+;;       [?=] (lambda! (pyim-page-select-word-by-number 5))
+;;       [?\&] (lambda! (pyim-entered-backward-point))
+;;       [?\é] (lambda! (pyim-entered-forward-point))
+;;       [?\"] (lambda! (pyim-page-previous-page 1))
+;;       [?\'] (lambda! (pyim-page-next-page 1)))
 
 ;; But it still too slow for me to use fluently: mainly because of the dearth of
 ;; a sufficiently large dictionary. It is kind of OK to input Chinese words by
@@ -544,10 +544,10 @@
 
 ;; opencc
 
-(use-package! opencc
-  :after pyim
-  :config
-  (setf pyim-magic-converter 'sim-2-tw-chinese))
+;; (use-package! opencc
+;;   :after pyim
+;;   :config
+;;   (setf pyim-magic-converter 'sim-2-tw-chinese))
 
 ;; bind a key to merge both variants of a conflict without markers
 

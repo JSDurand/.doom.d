@@ -157,6 +157,7 @@
         +pandoc      ; export-with-pandoc support
         ;;+pomodoro        ; be fruitful with the tomato technique
         +noter
+        +roam
         +present)    ; using org-mode for presentations
        durand-org    ; my org configs
        ;;perl              ; write code no one else can comprehend
@@ -192,7 +193,7 @@
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;write             ; emacs for writers (fiction, notes, papers, etc.)
        :input
-       chinese
+       ;; chinese
        ;;japanese
        durand-greek                     ; input greek letters using code letters
 
