@@ -157,7 +157,7 @@
         +pandoc      ; export-with-pandoc support
         ;;+pomodoro        ; be fruitful with the tomato technique
         +noter
-        +roam
+        ;; +roam
         +present)    ; using org-mode for presentations
        durand-org    ; my org configs
        ;;perl              ; write code no one else can comprehend
