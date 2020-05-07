@@ -186,3 +186,30 @@ The default is 25 minutes."
 ;;               (goto-char (point-min))
 ;;               (while (search-forward ":END:\n:PRO:NOTER_PAGE: 1PERTIES:\n\n" nil t)
 ;;                 (replace-match ""))))))))
+
+;; deft parse title
+
+(defun deft-parse-title (file contents)
+  "Parse the given FILE and CONTENTS and determine the title.
+If `deft-use-filename-as-title' is nil, the title is taken to
+be the first non-empty line of the FILE.  Else the base name of the FILE is
+used as title.
+
+This is modified by Durand so that for org files the title needs not be on the first line,
+and for tex files the title is defined by the title macro."
+  (if deft-use-filename-as-title
+      (deft-base-filename file)
+    (let ((begin (string-match "^.+$" contents)))
+      (when begin
+        (cond
+         ((string-match-p "org$" file)
+          (if (string-match "#\\+TITLE: \\([^\n]*\\)\n" contents)
+              (match-string 1 contents)
+            (deft-base-filename file)))
+         ((string-match-p "tex$" file)
+          (if (string-match "\\(?:[^% ]\\)\\\\tit\\(?:le\\)?{\\([^}]*\\)}" contents)
+              (match-string 1 contents)
+            (deft-base-filename file)))
+         (t
+          (funcall deft-parse-title-function
+                   (substring contents begin (match-end 0)))))))))

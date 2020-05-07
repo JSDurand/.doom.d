@@ -589,8 +589,19 @@
 
 ;; org-noter
 
-(setf org-noter-notes-search-path (list "/Users/durand/org/mes-notes/")
-      org-noter-always-create-frame nil
-      org-noter-kill-frame-at-session-end nil
-      org-noter-notes-window-location 'vertical-split)
+(when (featurep! :lang org +noter)
+  (setf org-noter-notes-search-path (list "/Users/durand/org/mes-notes/")
+        org-noter-always-create-frame nil
+        org-noter-kill-frame-at-session-end nil
+        org-noter-notes-window-location 'vertical-split))
 
+;; deft settings
+
+(when (featurep! :ui deft)
+  (set-evil-initial-state! 'deft-mode 'emacs)
+  (setf deft-directory org-directory
+        deft-recursive t
+        deft-recursive-ignore-dir-regexp
+        "\\(?:\\.\\|\\.\\.\\|account\\|screen-shots\\|ltximg\\|delf b1.*\\)$"
+        deft-ignore-file-regexp
+        "ex\\.org$"))
