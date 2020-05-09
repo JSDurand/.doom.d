@@ -25,7 +25,7 @@
        durand-ivy
 
        :ui
-       deft              ; notational velocity for Emacs
+       deft                   ; notational velocity for Emacs
        doom                   ; what makes DOOM look the way it does
        doom-dashboard         ; a nifty splash screen for Emacs
        durand-dashboard       ; my dashboard configs
@@ -84,6 +84,7 @@
 
        :term
        eshell                  ; a consistent, cross-platform shell (WIP)
+       durand-eshell           ; my eshell extension
        ;;shell             ; a terminal REPL for Emacs
        ;;term              ; terminals in Emacs
        ;; vterm             ; another terminals in Emacs

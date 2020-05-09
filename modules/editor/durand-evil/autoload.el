@@ -87,9 +87,10 @@ With ARG, open the index file even not in `js2-mode'."
   "View videos"
   (interactive)
   (eshell t)
-  (insert "cd ~/Desktop/Centre/Vidéos")
+  ;; (insert "cd ~/Desktop/Centre/Vidéos")
+  (insert "vid")
   (eshell-send-input)
-  (insert "alias play \"mpv --no-terminal --autofit=100%x100% --no-border --geometry=+0+-24 \\$*\"")
+  ;; (insert "alias play \"mpv --no-terminal --autofit=100%x100% --no-border --geometry=+0+-24 \\$*\"")
   (eshell-send-input)
   (insert "ls -lah")
   (eshell-send-input)
