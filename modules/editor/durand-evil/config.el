@@ -20,6 +20,7 @@
 
   (setf evil-cross-lines t)
   (setf evil-emacs-state-modes (delq 'pdf-view-mode evil-emacs-state-modes))
+  (setf evil-escape-unordered-key-sequence t)
   (add-to-list 'evil-emacs-state-modes 'durand-greek-search-mode)
   (add-to-list 'evil-emacs-state-modes 'account-report-mode)
   (add-to-list 'evil-emacs-state-modes 'elfeed-search-mode)
