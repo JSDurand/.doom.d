@@ -517,3 +517,18 @@ This should be setted by the PERIOD-FUNC argument.")
              (replace-regexp-in-string
               "%latex" "xelatex" s))
            org-latex-pdf-process))))
+
+;;; org-noter
+
+(when (featurep! :lang org +noter)
+  (use-package! org-noter
+    :after-call org-noter
+    :config
+    (setf org-noter-notes-search-path (list "/Users/durand/org/mes-notes/")
+          org-noter-always-create-frame nil
+          org-noter-kill-frame-at-session-end nil
+          org-noter-notes-window-location 'vertical-split)
+    (map! :map org-noter-doc-mode-map
+          [?g ?'] 'durand-org-noter-edit-document)
+    (map! :map org-noter-notes-mode-map
+          [?g ?'] 'durand-org-noter-go-to-doc)))

@@ -109,6 +109,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
 (map! :map durand-view-map
       [?l] #'org-open-articles
       [?b] #'org-open-bookmarks
+      [?B] #'battery
       [?y] #'org-open-youtube
       [?w] #'org-open-weblink
       [?W] #'durand-wifi

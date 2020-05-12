@@ -3558,3 +3558,39 @@ Modified by Durand <2020-04-28 Mar 14:55>"
 	        (when value (insert " " value))
 	        (org-indent-line)))))
     (run-hook-with-args 'org-property-changed-functions property value)))
+
+;;; quickly edit using org-noter
+
+;;;###autoload
+(defun durand-org-noter-edit-document ()
+  "If needed, get out of the maximized window and edit the notes buffer."
+  (interactive)
+  (when (featurep! :lang org +noter)
+    (org-noter--with-valid-session
+     (when doom--enlargen-last-wconf
+       (doom/window-enlargen))
+     (select-window (org-noter--get-notes-window))
+     (doom/window-enlargen))))
+
+;;;###autoload
+(defun durand-org-noter-go-to-doc ()
+  "Go back to the document."
+  (interactive)
+  (when (featurep! :lang org +noter)
+    (org-noter--with-valid-session
+     (when doom--enlargen-last-wconf
+       (doom/window-enlargen))
+     (select-window (org-noter--get-doc-window))
+     (doom/window-enlargen))))
+
+;; FIXME: This is not working!
+;;;###autoload
+;; (defadvice! durand-org-noter-kill-session-buffers (&rest _args)
+;;   "Kill unnecessary buffers."
+;;   :before 'org-noter-kill-session
+;;   (let ((doc-file-name
+;;          (buffer-file-name
+;;           (org-noter--session-doc-buffer org-noter--session))))
+;;     (run-at-time "0.5 sec" nil
+;;                  (lambda ()
+;;                    (kill-buffer (get-file-buffer doc-file-name))))))
