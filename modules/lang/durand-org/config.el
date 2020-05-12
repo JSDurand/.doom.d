@@ -528,7 +528,8 @@ This should be setted by the PERIOD-FUNC argument.")
           org-noter-always-create-frame nil
           org-noter-kill-frame-at-session-end nil
           org-noter-notes-window-location 'vertical-split)
-    (map! :map org-noter-doc-mode-map
-          [?g ?'] 'durand-org-noter-edit-document)
-    (map! :map org-noter-notes-mode-map
-          [?g ?'] 'durand-org-noter-go-to-doc)))
+    (require 'pdf-tools)
+    (map! :map pdf-view-mode-map
+          :n [?g ?'] 'durand-org-noter-edit-document)
+    (map! :map org-mode-map
+          :n [?g ?'] 'durand-org-noter-go-to-doc)))
