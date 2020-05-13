@@ -605,3 +605,12 @@
         "\\(?:\\.\\|\\.\\.\\|account\\|screen-shots\\|ltximg\\|delf b1.*\\)$"
         deft-ignore-file-regexp
         "ex\\.org$"))
+
+;; biblio use local bibliography files
+
+(use-package! ivy-bibtex
+  :when (featurep! :completion ivy)
+  :defer t
+  :config
+  (map! :map doom-leader-notes-map
+        [?b] 'ivy-bibtex-with-local-bibliography))
