@@ -3583,6 +3583,12 @@ Modified by Durand <2020-04-28 Mar 14:55>"
      (select-window (org-noter--get-doc-window))
      (doom/window-enlargen))))
 
+;;;###autoload
+(defun durand-view-svg (graph-file)
+  "View the graph file iusing Safari"
+  (start-process "view" nil "open"
+                 "-a" "Safari" graph-file))
+
 ;; FIXME: This is not working!
 ;;;###autoload
 ;; (defadvice! durand-org-noter-kill-session-buffers (&rest _args)

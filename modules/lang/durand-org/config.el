@@ -533,3 +533,33 @@ This should be setted by the PERIOD-FUNC argument.")
           :n [?g ?'] 'durand-org-noter-edit-document)
     (map! :map org-mode-map
           :n [?g ?'] 'durand-org-noter-go-to-doc)))
+
+;;; org-roam
+
+(use-package! org-roam
+  :hook (org-load . org-roam-mode)
+  :hook (org-roam-backlinks-mode . turn-on-visual-line-mode)
+  :commands (org-roam-buffer-toggle-display
+             org-roam-find-file
+             org-roam-graph-show
+             org-roam-insert
+             org-roam-switch-to-buffer
+             org-roam-dailies-date
+             org-roam-dailies-today
+             org-roam-dailies-tomorrow
+             org-roam-dailies-yesterday)
+  :config
+  ;; set it explicitly to org-directory
+  (setf org-roam-directory org-directory)
+  ;; use separators
+  (setf org-roam-capture-templates
+        '(("d" "default" plain #'org-roam-capture--get-point "%?"
+           :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%S\")-${slug}"
+           :head "#+TITLE: ${title}\n"
+           :unnarrowed t)))
+  ;; ignore certain files
+  (setf org-roam-graph-exclude-matcher '("account" "ltximg" "screen-shots")
+        ;; use safari for viewing svg files
+        org-roam-graph-viewer 'durand-view-svg
+        org-roam-graph-executable (executable-find "neato")
+        org-roam-graph-extra-config '(("overlap" . "false"))))
