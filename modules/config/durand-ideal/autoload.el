@@ -775,9 +775,10 @@ REG is additonal regexp to match as not needed."
 ;;;###autoload
 (defun clean-up-buffers (&optional arg)
   "Clean up some buffers that I oft do not need to keep around and kill unnecessary timers;
+Also clear graph files made by org-roam.
 If the buffer has a running process, then do not kill it.
-If \\[universal-argument], then ask for additional regexps to match buffers to kill.
-If \\[universal-argument]\\[universal-argument], then turn off mu4e as well if necessary."
+If \\[universal-argument], then ask for additional regexps to match buffers to kill. "
+  ;; If \\[universal-argument]\\[universal-argument], then turn off mu4e as well if necessary.
   (interactive "P")
   (cl-loop for timer in timer-idle-list
            if (eq (timer--function timer) 'pdf-cache--prefetch-start)
@@ -791,6 +792,15 @@ If \\[universal-argument]\\[universal-argument], then turn off mu4e as well if n
              (boundp 'durand-recently-closed-files))
     (setf recentf-list nil
           durand-recently-closed-files nil))
+  (let* ((var_dir "/var/folders/m_/2kpvwt3d5v92hxy_gyt9324r0000gn/T")
+         (graph-files (directory-files var_dir 'full
+                                       (rx bos "graph" (1+ anything) (or "dot" "svg") eos)
+                                       t)))
+    (when (or (null arg)
+              (and graph-files
+                   (y-or-n-p "Delete graph files?")))
+      (cl-loop for file in graph-files
+               do (delete-file file))))
   ;; (cond
   ;;  ((and arg (or (get-process " *mu4e-proc*")
   ;;                mu4e~update-timer))
