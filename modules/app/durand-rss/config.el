@@ -150,4 +150,3 @@
 (defface elfeed-youtube-face
   `((t . (:background "gray10" :foreground "yellow")))
   "face for youtube feed")
-

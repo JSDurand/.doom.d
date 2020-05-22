@@ -164,3 +164,15 @@ Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
 
 ;;;###autoload
 (make-toggler "math")
+
+;;;###autoload
+(defun elfeed-next-entry (&optional n)
+  "Move to the next entry in search buffer"
+  (interactive "p")
+  (forward-line n))
+
+;;;###autoload
+(defun elfeed-previous-entry (&optional n)
+  "Move to the previous entry in search buffer"
+  (interactive "p")
+  (forward-line (- n)))
