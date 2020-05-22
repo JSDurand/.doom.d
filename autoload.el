@@ -202,7 +202,9 @@ and for tex files the title is defined by the title macro."
     (let ((begin (string-match "^.+$" contents)))
       (when begin
         (cond
-         ((string-match-p "org$" file)
+         ((or
+           (string-match-p "org$" file)
+           (string-match-p "org_archive$" file))
           (if (string-match "#\\+TITLE: \\([^\n]*\\)\n" contents)
               (match-string 1 contents)
             (deft-base-filename file)))

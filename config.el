@@ -599,6 +599,7 @@
 
 (when (featurep! :ui deft)
   (set-evil-initial-state! 'deft-mode 'emacs)
+  (add-to-list 'deft-extensions "org_archive")
   (setf deft-directory org-directory
         deft-recursive t
         deft-recursive-ignore-dir-regexp
@@ -614,3 +615,4 @@
   :config
   (map! :map doom-leader-notes-map
         [?b] 'ivy-bibtex-with-local-bibliography))
+
