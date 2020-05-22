@@ -655,7 +655,7 @@ With ARG \\[universal-argument]\\[universal-argument], close Safari."
                   ("math" . "https://math.stackexchange.com/questions")
                   ("fb" . "https://facebook.com")
                   ("twitter" . "https://twitter.com")
-                  ("ask" . "https://ask.fm")
+                  ("messages" . "https://facebook.com/messages/t")
                   ("YT" . "https://youtube.com")))
          (choix (when (equal arg '(4)) (ivy-read "Chois un lien: " cands)))
          (link (when choix
