@@ -2,6 +2,12 @@
 #+DATE:    décembre 1, 2019
 #+STARTUP: inlineimages
 
+* Table of contents                                                                           :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+  - [[#hacks][Hacks]]
+
 * Description
 My ivy configurations.
 
