@@ -248,10 +248,11 @@ This should be setted by the PERIOD-FUNC argument.")
                              "即食樂"
                              "來吃麵"
                              "鍋兵鍋將"
-                             "羅胖子"
-                             "牛魔王"
-                             "光華夜市鱔魚意麵"
-                             "光華夜市酵素臭豆腐"))
+                             ;; "羅胖子"
+                             ;; "牛魔王"
+                             ;; "光華夜市鱔魚意麵"
+                             ;; "光華夜市酵素臭豆腐"
+                             ))
 
 ;;;###autoload
 (defvar durand-complete-shop-history nil
@@ -559,6 +560,8 @@ This should be setted by the PERIOD-FUNC argument.")
            :unnarrowed t)))
   ;; ignore certain files
   (setf org-roam-graph-exclude-matcher '("account" "ltximg" "screen-shots")
+        ;; Don't open org-roam when I don't want to!
+        +org-roam-open-buffer-on-find-file nil
         ;; use safari for viewing svg files
         org-roam-graph-viewer 'durand-view-svg
         org-roam-graph-executable (executable-find "neato")
