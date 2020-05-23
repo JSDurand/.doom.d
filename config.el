@@ -597,7 +597,9 @@
 
 ;; deft settings
 
-(when (featurep! :ui deft)
+(use-package! deft
+  :commands deft
+  :config
   (set-evil-initial-state! 'deft-mode 'emacs)
   (add-to-list 'deft-extensions "org_archive")
   (setf deft-directory org-directory
