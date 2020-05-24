@@ -71,7 +71,12 @@ See `durand-play-with-mpv' also."
     (if patterns
         (call-interactively 'durand-play-with-mpv-in-elfeed)
       (if (eq major-mode 'elfeed-search-mode)
-          (elfeed-search-browse-url)
+          (let ((entries (elfeed-search-selected)))
+            (cl-loop for entry in entries
+                     when (elfeed-entry-link entry)
+                     do (browse-url it))
+            (unless (or elfeed-search-remain-on-entry (use-region-p))
+              (forward-line)))
         (elfeed-show-visit)))))
 
 ;;;###autoload

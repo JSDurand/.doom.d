@@ -96,7 +96,9 @@
 
 (map! :leader :n [?e] '=rss)
 
-(after! elfeed
+(use-package! elfeed
+  :commands elfeed
+  :config
   (add-to-list 'elfeed-search-face-alist
                '(emacs elfeed-emacs-face))
   (add-to-list 'elfeed-search-face-alist
@@ -133,6 +135,10 @@
   (define-key elfeed-search-mode-map [?n] #'elfeed-next-entry)
   (define-key elfeed-search-mode-map [?p] #'elfeed-previous-entry)
   (define-key elfeed-show-mode-map [?b] 'elfeed-visit-or-play-with-mpv)
+
+  (map! :map elfeed-search-mode-map
+        :n [?b] 'elfeed-visit-or-play-with-mpv
+        :n [?g ?r] 'elfeed-search-fetch)
 
   (setq-default elfeed-search-filter "@1week-ago +unread"))
 
