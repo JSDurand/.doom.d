@@ -1,5 +1,9 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+;;* frame title format, just for fun
+
+(setf frame-title-format "l'emacs de Durand")
+
 ;;* avy single candidate jump
 
 (setf avy-single-candidate-jump t)
