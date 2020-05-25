@@ -7,7 +7,7 @@
 ;; (package! builtin-package :disable t)
 
 ;; (package! evil-snipe :disable t)
-(disable-packages! evil-snipe which-key org-bookmark-heading durand-cat undo-tree)
+(disable-packages! evil-snipe org-bookmark-heading durand-cat undo-tree)
 ;; (package! org-pdfview)
 
 ;; (package! durand-cat :recipe (:host github :repo "JSDurand/durand-cat"))
