@@ -305,8 +305,8 @@
 ;; (load! "+ivy.el" doom-private-dir)
 
 ;;* I don't like which-key-mode, as it slows down emacs a lot...
-(which-key-mode -1)
-
+(remove-hook 'doom-first-input-hook #'which-key-mode)
+(after! which-key  (which-key-mode -1))
 ;;* load my dashboard configurations
 ;; (load! "dashboard.el" doom-private-dir)
 
