@@ -657,7 +657,7 @@ With ARG \\[universal-argument]\\[universal-argument], close Safari."
                   ("twitter" . "https://twitter.com")
                   ("messages" . "https://facebook.com/messages/t")
                   ("YT" . "https://youtube.com")))
-         (choix (when (equal arg '(4)) (ivy-read "Chois un lien: " cands)))
+         (choix (when (equal arg '(4)) (completing-read "Chois un lien: " cands)))
          (link (when choix
                  (cond
                   ((assoc-default choix cands)

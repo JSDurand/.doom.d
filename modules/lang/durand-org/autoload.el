@@ -142,10 +142,9 @@ Don't bind it to a key in `general-hydra/heads'"
                           (remove nil shops-list)
                           :key 'upcase
                           :test 'string=))))
-           (chosen-shop (ivy-read "Chois un magasin: " shops-list
-                                  :preselect (car durand-frequent-shops)
-                                  :caller 'durand-org-complete-capture-account
-                                  :history durand-complete-shop-history))
+           (chosen-shop (completing-read
+                         "Chois un magasin: " shops-list
+                         nil nil nil durand-complete-shop-history))
            (items-list (save-excursion
                          (save-restriction
                            (widen)

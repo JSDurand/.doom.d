@@ -112,13 +112,12 @@ Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
     (when patterns
       (durand-download-youtube link title))))
 
-(after! ivy
 ;;;###autoload
-  (defun durand-get-quality-val ()
-    "Let the user choose a quality format."
-    (ivy-read "Max height resolution (0 for unlimited): "
-              '("0" "480" "720")
-              :caller 'durand-get-quality-val)))
+(defun durand-get-quality-val ()
+  "Let the user choose a quality format."
+  (completing-read
+   "Max height resolution (0 for unlimited): "
+   '("0" "480" "720")))
 
 ;;;###autoload
 (defmacro make-tag-toggler (arg)
