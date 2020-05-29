@@ -594,6 +594,10 @@
 
 (map! :n [?u] 'undo-fu-only-undo)
 
+;; no persistent undo is fine for me
+
+(remove-hook 'undo-fu-mode-hook #'global-undo-fu-session-mode)
+
 ;; org-noter
 
 (when (featurep! :lang org +noter)
