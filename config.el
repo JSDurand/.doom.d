@@ -545,6 +545,10 @@
 
 (map! :n [?g ?i] 'evil-indent)
 
+;; bind go to implementation
+
+(map! :n [?g ?m] '+lookup/implementations)
+
 ;; opencc
 
 ;; (use-package! opencc
@@ -621,3 +625,12 @@
   (map! :map doom-leader-notes-map
         [?b] 'ivy-bibtex-with-local-bibliography))
 
+
+;; rust-analyzer seems to be superior than RLS.
+
+(setq rustic-lsp-server 'rust-analyzer
+      lsp-signature-auto-activate nil
+      lsp-signature-function 'ignore)
+(set-popup-rules! '(("*rustic-compilation*" :size 0.3)
+                    ("*cargo-test*"
+                     :size 0.5)))
