@@ -635,6 +635,11 @@
 (setq rustic-lsp-server 'rust-analyzer
       lsp-signature-auto-activate nil
       lsp-signature-function 'ignore)
-(set-popup-rules! '(("*rustic-compilation*" :size 0.3)
-                    ("*cargo-test*"
-                     :size 0.5)))
+
+(set-popup-rules!
+  '(("*rustic-compilation*"
+     :size 0.3
+     :select t)
+    ("*cargo-test*"
+     :size 0.5
+     :select t)))
