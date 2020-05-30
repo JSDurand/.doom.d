@@ -266,6 +266,8 @@ This should be setted by the PERIOD-FUNC argument.")
   :select t)
 
 (map! :map account-report-mode-map
+      [?<] #'durand-account-first-entry
+      [?>] #'durand-account-last-entry
       [?d] #'durand-view-last-day
       [?w] #'durand-view-last-week
       [?m] #'durand-view-last-month

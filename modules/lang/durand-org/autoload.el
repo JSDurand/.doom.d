@@ -728,6 +728,20 @@ Press \\[durand-view-last-day] to view the last day;
 \\[durand-view-last-custom] to specify a custom continuous range.")
 
 ;;;###autoload
+(defun durand-account-first-entry ()
+  "Go to the first entry in the report."
+  (interactive)
+  (goto-char (point-min))
+  (durand-view-go-to-next-day 1))
+
+;;;###autoload
+(defun durand-account-last-entry ()
+  "Go to the last entry in the report."
+  (interactive)
+  (goto-char (point-max))
+  (durand-view-go-to-previous-day 1))
+
+;;;###autoload
 (defun durand-view-go-to-next-day (&optional arg)
   "Go to the next ARG day."
   (interactive "p")
@@ -739,7 +753,7 @@ Press \\[durand-view-last-day] to view the last day;
 (defun durand-view-go-to-previous-day (&optional arg)
   "Go to the next ARG day."
   (interactive "p")
-  (forward-char)
+  (ignore-errors (forward-char))
   (re-search-forward "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" nil t (- arg))
   (beginning-of-line))
 
