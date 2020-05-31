@@ -7,7 +7,8 @@
  "cb" "cargo build $*"
  "ct" "cargo test $*"
  "cc" "cargo check"
- "crd" "cargo rustdoc --open -- --document-private-items")
+ "crd" "cargo rustdoc --open -- --document-private-items"
+ "rdb" "rustup doc --book")
 
 (add-hook! 'eshell-first-time-mode-hook
     (defun durand-eshell-init-keymap-h ()
