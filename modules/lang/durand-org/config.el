@@ -193,7 +193,7 @@
            (file+headline "~/org/notes.org" "Links")
            "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
           ("L" "for storing webpages" entry
-           (file+headline "~/org/notes.org" "Links")
+           (function org-determine-link-file)
            "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
            :empty-lines 1
            :kill-buffer t
@@ -553,7 +553,7 @@ This should be setted by the PERIOD-FUNC argument.")
              org-roam-dailies-yesterday)
   :config
   ;; set it explicitly to org-directory
-  (setf org-roam-directory org-directory)
+  (setf org-roam-directory (expand-file-name "roam" org-directory))
   ;; use separators
   (setf org-roam-capture-templates
         '(("d" "default" plain #'org-roam-capture--get-point "%?"

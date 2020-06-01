@@ -344,6 +344,29 @@ make my own functions."
      (t
       ":web_link:"))))
 
+;;;###autoload
+(defun org-determine-link-file ()
+  "Go to the file to capture to based upon the URL"
+  (let* ((link (plist-get org-store-link-plist :link))
+         (file-name
+          (cond
+           ((string-match "https?://www.youtube.com" link)
+            "youtube_links.org")
+           ((or
+             (string-match "https?://math.stackexchange.com" link)
+             (string-match "https?://mathoverflow.net/" link))
+            "math_article_links.org")
+           ((cl-some
+             (lambda (re) (string-match re link))
+             durand-novel-addresses-regexp)
+            "notes.org")
+           ((string-match "https?://stacks.math.columbia.edu/" link)
+            "math_article_links.org")
+           (t
+            "notes.org"))))
+    (find-file (expand-file-name file-name org-directory))
+    (goto-char (point-max))))
+
 ;;; kill server buffer
 ;;;
 ;;; FIXME: This does not work. It even hinders the execution of the external
@@ -2368,7 +2391,7 @@ With \\[universal-argument], just kill the entry.
 With \\[universal-argument] \\[universal-argument], don't kill the entry."
   (interactive)
   (let (cands)
-    (with-current-file "/Users/durand/org/notes.org" nil
+    (with-current-file "/Users/durand/org/youtube_links.org" nil
       (setf cands (org-map-entries
                    (lambda () (durand-org-link-info 'youtube))
                    "youtube-ARCHIVE")))
@@ -2389,7 +2412,7 @@ With \\[universal-argument] \\[universal-argument], don't kill the entry."
       (setf sel (sort sel (lambda (x y)
                             (< (cadr (assoc-default x cands))
                                (cadr (assoc-default y cands))))))
-      (with-current-file "/Users/durand/org/notes.org" nil
+      (with-current-file "/Users/durand/org/youtube_links.org" nil
         (dolist (x (reverse sel))
           (goto-char (cadr (assoc-default x cands)))
           (when to-kill (org-cut-subtree))
@@ -2667,18 +2690,31 @@ If ARG is (64), then execute `(durand-update-article t)'."
   (cond
    ((or (null arg) (equal arg '(16)))
     (let* ((tag (if (null arg) "a_voir-ARCHIVE" "TODO=\"TO-THINK\"-ARCHIVE"))
+           (files '("/Users/durand/org/notes.org"
+                    "/Users/durand/org/math_article_links.org"))
            cands)
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (setf cands (org-map-entries #'durand-org-link-info tag)
-              cands (nreverse (mapcar (lambda (x) (cons (durand-org-filter-dates (car x)) (cdr x)))
-                                      cands))))
+      (setf cands
+            (cl-loop for file in files
+                     append
+                     (with-current-file file nil
+                       (org-map-entries
+                        (lambda ()
+                          (let ((orig (durand-org-link-info nil)))
+                            (append
+                             (list (durand-org-filter-dates (car orig)))
+                             (cdr orig)
+                             (list file))))
+                        tag)))
+            cands (reverse cands))
       (let ((liste-de-choix
              (let (temp)
                (let* ((sel (durand-choose-list cands nil "Chois un article: ")))
                  (mapc (lambda (x)
                          (setf temp (append temp
                                             (durand-choose-list
-                                             (assoc-default x cands)
+                                             (-remove-last
+                                              (lambda (element) t)
+                                              (assoc-default x cands))
                                              t "Chois un lien: " nil t))))
                        sel)
                  temp))))
@@ -2720,22 +2756,28 @@ keyword but not archived, instead of A_VOIR."
                 (and
                  (string= "TO-THINK" todo)
                  (not (cl-member "ARCHIVE" tags :test 'string=))))))))
+         (files '("/Users/durand/org/notes.org"
+                  "/Users/durand/org/math_article_links.org"))
          cands)
-    (with-current-file "/Users/durand/org/notes.org" nil
-      (setf cands
-            (save-excursion
-              (goto-char (point-min))
-              (reverse
-               (cl-loop while (re-search-forward org-heading-regexp nil t)
-                        when (funcall predicate)
-                        collect (cl-destructuring-bind (title . position) (durand-org-link-info t)
-                                  (cons (durand-org-filter-dates title)
-                                        position)))))))
-    (let* ((choix (ivy-read "Chois un titre à mettre à jour: " cands
-                            :require-match t))
+    (setf cands
+          (cl-loop
+           for file in files
+           append
+           (with-current-file file nil
+             (save-excursion
+               (goto-char (point-min))
+               (reverse
+                (cl-loop while (re-search-forward org-heading-regexp nil t)
+                         when (funcall predicate)
+                         collect (cl-destructuring-bind (title . position) (durand-org-link-info t)
+                                   (list (durand-org-filter-dates title)
+                                         position
+                                         file))))))))
+    (let* ((choix (completing-read "Chois un titre à mettre à jour: " cands
+                                   nil t))
            (item (cl-assoc choix cands :test #'string=)))
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (goto-char (cdr item))
+      (with-current-file (caddr item) nil
+        (goto-char (cadr item))
         (org-update-link)))))
 
 ;;;###autoload
@@ -2757,45 +2799,59 @@ If ARG is '(4), then execute `durand-update-weblink'."
   "Update the link to a weblink;
 the link comes from the most recently stored link, so choose carefully the target to update."
   (interactive)
-  (let* ((tag "web_link-special-personnes-ARCHIVE") cands)
-    (with-current-file "/Users/durand/org/notes.org" nil
-      (setf cands (org-map-entries
-                   (lambda () (durand-org-link-info t))
-                   tag))
-      (setf cands (mapcar (lambda (x)
-                            (cons (durand-org-filter-dates (car x)) (cdr x)))
-                          cands))
-      (setf cands (reverse cands)))
-    (let* ((choix (ivy-read "Chois un lien à mettre à jour: " cands
-                            :require-match t))
+  (let* ((tag "web_link-special-personnes-ARCHIVE")
+         (files '("/Users/durand/org/notes.org" "/Users/durand/org/math_article_links.org"))
+         cands)
+    (setf cands (cl-loop for file in files
+                         append (with-current-file file nil
+                                  (org-map-entries
+                                   (lambda ()
+                                     (let ((orig (durand-org-link-info t)))
+                                       (list (car orig) (cdr orig) file)))
+                                   tag)))
+          cands (mapcar (lambda (x)
+                          (cons (durand-org-filter-dates (car x)) (cdr x)))
+                        cands)
+          cands (reverse cands))
+    (let* ((choix (completing-read "Chois un lien à mettre à jour: " cands
+                            nil t))
            (item (cl-assoc choix cands :test #'string=))
            (link (plist-get org-store-link-plist :link))
            (desc (file-name-nondirectory
                   (plist-get org-store-link-plist :description))))
-      (with-current-file "/Users/durand/org/notes.org" nil
-        (goto-char (cdr item))
+      (with-current-file (caddr item) nil
+        (goto-char (cadr item))
         (org-update-link link nil nil desc)))))
 
 ;;;###autoload
 (defun durand-mark-weblink ()
   "Choose web links and execute `durand-mark-links' for each of them."
   (interactive)
-  (with-current-file "/Users/durand/org/notes.org" nil
-    (let* ((tag "web_link-special-personnes-ARCHIVE")
-           (cands (org-map-entries (lambda () (durand-org-link-info t)) tag))
-           (cands (mapcar (lambda (x)
-                            (cons (durand-org-filter-dates (car x))
-                                  (cdr x)))
-                          cands))
-           (cands (nreverse cands))
-           (choice-headings (durand-choose-list cands t "Chois un lien à marquer: " t))
-           (choice-elements (mapcar (lambda (x)
-                                      (cl-assoc x cands :test #'string=))
-                                    choice-headings)))
-      (cl-loop for element in choice-elements
-               do (save-excursion
-                    (goto-char (cdr element))
-                    (durand-mark-links))))))
+  (let* ((files '("/Users/durand/org/notes.org" "/Users/durand/org/math_article_links.org"))
+         (tag "web_link-special-personnes-ARCHIVE")
+         (cands
+          (cl-loop for file in files
+                   append (with-current-file file nil
+                             (org-map-entries
+                              (lambda ()
+                                (let ((orig (durand-org-link-info t)))
+                                  (list (car orig)
+                                        (cdr orig)
+                                        file)))
+                              tag))))
+         (cands (mapcar (lambda (x)
+                          (cons (durand-org-filter-dates (car x))
+                                (cdr x)))
+                        cands))
+         (cands (nreverse cands))
+         (choice-headings (durand-choose-list cands t "Chois un lien à marquer: " t))
+         (choice-elements (mapcar (lambda (x)
+                                    (cl-assoc x cands :test #'string=))
+                                  choice-headings)))
+    (cl-loop for element in choice-elements
+             do (with-current-file (caddr element) nil
+                  (goto-char (cadr element))
+                  (durand-mark-links)))))
 
 ;;;###autoload
 (defun durand-mark-links ()
@@ -2819,7 +2875,7 @@ tuer: delete the link."
          (action-list (list "visiter" "marquer" "presque marquer" "unmarquer" "tuer"))
          (chosen-elements (cl-loop for link in chosen-links
                                    collect (cl-assoc link contained-links :test #'string=)))
-         (chosen-action (ivy-read "Quoi faire? " action-list :require-match t)))
+         (chosen-action (completing-read "Quoi faire? " action-list nil t)))
     (cond
      ((string= chosen-action "visiter")
       (cl-loop for element in chosen-elements
