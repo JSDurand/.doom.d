@@ -18,7 +18,10 @@
           (sequence "TO-THINK(c)" "PENDING(p)" "HARD(r)" "IMPOSSIBLE(i)" "|" "SOLVED(v)"))
         org-tags-column -110
         org-special-ctrl-a/e nil))
-(setq org-agenda-files '("~/org/agenda.org" "~/org/notes.org" "~/org/aujourdhui.org"))
+(setq org-agenda-files '("~/org/agenda.org"
+                         "~/org/notes.org"
+                         "~/org/aujourdhui.org"
+                         "~/org/math_article_links.org"))
 ;; (setq org-log-state-notes-insert-after-drawers nil)
 (setq org-log-into-drawer t)
 (setf org-hide-emphasis-markers t)
@@ -362,7 +365,8 @@ This should be setted by the PERIOD-FUNC argument.")
             ;;        (org-agenda-overriding-header "PLAN")))
             ;; NOTE: A reading plan
             (tags "a_voir+matin|a_voir+après_midi|a_voir+nuit"
-                  ((org-agenda-files '("~/org/notes.org"))
+                  ((org-agenda-files '("~/org/notes.org"
+                                       "~/org/math_article_links.org"))
                    (org-agenda-overriding-header "À Lire")
                    (org-super-agenda-groups
                     '((:name "Le Matin" :tag "matin")
@@ -380,10 +384,6 @@ This should be setted by the PERIOD-FUNC argument.")
   (advice-add 'org-agenda-log-mode :after 'evil-emacs-state)
   (add-hook 'org-agenda-mode-hook #'org-agenda-first-block)
   (org-super-agenda-mode))
-
-(set-evil-initial-state!
-  '(org-agenda-mode)
-  'emacs)
 
 ;; (map! :leader :n "oaa" #'durand-agenda)
 
