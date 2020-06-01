@@ -643,3 +643,9 @@
     ("*cargo-test*"
      :size 0.5
      :select t)))
+
+;;; org-agenda start with emacs state!!!
+
+(set-evil-initial-state!
+  '(org-agenda-mode)
+  'emacs)
