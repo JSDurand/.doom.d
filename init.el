@@ -61,7 +61,7 @@
        durand-template                ; my custom templates
        durand-evil                    ; my evil settings
        fold                           ; (nigh) universal code folding
-       ;;(format +onsave)  ; automated prettiness
+       (format +onsave)  ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
        lispy          ; vim for lisp, for people who don't like vim
        ;; multiple-cursors  ; editing in many places at once
@@ -146,7 +146,7 @@
        (latex
         +cdlatex                        ; fast insertion of math stuffs
         ;; +fold                        ; REVIEW: This is not very helpful for me.
-        +lsp                            ; NOTE: There is a weird bug: on some
+        ;; +lsp                            ; NOTE: There is a weird bug: on some
                                         ; file, it will hang indefinitely.
         )                    ; writing papers in Emacs has never been so fun
        durand-tex
