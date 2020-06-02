@@ -4,6 +4,15 @@
 
 (setf frame-title-format "l'emacs de Durand")
 
+;; (setf frame-title-format '((:eval (let ((bfn (buffer-file-name))
+;;                                         (bn (buffer-name)))
+;;                                     (cond
+;;                                      (bfn)
+;;                                      ((string= "*doom*" bn)
+;;                                       "DOOM")
+;;                                      (t (buffer-name)))))
+;;                            " - l'emacs de Durand"))
+
 ;;* avy single candidate jump
 
 (setf avy-single-candidate-jump t)
