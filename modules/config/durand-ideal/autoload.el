@@ -649,8 +649,9 @@ Also open message in `mu4e-headers-mode' without forwarding to links even if no 
 ;;;###autoload
 (defun durand-open-browser (&optional arg)
   "Open browser.
+The browser is set by the variable `durand-browser'
 With ARG \\[universal-argument], prompt for some frequently visited websites.
-With ARG \\[universal-argument]\\[universal-argument], close Safari."
+With ARG \\[universal-argument]\\[universal-argument], close browser."
   (interactive "P")
   (let* ((cands '(("google" . "https://google.com")
                   ("math" . "https://math.stackexchange.com/questions")
@@ -668,17 +669,19 @@ With ARG \\[universal-argument]\\[universal-argument], close Safari."
                   (t
                    choix))))
          (browsing-command (cond ((equal arg '(16))
-                                  '("osascript" "-e" "tell application \"Safari\" to quit"))
+                                  (list
+                                   "osascript" "-e" (format "tell application \"%s\" to quit"
+                                                            durand-browser)))
                                  (link
-                                  `("open" "-a" "Safari" ,link))
+                                  `("open" "-a" ,durand-browser ,link))
                                  (t
-                                  '("open" "-a" "Safari")))))
+                                  `("open" "-a" ,durand-browser)))))
     (make-process
-     :name "Safari"
+     :name durand-browser
      :command browsing-command
      :buffer nil))
   (when (equal arg '(16))
-    (message "Safari closed.")))
+    (message "%s closed." durand-browser)))
 
 ;;;###autoload
 (defvar durand-stop-music-map (let ((map (make-sparse-keymap)))

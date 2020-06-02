@@ -445,12 +445,6 @@ This should be setted by the PERIOD-FUNC argument.")
                                         "booktxt")
   "Regexp for matching a novel website.")
 
-;;; my browser of choice
-
-;;;###autoload
-(defvar durand-browser "Safari"
-  "The browser that I use to browse url.")
-
 ;; org clock
 (setq org-clock-mode-line-total 'current)
 ;; (setq org-clock-persist t)

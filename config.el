@@ -658,3 +658,9 @@
 (set-evil-initial-state!
   '(org-agenda-mode)
   'emacs)
+
+;;; my browser of choice
+
+;;;###autoload
+(defvar durand-browser "Firefox"
+  "The browser that I use to browse url.")
