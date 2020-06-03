@@ -501,6 +501,7 @@ This should be setted by the PERIOD-FUNC argument.")
   (define-key durand-org-subtree-map [?p] 'org-paste-subtree)
   (map! :map org-mode-map
         :localleader
+        :n [?a ?g] 'durand-org-goto-archive
         :n [?s] durand-org-subtree-map
         :n [?S] 'org-schedule))
 

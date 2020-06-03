@@ -3658,6 +3658,58 @@ Modified by Durand <2020-04-28 Mar 14:55>"
   (start-process "view" nil "open"
                  "-a" "Safari" graph-file))
 
+;;;###autoload
+(defun durand-org-archive-file-name (file-name)
+  "Produce an archive file name.
+The rule is as follows:
+example.org
+example.org_archive
+example(1).org_archive
+example(2).org_archive
+etc."
+  (unless (or (string-match "org$" file-name)
+              (string-match "org_archive$" file-name))
+    (user-error "Not an org file."))
+  (cond
+   ((string-match "org$" file-name)
+    (replace-match "org_archive" nil nil file-name))
+   ((string-match "\\((\\([[:digit:]]+\\))\\).org_archive$" file-name)
+    (replace-match
+     (format "(%d)"
+             (1+ (string-to-number
+                  (match-string-no-properties 2 file-name))))
+     nil nil file-name 1))
+   (t
+    (replace-regexp-in-string ".org_archive$" "(1).org_archive" file-name))))
+
+;;;###autoload
+(defun durand-org-goto-archive ()
+  "Go to the archive file of the current org file, if any.
+It will cycle through all archive files of the file.
+The rule is as follows:
+example.org
+example.org_archive
+example(1).org_archive
+example(2).org_archive
+etc."
+  (interactive)
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Not in an org file."))
+  (let* ((current-name (buffer-file-name (current-buffer)))
+         (base-name (cond
+                     ((string-match "org_archive$" current-name)
+                      (replace-match "org" nil nil current-name))
+                     (t current-name)))
+         (base-name (cond
+                     ((string-match "\\(([[:digit:]])\\).org$" base-name)
+                      (replace-match "" nil nil base-name 1))
+                     (t base-name)))
+         (next-name (durand-org-archive-file-name current-name))
+         (next-name (cond
+                     ((file-exists-p next-name) next-name)
+                     (t base-name))))
+    (find-file next-name)))
+
 ;; FIXME: This is not working!
 ;;;###autoload
 ;; (defadvice! durand-org-noter-kill-session-buffers (&rest _args)
