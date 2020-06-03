@@ -50,7 +50,7 @@
           ("/drafts" . ?d)))
   (map! :map mu4e-view-mode-map
         [?o] 'mu4e-view-attach-emacs
-        [home] 'doom/escape)
+        [escape] 'doom/escape)
   (add-to-list 'mu4e-view-actions
                '("Browse this mail" . mu4e-action-view-in-browser))
 

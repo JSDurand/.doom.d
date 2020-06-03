@@ -153,7 +153,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
       [?z] 'capitalize-region-or-word)
 
 (after! evil
-  (map! :m [home] 'evil-normal-state
+  (map! :m (kbd "<escape>") 'evil-normal-state
         ;; [32] durand-evil-space-map
         :m [?\r]  durand-evil-ret-map
         :m [?\d] 'durand-other-buffer
@@ -165,7 +165,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
         :m [?\)] 'evil-forward-paragraph
         :m [?Q] 'durand-quit-window)
 
-  (map! :n [home] 'evil-emacs-state
+  (map! :n [escape] 'evil-force-normal-state
         :n [?,] 'evil-repeat-find-char-reverse
         :n [?\;] 'evil-repeat-find-char
         :n [?X] (lambda ()
@@ -239,7 +239,7 @@ articles, bookmarks, youtube links, novels, or weblinks.")
         ;;          (t
         ;;           (indent-for-tab-command current-prefix-arg))))
         :n [?J] 'evil-join
-        :n [?\M-o] 'evil-jump-forward
+        ;; :n [?\M-o] 'evil-jump-forward
         ;; [?\C-a] 'evil-numbers/inc-at-pt
         ;; [?\C-x] 'evil-numbers/dec-at-pt
         :n [?\(] 'universal-argument

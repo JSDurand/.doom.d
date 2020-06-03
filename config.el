@@ -103,7 +103,7 @@
           :n [?s] 'osx-dictionary-search-input)))
 
 ;;* use home key
-(map! :meorgvi [home] #'evil-normal-state
+(map! :meorgvi (kbd "<escape>") #'evil-normal-state
       :mov "à" #'durand-beginning-of-line-or-block
       :n (kbd "<backspace>") #'durand-other-buffer)
 
