@@ -662,5 +662,5 @@
 ;;; my browser of choice
 
 ;;;###autoload
-(defvar durand-browser "Firefox"
+(defvar durand-browser "Safari"
   "The browser that I use to browse url.")
