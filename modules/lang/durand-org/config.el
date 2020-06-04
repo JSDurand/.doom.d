@@ -17,6 +17,7 @@
         '((sequence "TODO(t)" "START(s)" "WORKING(w)" "HARD-WORKING(h)" "ALMOST(a)" "|" "DONE(d)")
           (sequence "TO-THINK(c)" "PENDING(p)" "HARD(r)" "IMPOSSIBLE(i)" "|" "SOLVED(v)"))
         org-tags-column -110
+        org-hide-emphasis-markers nil
         org-special-ctrl-a/e nil))
 (setq org-agenda-files '("~/org/agenda.org"
                          "~/org/notes.org"

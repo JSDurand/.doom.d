@@ -613,7 +613,15 @@
   (setf org-noter-notes-search-path (list "/Users/durand/org/mes-notes/")
         org-noter-always-create-frame nil
         org-noter-kill-frame-at-session-end nil
-        org-noter-notes-window-location 'vertical-split))
+        org-noter-notes-window-location 'vertical-split)
+
+  ;; remap keys
+  (map! :map pdf-view-mode-map
+        :n [?i] 'org-noter-insert-precise-note
+        :n [?\M-n] 'org-noter-sync-next-note
+        :n [?\M-p] 'org-noter-sync-prev-note
+        :n [?\M-.] 'org-noter-sync-current-note
+        :n [?q] 'org-noter-kill-session))
 
 ;; deft settings
 
