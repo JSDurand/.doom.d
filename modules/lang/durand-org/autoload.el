@@ -298,12 +298,12 @@ make my own functions."
                       :title description
                       :body selection)))
     (setf org-store-link-plist
-          (list (list :type type
-                      :link link
-                      :description description
-                      :annotation annotation
-                      :initial ""
-                      :query query)))
+          (list :type type
+                :link link
+                :description description
+                :annotation annotation
+                :initial ""
+                :query query))
     (push (list link description) org-stored-links)))
 
 ;; filter title in the link
@@ -3430,6 +3430,27 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
                                        :initial-input "^")
                              choix)))
     (org-capture nil clé)))
+
+;;;###autoload
+(defun durand-capture-web-link ()
+  "Since `org-capture' sometimes behaves weirdly, I make my own capturing function.
+This should be run after the store-link properties have been set."
+  (interactive)
+  (let* ((template (nth 3 (alist-get
+                           "L"
+                           (org-capture-upgrade-templates org-capture-templates)
+                           nil nil #'string=)))
+         (template (org-capture-fill-template template))
+         (cur-buffer (current-buffer)))
+    (org-determine-link-file)
+    (let ((orig-p (point)))
+      (org-paste-subtree 1 template)
+      (goto-char orig-p))
+    (when (search-forward "%?" nil t)
+      (replace-match ""))
+    (save-buffer 0)
+    (unless (eq cur-buffer (current-buffer))
+      (kill-buffer (current-buffer)))))
 
 (after! org-pdfview
   ;; custom store link function to store the height as well
