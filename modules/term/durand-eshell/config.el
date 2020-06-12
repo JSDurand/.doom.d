@@ -3,6 +3,7 @@
 (set-eshell-alias!
  "vid"  "cd ~/Desktop/Centre/Vidéos"
  "play" "mpv --no-terminal --autofit=100%x100% --no-border --geometry=+0+-24 $*"
+ "e" "exit"
  "cr" "cargo run $*"
  "cb" "cargo build $*"
  "ct" "cargo test $*"
@@ -17,4 +18,5 @@
       ;; grasp such wisdom.
       (map! :map eshell-mode-map
             :leader
+            [?à] 'durand-eshell-goto-last-output-end
             "r" 'durand/eshell-complete-recent-dir)))
