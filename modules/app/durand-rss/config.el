@@ -109,6 +109,8 @@
                '(important elfeed-math-face))
   (add-to-list 'elfeed-search-face-alist
                '(youtube elfeed-youtube-face))
+  (add-to-list 'elfeed-search-face-alist
+               '(math elfeed-math-face))
   ;; my primary interests
   (add-hook 'elfeed-new-entry-hook
             (elfeed-make-tagger :feed-url "math.*stackexchange"
@@ -123,13 +125,13 @@
             (elfeed-make-tagger :feed-url "math.*stackexchange"
                                 :feed-title "geometry\\|topology\\|hodge\\|graph"
                                 :add '(math relevant)))
-  (define-key elfeed-search-mode-map [?i] 'important-tag-toggler)
-  (define-key elfeed-search-mode-map [?l] 'relevant-tag-toggler)
-  (define-key elfeed-search-mode-map [?e] 'emacs-tag-toggler)
-  (define-key elfeed-search-mode-map [?m] 'math-toggler)
-  (define-key elfeed-search-mode-map [?U] 'unread-tag-toggler)
-  (define-key elfeed-search-mode-map [?y] 'youtube-tag-toggler)
-  (define-key elfeed-search-mode-map [?h] 'haskell-tag-toggler)
+  ;; (define-key elfeed-search-mode-map [?i] 'important-tag-toggler)
+  ;; (define-key elfeed-search-mode-map [?l] 'relevant-tag-toggler)
+  ;; (define-key elfeed-search-mode-map [?e] 'emacs-tag-toggler)
+  ;; (define-key elfeed-search-mode-map [?m] 'math-toggler)
+  ;; (define-key elfeed-search-mode-map [?U] 'unread-tag-toggler)
+  ;; (define-key elfeed-search-mode-map [?y] 'youtube-tag-toggler)
+  ;; (define-key elfeed-search-mode-map [?h] 'haskell-tag-toggler)
   (define-key elfeed-search-mode-map [?b] 'elfeed-visit-or-play-with-mpv)
   (define-key elfeed-search-mode-map [?d] 'elfeed-download-youtube)
   (define-key elfeed-search-mode-map [?n] #'elfeed-next-entry)
@@ -138,6 +140,7 @@
 
   (map! :map elfeed-search-mode-map
         :n [?b] 'elfeed-visit-or-play-with-mpv
+        :n [?g ?s] 'durand-elfeed-filter-complete
         :n [?g ?r] 'elfeed-search-fetch)
 
   (setq-default elfeed-search-filter "@1week-ago +unread"))

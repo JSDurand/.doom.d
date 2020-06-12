@@ -74,7 +74,9 @@ See `durand-play-with-mpv' also."
           (let ((entries (elfeed-search-selected)))
             (cl-loop for entry in entries
                      when (elfeed-entry-link entry)
-                     do (browse-url it))
+                     do (shell-command
+                         (format
+                          "open -a \"Safari\" --background %s" it)))
             (unless (or elfeed-search-remain-on-entry (use-region-p))
               (forward-line)))
         (elfeed-show-visit)))))
@@ -180,3 +182,20 @@ Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
   "Move to the previous entry in search buffer"
   (interactive "p")
   (forward-line (- n)))
+
+;;;###autoload
+(defun durand-elfeed-filter-complete ()
+  "Complete filters for elfeed."
+  (interactive)
+  (let* ((tags (elfeed-db-get-all-tags))
+         (tags (cl-loop for tag in tags
+                        append (list
+                                (format "+%s" tag)
+                                (format "-%s" tag))))
+         (filters (completing-read-multiple
+                   "Filter: "
+                   tags nil nil
+                   (replace-regexp-in-string " " "," elfeed-search-filter))))
+    (setf elfeed-search-filter
+          (string-join filters " "))
+    (elfeed-search-update :force)))
