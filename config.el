@@ -672,3 +672,9 @@
 ;;;###autoload
 (defvar durand-browser "Safari"
   "The browser that I use to browse url.")
+
+;;; don't format in org mode
+
+(setf +format-on-save-enabled-modes
+      (append +format-on-save-enabled-modes
+              (list 'org-mode)))
