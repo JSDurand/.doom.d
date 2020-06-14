@@ -140,7 +140,7 @@
 
   (map! :map elfeed-search-mode-map
         :n [?b] 'elfeed-visit-or-play-with-mpv
-        :n [?g ?s] 'durand-elfeed-filter-complete
+        :n [?s] 'durand-elfeed-filter-complete
         :n [?g ?r] 'elfeed-search-fetch)
 
   (setq-default elfeed-search-filter "@1week-ago +unread"))

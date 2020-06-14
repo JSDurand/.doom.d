@@ -60,78 +60,104 @@ When ARG is non-nil, show it in a pop-up window."
 
 ;;;###autoload
 (defun durand-bookmark-jump-headlong ()
-  "Inspired by `bookmark-jump-headlong', but using `ivy-read':
+  "Inspired by `bookmark-jump-headlong', but using `completing-read':
 If there is only one match, then perform the default action"
   (interactive)
   (require 'bookmark)
   (bookmark-maybe-load-default-file)
-  (reset-durand-changed)
-  (reset-durand-headlong)
-  (unwind-protect
-      (ivy-read "Jump to bookmark: " (mapcar #'car bookmark-alist)
-                :action '(1
-                          ("o" (lambda (x)
-                                 (interactive)
-                                 (bookmark-jump (assoc x bookmark-alist))
-                                 (setf bookmark-current-bookmark x))
-                           "jump")
-                          ("k" (lambda (x)
-                                 (interactive)
-                                 (setq bookmark-alist (delete (assoc x bookmark-alist) bookmark-alist))
-                                 (setf (ivy-state-collection ivy-last)
-                                       (mapcar #'car bookmark-alist))
-                                 (setf ivy--index (max 0 (1- ivy--index)))
-                                 (ivy--reset-state ivy-last))
-                           "kill"))
-                :update-fn 'durand-self-insert-complete-and-exit
-                :initial-input "^"
-                :re-builder 'ivy--regex-plus
-                :unwind 'reset-durand-changed
-                :keymap durand-switch-buffer-map
-                :caller 'durand-bookmark-jump-headlong)
+  (let* ((chosen-bookmark-name
+          (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+            (completing-read "Jump to bookmark: " (mapcar #'car bookmark-alist)
+                             nil t "^")))
+         (chosen-bookmark (assoc chosen-bookmark-name bookmark-alist 'string=)))
+    (bookmark-jump chosen-bookmark)
     (+workspaces-add-current-buffer-h)
     (let* ((cur-name (buffer-name))
-           (action (assoc-default cur-name durand-jump-hook-alist
-                                  (lambda (element key)
-                                    (string-match element key)))))
-      (cond
-       ((not (null action))
-        (funcall action))
-       (t nil)))))
+           (action (alist-get cur-name durand-jump-hook-alist nil nil 'string-match)))
+      (when action (funcall action)))))
+
+;; (defun durand-bookmark-jump-headlong ()
+;;   "Inspired by `bookmark-jump-headlong', but using `completing-read':
+;; If there is only one match, then perform the default action"
+;;   (interactive)
+;;   (require 'bookmark)
+;;   (bookmark-maybe-load-default-file)
+;;   (reset-durand-changed)
+;;   (reset-durand-headlong)
+;;   (unwind-protect
+;;       (ivy-read "Jump to bookmark: " (mapcar #'car bookmark-alist)
+;;                 :action '(1
+;;                           ("o" (lambda (x)
+;;                                  (interactive)
+;;                                  (bookmark-jump (assoc x bookmark-alist))
+;;                                  (setf bookmark-current-bookmark x))
+;;                            "jump")
+;;                           ("k" (lambda (x)
+;;                                  (interactive)
+;;                                  (setq bookmark-alist (delete (assoc x bookmark-alist) bookmark-alist))
+;;                                  (setf (ivy-state-collection ivy-last)
+;;                                        (mapcar #'car bookmark-alist))
+;;                                  (setf ivy--index (max 0 (1- ivy--index)))
+;;                                  (ivy--reset-state ivy-last))
+;;                            "kill"))
+;;                 :update-fn 'durand-self-insert-complete-and-exit
+;;                 :initial-input "^"
+;;                 :re-builder 'ivy--regex-plus
+;;                 :unwind 'reset-durand-changed
+;;                 :keymap durand-switch-buffer-map
+;;                 :caller 'durand-bookmark-jump-headlong)
+;;     (+workspaces-add-current-buffer-h)
+;;     (let* ((cur-name (buffer-name))
+;;            (action (assoc-default cur-name durand-jump-hook-alist
+;;                                   (lambda (element key)
+;;                                     (string-match element key)))))
+;;       (cond
+;;        ((not (null action))
+;;         (funcall action))
+;;        (t nil)))))
 
 ;;;###autoload
-(defun durand-recentf-jump-headlong (&optional arg)
-  "Jump to recent files.
-If there is only one match, then perform the default action"
-  (interactive "P")
-  (durand-update-recentf)
-  (reset-durand-changed)
-  (reset-durand-headlong)
-  (if arg
-      (if durand-recently-closed-files
-          (find-file (pop durand-recently-closed-files))
-        (user-error "No recently closed files"))
-    (ivy-read "Recent files: " (mapcar #'car durand-recentf-list)
-              :action '(1
-                        ("o" (lambda (x)
-                               (interactive)
-                               (find-file (cdr (assoc x durand-recentf-list))))
-                         "Open the file")
-                        ("k" (lambda (x)
-                               (interactive)
-                               (durand-kill-from-recentf x)
-                               (durand-update-recentf)
-                               (setf (ivy-state-collection ivy-last)
-                                     (mapcar #'car durand-recentf-list))
-                               (setf ivy--index (max 0 (1- ivy--index)))
-                               (ivy--reset-state ivy-last))
-                         "Kill it from RECENTF-LIST"))
-              :update-fn 'durand-self-insert-complete-and-exit
-              :initial-input "^"
-              :re-builder 'ivy--regex-plus
-              :unwind 'reset-durand-changed
-              :keymap durand-switch-buffer-map
-              :caller 'durand-recentf-jump-headlong)))
+(defun durand-recentf-jump-headlong ()
+  "Jump to recent files. If there is only one match, then jump directly."
+  (interactive)
+  (let ((chosen-file
+         (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+           (completing-read "Recent files: " recentf-list
+                            nil t "^"))))
+    (find-file chosen-file)))
+
+;; (defun durand-recentf-jump-headlong (&optional arg)
+;;   "Jump to recent files.
+;; If there is only one match, then perform the default action"
+;;   (interactive "P")
+;;   (durand-update-recentf)
+;;   (reset-durand-changed)
+;;   (reset-durand-headlong)
+;;   (if arg
+;;       (if durand-recently-closed-files
+;;           (find-file (pop durand-recently-closed-files))
+;;         (user-error "No recently closed files"))
+;;     (ivy-read "Recent files: " (mapcar #'car durand-recentf-list)
+;;               :action '(1
+;;                         ("o" (lambda (x)
+;;                                (interactive)
+;;                                (find-file (cdr (assoc x durand-recentf-list))))
+;;                          "Open the file")
+;;                         ("k" (lambda (x)
+;;                                (interactive)
+;;                                (durand-kill-from-recentf x)
+;;                                (durand-update-recentf)
+;;                                (setf (ivy-state-collection ivy-last)
+;;                                      (mapcar #'car durand-recentf-list))
+;;                                (setf ivy--index (max 0 (1- ivy--index)))
+;;                                (ivy--reset-state ivy-last))
+;;                          "Kill it from RECENTF-LIST"))
+;;               :update-fn 'durand-self-insert-complete-and-exit
+;;               :initial-input "^"
+;;               :re-builder 'ivy--regex-plus
+;;               :unwind 'reset-durand-changed
+;;               :keymap durand-switch-buffer-map
+;;               :caller 'durand-recentf-jump-headlong)))
 
 ;;;###autoload
 (defun durand-self-insert-complete-and-exit (&rest _args)
@@ -171,20 +197,20 @@ Default to t")
   (setq durand-headlong (not durand-headlong)))
 
 ;;;###autoload
-(defvar durand-changed-p nil
-  "A variable to determine if `ivy-read' is just initialised.")
+;; (defvar durand-changed-p nil
+;;   "A variable to determine if `ivy-read' is just initialised.")
 
 ;;;###autoload
-(defun reset-durand-changed ()
-  "Reset the variable DURAND-CHANGED-P to nil"
-  (setq durand-changed-p nil))
+;; (defun reset-durand-changed ()
+;;   "Reset the variable DURAND-CHANGED-P to nil"
+;;   (setq durand-changed-p nil))
 
 ;; update durand-recentf
 ;;;###autoload
-(defun durand-update-recentf ()
-  "Simple `mapcar'"
-  (interactive)
-  (setq durand-recentf-list (mapcar (lambda (x) (cons (file-name-nondirectory x) x)) recentf-list)))
+;; (defun durand-update-recentf ()
+;;   "Simple `mapcar'"
+;;   (interactive)
+;;   (setq durand-recentf-list (mapcar (lambda (x) (cons (file-name-nondirectory x) x)) recentf-list)))
 
 ;;;###autoload
 (defalias 'quit-other-window 'durand-quit-other-window)
@@ -207,75 +233,91 @@ Default to t")
   "Use `durand-complete-buffer' to choose buffers to switch to.
 See the documentation of `durand-complete-buffer' to know more."
   (interactive)
-  (reset-durand-headlong)
-  (ivy-read "buffer: " 'durand-complete-buffer
-            :dynamic-collection t
-            :action '(1
-                      ("o" switch-to-buffer
-                       "Switch to buffer")
-                      ("k" (lambda (x)
-                             (interactive)
-                             (and (get-buffer x)
-                                  (kill-buffer x))
-                             (ivy--reset-state ivy-last))
-                       "Kill"))
-            :update-fn 'durand-self-insert-complete-and-exit
-            :re-builder (if current-prefix-arg 'ivy--regex-ignore-order 'ivy--regex-fuzzy)
-            :initial-input (cond ((equal current-prefix-arg '(4)) "^*")
-                                 ((equal current-prefix-arg '(16)) " ")
-                                 (t "^"))
-            :unwind 'reset-durand-changed
-            :caller 'ivy-switch-buffer
-            :keymap 'durand-switch-buffer-map))
+  (require 'orderless)
+  (let* ((orderless-component-separator 'orderless-escapable-split-on-space)
+         (buffer (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+                   (completing-read "Buffer: "
+                                    (mapcar #'buffer-name (buffer-list))
+                                    nil nil "^"))))
+    ;; NOTE: ignoring a parameter is counted as using the parameter by the
+    ;; compiler.
+    (ignore orderless-component-separator)
+    (switch-to-buffer buffer)))
 
+;; (defun durand-switch-buffer (&optional _buf)
+;;   "Use `durand-complete-buffer' to choose buffers to switch to.
+;; See the documentation of `durand-complete-buffer' to know more."
+;;   (interactive)
+;;   (reset-durand-headlong)
+;;   (ivy-read "buffer: " 'durand-complete-buffer
+;;             :dynamic-collection t
+;;             :action '(1
+;;                       ("o" switch-to-buffer
+;;                        "Switch to buffer")
+;;                       ("k" (lambda (x)
+;;                              (interactive)
+;;                              (and (get-buffer x)
+;;                                   (kill-buffer x))
+;;                              (ivy--reset-state ivy-last))
+;;                        "Kill"))
+;;             :update-fn 'durand-self-insert-complete-and-exit
+;;             :re-builder (if current-prefix-arg 'ivy--regex-ignore-order 'ivy--regex-fuzzy)
+;;             :initial-input (cond ((equal current-prefix-arg '(4)) "^*")
+;;                                  ((equal current-prefix-arg '(16)) " ")
+;;                                  (t "^"))
+;;             :unwind 'reset-durand-changed
+;;             :caller 'ivy-switch-buffer
+;;             :keymap 'durand-switch-buffer-map))
+
+;; REVIEW: This is not used anymore.
 ;;;###autoload
-(defun durand-complete-buffer (str &rest _args)
-  "Complete buffers; intended to be used as `collection' of `ivy-read' with `dynamic-collection' set to t.
-If STR starts with \"-\", then complete also with mode name;
-if STR starts with \"/\", then complete also with the file name;
-if STR starts with a space, then consider also hidden buffers."
-  (cl-loop for buffer being the buffers
-           when (let* ((nom (buffer-name buffer))
-                       (re-str (funcall (or (ivy-state-re-builder ivy-last)
-                                            'ivy--regex-fuzzy)
-                                        str))
-                       (matcher (if (stringp re-str) 'string-match 'ivy-re-match)))
-                  (cond
-                   ((and (> (length str) 0)
-                         (= (aref str 0) 32)
-                         (= (aref nom 0) 32))
-                    (funcall matcher re-str nom))
-                   ((= (aref nom 0) 32) nil)
-                   ((and (> (length str) 0)
-                         (= (aref str 0) ?-))
-                    (let* ((re-str
-                            (funcall (or (ivy-state-re-builder ivy-last)
-                                         'ivy--regex-fuzzy)
-                                     (substring str 1)))
-                           (matcher (if (stringp re-str) 'string-match 'ivy-re-match)))
-                      (or (funcall matcher re-str nom)
-                          (funcall matcher re-str
-                                   (ivy-rich-switch-buffer-major-mode
-                                    nom)))))
-                   ((and (> (length str) 0)
-                         (= (aref str 0) ?/))
-                    (let* ((re-str
-                            (funcall (or (ivy-state-re-builder ivy-last)
-                                         'ivy--regex-fuzzy)
-                                     (substring str 1)))
-                           (matcher (if (stringp re-str) 'string-match 'ivy-re-match)))
-                      (or (funcall matcher re-str nom)
-                          (funcall matcher re-str
-                                   (ivy-rich-switch-buffer-path nom)))))
-                   (t (funcall matcher re-str nom))))
-           when (cond ((= (aref (buffer-name buffer) 0) 32) t)
-                      ((and (string-prefix-p "*" (buffer-name buffer))
-                            (string-prefix-p "^*" str))
-                       t)
-                      ((featurep! :ui workspaces)
-                       (+workspace-contains-buffer-p buffer))
-                      (t t))
-           collect (buffer-name buffer)))
+;; (defun durand-complete-buffer (str &rest _args)
+;;   "Complete buffers; intended to be used as `collection' of `ivy-read' with `dynamic-collection' set to t.
+;; If STR starts with \"-\", then complete also with mode name;
+;; if STR starts with \"/\", then complete also with the file name;
+;; if STR starts with a space, then consider also hidden buffers."
+;;   (cl-loop for buffer being the buffers
+;;            when (let* ((nom (buffer-name buffer))
+;;                        (re-str (funcall (or (ivy-state-re-builder ivy-last)
+;;                                             'ivy--regex-fuzzy)
+;;                                         str))
+;;                        (matcher (if (stringp re-str) 'string-match 'ivy-re-match)))
+;;                   (cond
+;;                    ((and (> (length str) 0)
+;;                          (= (aref str 0) 32)
+;;                          (= (aref nom 0) 32))
+;;                     (funcall matcher re-str nom))
+;;                    ((= (aref nom 0) 32) nil)
+;;                    ((and (> (length str) 0)
+;;                          (= (aref str 0) ?-))
+;;                     (let* ((re-str
+;;                             (funcall (or (ivy-state-re-builder ivy-last)
+;;                                          'ivy--regex-fuzzy)
+;;                                      (substring str 1)))
+;;                            (matcher (if (stringp re-str) 'string-match 'ivy-re-match)))
+;;                       (or (funcall matcher re-str nom)
+;;                           (funcall matcher re-str
+;;                                    (ivy-rich-switch-buffer-major-mode
+;;                                     nom)))))
+;;                    ((and (> (length str) 0)
+;;                          (= (aref str 0) ?/))
+;;                     (let* ((re-str
+;;                             (funcall (or (ivy-state-re-builder ivy-last)
+;;                                          'ivy--regex-fuzzy)
+;;                                      (substring str 1)))
+;;                            (matcher (if (stringp re-str) 'string-match 'ivy-re-match)))
+;;                       (or (funcall matcher re-str nom)
+;;                           (funcall matcher re-str
+;;                                    (ivy-rich-switch-buffer-path nom)))))
+;;                    (t (funcall matcher re-str nom))))
+;;            when (cond ((= (aref (buffer-name buffer) 0) 32) t)
+;;                       ((and (string-prefix-p "*" (buffer-name buffer))
+;;                             (string-prefix-p "^*" str))
+;;                        t)
+;;                       ((featurep! :ui workspaces)
+;;                        (+workspace-contains-buffer-p buffer))
+;;                       (t t))
+;;            collect (buffer-name buffer)))
 
 ;;;###autoload
 (defun durand-other-buffer ()

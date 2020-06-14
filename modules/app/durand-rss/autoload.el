@@ -84,7 +84,7 @@ See `durand-play-with-mpv' also."
 ;;;###autoload
 (defun durand-download-youtube (url &optional title)
   "Download the URL with youtube-dl"
-  (interactive)
+  (interactive (list (read-string "URL of video: ")))
   (let ((current-prefix-arg '(4)))
     (call-interactively 'eshell))
   (insert "cd ~/Desktop/Centre/Vidéos")

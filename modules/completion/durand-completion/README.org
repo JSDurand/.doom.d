@@ -1,0 +1,55 @@
+#+TITLE:   completion/durand-completion
+#+DATE:    juin 12, 2020
+#+SINCE:   v0.0.1
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+- [[#features][Features]]
+  - [[#multiple-selection][multiple selection]]
+  - [[#headlong-effect][Headlong effect]]
+  - [[#actions-on-candidates][Actions on candidates]]
+  - [[#durand-choose-list][=durand-choose-list=]]
+
+* Description
+This is my completion framework using mainly the built-in tools such as =icomplete=. Also
+uses the package =orderless= for better matching, and uses the package =embark= for more
+actions on candidates, and of course the package =icomplete-vertical= for a visually
+appealing interface.
+
+- Supports multiple selection out of the box using =completing-read-multiple=.
+- Supports /headlong/ effect using a custom hook function.
+- Supports actions on completion candidates, by means of the package =embark=.
+- A custom function for more feature-rich selection from lists.
+
+** Maintainers
+- [[https://github.com/JSDurand][JSDurand]]
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
+- [[https://github.com/oantolin/orderless][orderless]]
+- [[https://github.com/oantolin/embark][embark]]
+- [[https://github.com/oantolin/icomplete-vertical][icomplete-vertical]]
+
+* Features
+
+** multiple selection
+
+Use the function =completing-read-multiple=.
+
+** Headlong effect
+
+Add the function =durand-headlong-minibuffer-setup-hook= to =minibuffer-setup-hook=.
+
+** Actions on candidates
+
+Use the package =embark=.
+
+** =durand-choose-list=
+
+A function to choose a candidate from a list that is tailor-made for my needs.

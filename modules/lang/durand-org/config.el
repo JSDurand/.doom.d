@@ -183,10 +183,10 @@
   (setq org-capture-templates
         '(("m" "Account records" entry
            (file+olp+datetree "~/org/account/account.org")
-           "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %^{COST|0}\n  :FROM: %^{FROM|Cash|etique}\n  :RECORD_TIME: %U\n  :END:\n  %(durand-org-complete-capture-account)%?"
+           "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %(number-to-string (read-number \"COST:\" 0))\n  :FROM: %(completing-read \"FROM: \" '(\"Cash\" \"etique\"))\n  :RECORD_TIME: %U\n  :END:\n  %(durand-org-complete-capture-account)%?"
            :jump-to-captured t)
           ("d" "Record Diaries" entry
-           (file+datetree "~/org/diary.org")
+           (file+olp+datetree "~/org/diary.org")
            "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
            :jump-to-captured t)
           ("w" "Withdrawal records" entry

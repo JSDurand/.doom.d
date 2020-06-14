@@ -13,16 +13,18 @@
 (setq evil-respect-visual-line-mode nil)
 
 (doom! :completion
+       durand-completion
        (company
         ;; +childframe
         )      ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;; ivy
-       (ivy
-        ;; +childframe
-        +fuzzy)                         ; a search engine for love and life
-       durand-ivy
+       ;; (ivy
+       ;;  ;; +childframe
+       ;;  +fuzzy)
+                                        ; a search engine for love and life
+       ;; durand-ivy
 
        :ui
        deft                   ; notational velocity for Emacs
@@ -75,7 +77,7 @@
        undo
        dired                ; making dired pretty [functional]
        electric             ; smarter, keyword-based electric-indent
-       ;; ibuffer           ; interactive buffer management
+       ibuffer           ; interactive buffer management
        ;; vc                ; version-control and Emacs, sitting in a tree
        :checkers
        syntax

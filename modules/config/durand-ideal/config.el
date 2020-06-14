@@ -22,7 +22,7 @@
 
   (map! :leader
         "," 'durand-switch-buffer
-        :n [?b ?v] 'ivy-switch-buffer))
+        :n [?b ?v] 'ibuffer))
 
 (map! :leader "wa" #'ace-window)
 

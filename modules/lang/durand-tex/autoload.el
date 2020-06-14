@@ -411,25 +411,26 @@ If ARG is non-nil, delete the buffer BN"
     (with-ivy-window
       (goto-char (cdr (assoc (ivy-state-current ivy-last) tex-def-alist))))))
 
+;; REVIEW: This is no more used.
 ;;;###autoload
-(defun read-tex-complete ()
-  "my function to find all defs and use ivy as backend to complete it,
-assuming all defs come at the beginning of line"
-  (interactive)
-  (setq tex-follow-up-or-not nil)
-  (setq tex-def-alist (get-defs))
-  (setq tex-old-pos (point))
-  (ivy-read "defs: " (mapcar #'car tex-def-alist)
-            :action '(1
-                      ("o" (lambda (x)
-                             (interactive)
-                             (insert (format "%s" (find-macro-name x))))
-                       "Insert Macro Name"))
-            :update-fn #'tex-follow-up
-            :unwind (lambda ()
-                      (goto-char tex-old-pos)
-                      (setq tex-def-alist nil))
-            :keymap tex-def-map))
+;; (defun read-tex-complete ()
+;;   "my function to find all defs and use ivy as backend to complete it,
+;; assuming all defs come at the beginning of line"
+;;   (interactive)
+;;   (setq tex-follow-up-or-not nil)
+;;   (setq tex-def-alist (get-defs))
+;;   (setq tex-old-pos (point))
+;;   (ivy-read "defs: " (mapcar #'car tex-def-alist)
+;;             :action '(1
+;;                       ("o" (lambda (x)
+;;                              (interactive)
+;;                              (insert (format "%s" (find-macro-name x))))
+;;                        "Insert Macro Name"))
+;;             :update-fn #'tex-follow-up
+;;             :unwind (lambda ()
+;;                       (goto-char tex-old-pos)
+;;                       (setq tex-def-alist nil))
+;;             :keymap tex-def-map))
 
 ;;;###autoload
 (defun make-blank-space (arg)

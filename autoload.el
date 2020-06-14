@@ -217,3 +217,84 @@ and for tex files the title is defined by the title macro."
          (t
           (funcall deft-parse-title-function
                    (substring contents begin (match-end 0)))))))))
+;;;###autoload
+(defun prot/rg-save-search-as-name ()
+  "Save `rg' buffer, naming it after the current search query.
+This function is meant to be mapped to a key in `rg-mode-map'."
+  (interactive)
+  (let ((pattern (car rg-pattern-history)))
+    (rg-save-search-as-name (concat "«" pattern "»"))))
+
+;;;###autoload
+(defun +default/search-cwd (&optional arg)
+  "Conduct a text search in files under the current folder.
+If prefix ARG is set, prompt for a directory to search from."
+  (interactive "P")
+  (let ((default-directory
+          (if arg
+              (read-directory-name "Search directory: ")
+            default-directory)))
+    (cond ((featurep! :completion ivy)
+           (call-interactively #'+ivy/project-search-from-cwd))
+          ((featurep! :completion helm)
+           (call-interactively #'+helm/project-search-from-cwd))
+          (t
+           (rg (read-string "Search: ") "everything" default-directory)))))
+
+;;;###autoload
+(defun +default/org-notes-search ()
+  "Perform a text search on `org-directory'."
+  (interactive)
+  (require 'org)
+  (cond
+   ((or
+     (featurep! :completion ivy)
+     (featurep! :completion helm))
+    (let ((default-directory org-directory))
+      (+default/search-project-for-symbol-at-point "")))
+   (t
+    (rg-literal (read-string "Search for: ")
+                "everything" org-directory))))
+
+;;; recentf handling
+
+;;;###autoload
+(defadvice! durand-recentf (&optional _files _buffer-name)
+  "Select a file from `recentf-list'.
+FILES and BUFFER-NAME are the same as for `recentf-open-files'."
+  :override 'recentf-open-files
+  (interactive)
+  (let ((icomplete-compute-delay 0))
+    (ignore icomplete-compute-delay)
+    (icomplete-vertical-do '()
+      (find-file
+       (completing-read "Recentf: "
+                        recentf-list
+                        nil t)))))
+
+;;; company selection using `completing-read'
+
+;;;###autoload
+(defun durand-company-completing ()
+  "Use `completing-read' for company.
+Runs `contrib/completing-read-in-region' on the word at point in
+effect."
+  (interactive)
+  (let ((bds (bounds-of-thing-at-point 'word)))
+    (contrib/completing-read-in-region (car bds)
+                                       (cdr bds)
+                                       company-candidates)))
+
+;;; ibuffer should not delete doom buffer
+
+(define-ibuffer-op ibuffer-do-delete ()
+  "Kill marked buffers as with `kill-this-buffer'."
+  (:opstring "killed"
+   :active-opstring "kill"
+   :dangerous t
+   :complex t
+   :modifier-p t)
+  (cond
+   ((eq (doom-fallback-buffer) buf) nil)
+   (t (when (kill-buffer buf)
+        'kill))))

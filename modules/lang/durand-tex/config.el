@@ -96,8 +96,8 @@
       :vni [?d] 'insert-def
       :vni [?o] 'one-def
       :vni [?t] 'two-def
-      :i [?\C-c] 'durand-general-save-buffer
-      :i [?r] 'read-tex-complete)
+      :i [?\C-c] 'durand-general-save-buffer)
+      ;; :i [?r] 'read-tex-complete)
 
 (map! :map TeX-mode-map
       :i [?\M-'] 'abbrev-prefix-mark
@@ -121,7 +121,8 @@
       :vni [?o] 'one-def
       :vni [?t] 'two-def
       :i [?\C-c] 'durand-general-save-buffer
-      :i [?r] 'read-tex-complete)
+      ;; :i [?r] 'read-tex-complete
+      )
 (map! :map LaTeX-mode-map
       :i [?\M-'] 'abbrev-prefix-mark
       ;; :i [?ù] abbrev-prefix-map
@@ -274,14 +275,19 @@ The list is in the variable `durand-o-things-list'"
   (interactive)
   (reset-durand-changed)
   (reset-durand-headlong)
-  (let ((thing (ivy-read "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
-                         :require-match t
-                         :initial-input "^"
-                         ;; :dynamic-collection t
-                         :unwind 'reset-durand-changed
-                         :update-fn 'durand-self-insert-complete-and-exit
-                         :caller 'durand-insert-o-things
-                         :re-builder 'ivy--regex-plus)))
+  (let ((thing (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+                 (completing-read
+                  "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
+                  nil t "^"))
+               ;; (ivy-read "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
+               ;;           :require-match t
+               ;;           :initial-input "^"
+               ;;           ;; :dynamic-collection t
+               ;;           :unwind 'reset-durand-changed
+               ;;           :update-fn 'durand-self-insert-complete-and-exit
+               ;;           :caller 'durand-insert-o-things
+               ;;           :re-builder 'ivy--regex-plus)
+               ))
     (insert (format "\\%s" (assoc-default thing durand-o-things-list #'string=)))))
 
 (add-hook! 'LaTeX-mode-hook

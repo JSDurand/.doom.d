@@ -1,8 +1,14 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
-;;* frame title format, just for fun
+;;; Set C source directory appropariately
 
-(setf frame-title-format "l'emacs de Durand")
+(setf find-function-C-source-directory "/Users/durand/w.emacs.d/emacs/src/")
+
+;;; frame title format, just for fun
+
+;; (setf frame-title-format "l'emacs de Durand")
+;; NOTE: Silence!
+(setf frame-title-format "")
 
 ;; (setf frame-title-format '((:eval (let ((bfn (buffer-file-name))
 ;;                                         (bn (buffer-name)))
@@ -13,50 +19,69 @@
 ;;                                      (t (buffer-name)))))
 ;;                            " - l'emacs de Durand"))
 
-;;* avy single candidate jump
+;;; avy single candidate jump
 
 (setf avy-single-candidate-jump t)
 
-;;* save-place cannot work automatically
+;;; save-place cannot work automatically
 (save-place-mode 1)
 
-;;* don't keep screen position
+;;; don't keep screen position
 (setf scroll-preserve-screen-position nil)
 
-;;* avy all windows
+;;; avy all windows
 (setf avy-all-windows 'all-frames)
 
-;;* Prevent some `battery-update' problem.
+;;; Prevent some `battery-update' problem.
 (fset 'battery-update 'ignore)
 
 ;; enable dired details mode
 (after! dired
   (add-hook 'dired-mode-hook #'dired-hide-details-mode))
 
-;;* Fonts
+;;; Fonts
 
 (setq doom-font "DejaVu Sans Mono for Powerline 20"
       doom-variable-pitch-font nil      ; inherits `doom-font''s :size
       doom-unicode-font nil
       doom-big-font nil)
 
-;;* disable line numbers, as that is a performace killer for me.
+;;; disable line numbers, as that is a performace killer for me.
 
 (setq-default display-line-numbers-type nil)
 (global-display-line-numbers-mode -1)
 
-;;* try light theme
-;; (setf doom-theme 'doom-solarized-light)
+;;; theme customizations
 
-;;* mode line help echo
+(setq modus-vivendi-theme-slanted-constructs t
+      modus-vivendi-theme-bold-constructs t
+      modus-vivendi-theme-3d-modeline t
+      modus-vivendi-theme-subtle-diffs t
+      modus-vivendi-theme-intense-standard-completions t
+      modus-vivendi-theme-distinct-org-blocks t
+      modus-vivendi-theme-proportional-fonts t
+      modus-vivendi-theme-rainbow-headings t
+      ;; modus-vivendi-theme-section-headings t
+      modus-vivendi-theme-scale-headings t
+      modus-vivendi-theme-scale-1 1.05
+      modus-vivendi-theme-scale-2 1.1
+      modus-vivendi-theme-scale-3 1.15
+      modus-vivendi-theme-scale-4 1.2
+      modus-vivendi-theme-scale-5 1.3)
+
+;;; try modus vivendi theme
+(setf doom-theme 'modus-vivendi)
+;; (setf doom-theme 'modus-operandi)
+
+;;; mode line help echo
 ;; (setf mode-line-default-help-echo t)
 (tooltip-mode)
 
-;;* option key
+;;; option key
 (setq mac-option-key-is-meta t)
 (setq mac-right-option-modifier nil)
 
-;;* ideal.el
+;;; ideal.el
 ;; (load! "+ideal.el" doom-private-dir)
 
 ;; (setq package-enable-at-startup nil)
@@ -76,10 +101,14 @@
 ;; +org.el
 ;; (load! "+org.el" doom-private-dir)
 
-;;* evil-setting.el
+;;; evil-setting.el
 ;; (load! "evil-setting.el" doom-private-dir)
 
-;;* dollar map is a little strange
+;;; My own yank-from-kill-ring function
+
+(map! :n [?\M-y] 'prot/icomplete-yank-kill-ring)
+
+;;; dollar map is a little strange
 
 (after! org
   (when (keymapp 'durand-evil-dollar-map)
@@ -92,7 +121,7 @@
         :n [?z ?j] 'dired-next-subdir
         :n [?z ?k] 'dired-prev-subdir))
 
-;;* dictionary mode map
+;;; dictionary mode map
 
 (when (featurep! :tools lookup +dictionary)
   (after! osx-dictionary
@@ -102,12 +131,12 @@
           :n [?o] 'osx-dictionary-open-dictionary.app
           :n [?s] 'osx-dictionary-search-input)))
 
-;;* use home key
+;;; use home key
 (map! :meorgvi (kbd "<escape>") #'evil-normal-state
       :mov "à" #'durand-beginning-of-line-or-block
       :n (kbd "<backspace>") #'durand-other-buffer)
 
-;;* some custom mappings
+;;; some custom mappings
 
 ;; archive mapping :ngvm (kbd "s-w") 'delete-other-windows
 
@@ -121,11 +150,11 @@
 (map! :map doom-leader-toggle-map
       "h" #'durand-toggle-hl-todo)
 
-;;* transpose word is very important
+;;; transpose word is very important
 (map! :n [?\M-t] #'transpose-words
       :map lispyville-mode-map :n [?\M-t] #'transpose-words)
 
-;;* this should be put here in order not to interfere with doom's internal
+;;; this should be put here in order not to interfere with doom's internal
 ;; workings
 (setq org-highest-priority ?A
       org-lowest-priority ?E
@@ -150,30 +179,30 @@
 ;; (map! :n (kbd "s-q") 'load-config)
 (map! :n [?\s-q] (lambda! (message "Don't use s-q!")))
 
-;;* set lispy key
+;;; set lispy key
 (after! (evil-collection lispy)
   (lispy-set-key-theme '(special lispy)))
 
 (after! pdf-tools
   (setq-default pdf-view-display-size 'fit-width))
 
-;;* message mode quit
+;;; message mode quit
 (map! :map messages-buffer-mode-map
       :n [?q] 'quit-window)
 
 ;; (map! :nvm "s" nil)
 ;; (map! :g "c" 'self-insert-command)
 
-;;* bookmark remap
+;;; bookmark remap
 (map! :leader :nv (kbd "RET") 'durand-evil-spc-ret-map
       (:map doom-leader-map
         "fp" 'doom/find-file-in-private-config
         "fP" 'doom/open-private-config))
 
-;;* mu4e and elfeed
+;;; mu4e and elfeed
 ;; (load! "mu-el.el" doom-private-dir)
 
-;;* pop up rule for timer list
+;;; pop up rule for timer list
 (set-popup-rule! "timer-list"
                  :side 'bottom
                  :quit t
@@ -189,7 +218,7 @@
 
 (map! :map timer-list-mode-map :n "q" #'quit-window)
 
-;;* popup rule for org capture
+;;; popup rule for org capture
 (set-popup-rule! "^CAPTURE.*\\.org$"
   :side 'bottom
   :select t
@@ -197,7 +226,7 @@
   :quit nil
   :modeline nil)
 
-;;* wrap-region
+;;; wrap-region
 ;; (use-package! wrap-region
 ;;   :config
 ;;   (wrap-region-global-mode t)
@@ -205,7 +234,7 @@
 ;;   (wrap-region-add-wrapper "=" "=")
 ;;   (wrap-region-add-wrapper "-" "-"))
 
-;;* default frames behaviour
+;;; default frames behaviour
 
 (setq initial-frame-alist '((width . 118)
                             (alpha . 90)))
@@ -220,22 +249,23 @@
 (setq frame-resize-pixelwise t)
 (setq revert-without-query '(".*"))
 
-;;* org-agenda and magit should start with emacs state
+;;; org-agenda and magit should start with emacs state
 
 (set-evil-initial-state!
   '(org-agenda-mode magit-status-mode)
   'emacs)
 
-;;* remove org-agenda in motion states
+;;; remove org-agenda in motion states
 (setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes))
 
-;;* dired should start with the normal state
+;;; dired should start with the normal state
 (set-evil-initial-state!
   '(dired-mode)
   'normal)
 
-;;* modeline config
-(setf doom-modeline-height 30
+;;; modeline config
+
+(setf doom-modeline-height 20
       doom-modeline-enable-word-count nil
       doom-modeline-buffer-encoding nil
       doom-modeline-indent-info nil
@@ -266,7 +296,7 @@
 ;; have to wrap it around.
 ;;
 
-;;* the original function does not work
+;;; the original function does not work
 
 ;; (defun doom-modeline-set-modeline-durand (key &optional default)
 ;;   "Set the modeline format. Does nothing if the modeline KEY doesn't exist.
@@ -286,7 +316,7 @@
 ;;     (setq-default mode-line-format '("%e" (:eval (doom-modeline-format--durand))))))
 ;; (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 
-;;* pdf view mode mode line
+;;; pdf view mode mode line
 ;;;###autoload
 ;; (defun set-durand-mode-line ()
 ;;   "Set the mode line to durand style."
@@ -294,33 +324,39 @@
 ;;   (setf mode-line-format '("%e" (:eval (doom-modeline-format--durand))))
 ;;   (force-mode-line-update))
 
-;;* don't ask me if I want to open a file!
+;;; don't ask me if I want to open a file!
 (setf large-file-warning-threshold nil)
 
-;;* c++ needs include files
+;;; c++ needs include files
 (setq-default flycheck-clang-include-path '("include"))
 (setq-default flycheck-gcc-include-path '("include"))
 
-;;* ay-go-to-char
+;;; ay-go-to-char
 (map! :leader :n "y" #'evil-avy-goto-char-timer)
 
-;;* soft wrap lines
+;;; soft wrap lines
 (global-visual-line-mode)
 
-;;* I like my narrow-dwim function
+;;; I like my narrow-dwim function
+
 (map! :leader :n :desc "narrow do what I mean" [?'] #'durand-narrow-dwim)
 
-;;* ivy configurations
+;;; ivy configurations
+
 ;; (load! "+ivy.el" doom-private-dir)
 
-;;* I don't like which-key-mode, as it slows down emacs a lot...
+;;; I don't like which-key-mode, as it slows down emacs a lot...
+
 (remove-hook 'doom-first-input-hook #'which-key-mode)
 (after! which-key  (which-key-mode -1))
-;;* load my dashboard configurations
+
+;;; load my dashboard configurations
+
 ;; (load! "dashboard.el" doom-private-dir)
 
-;;* +default/find-in-notes sometimes crashes because of project detection issues.
+;;; +default/find-in-notes sometimes crashes because of project detection issues.
 ;; and no highlights
+
 (map! :map doom-leader-notes-map
       [?n] #'+default/browse-notes
       [?j] 'evil-ex-nohighlight)
@@ -329,20 +365,21 @@
       [f5] #'durand-file-size
       [f6] #'show-buffer-name)
 
-;;* pdf viewer
+;;; pdf viewer
+
 (setf +latex-viewers '(pdf-tools skim))
 
-;;* ispell default dictionary
+;;; ispell default dictionary
 (setq-default ispell-dictionary "english")
 
-;;* this replaces `save-buffer', but I have my custom key bindings.
+;;; this replaces `save-buffer', but I have my custom key bindings.
 (map! :map doom-leader-file-map
       "s" 'durand-save-word)
 
-;;* scratch buffer major mode
+;;; scratch buffer major mode
 (setf doom-scratch-buffer-major-mode 'emacs-lisp-mode)
 
-;;* some temporary binding before the `fold' module supports `outline-minor-mode'
+;;; some temporary binding before the `fold' module supports `outline-minor-mode'
 ;; correctly.
 
 (map!
@@ -368,7 +405,7 @@
 
 (make-variable-buffer-local 'c-program-name)
 
-;;* glsl auto mode
+;;; glsl auto mode
 
 (add-to-list 'auto-mode-alist '("\\.fs\\'" . glsl-mode))
 (add-to-list 'auto-mode-alist '("\\.vs\\'" . glsl-mode))
@@ -405,7 +442,7 @@
 ;; prevent terminal specific initialisations
 ;; (setf term-file-prefix nil)
 
-;;* osxdictionary pop up rule
+;;; osxdictionary pop up rule
 
 (set-popup-rule! "\\*osx-dictionary\\*"
   :size 0.25
@@ -415,15 +452,15 @@
   :quit t
   :select t)
 
-;;* consider doom fallback buffer real
+;;; consider doom fallback buffer real
 
 (add-to-list 'doom-real-buffer-functions (lambda (buf) (eq buf (doom-fallback-buffer))) t)
 
-;;* workspace switch to
+;;; workspace switch to
 
 (define-key doom-leader-workspace-map [?t] '+workspace/switch-to)
 
-;;* kill karabiner
+;;; kill karabiner
 
 (map! :leader :n [?v ?k] 'kill-karabiner)
 
@@ -452,12 +489,12 @@
 ;;            (* 24 60 60)
 ;;            'kill-karabiner))))
 
-;;* interchange pp-eval-expression and eval-expression
+;;; interchange pp-eval-expression and eval-expression
 
 (map! [remap pp-eval-expression] 'eval-expression
       [remap eval-expression] 'pp-eval-expression)
 
-;;* remove semantic from completion-at-point-functions
+;;; remove semantic from completion-at-point-functions
 
 ;; (after! semantic
 ;;   (remove-hook! (semantic-mode emacs-lisp-mode)
@@ -465,7 +502,7 @@
 ;;              when (string-prefix-p "semantic-" (symbol-name fun))
 ;;              do (remove-hook 'completion-at-point-functions fun))))
 
-;;* it seems to be a better idea to advice rather than remove
+;;; it seems to be a better idea to advice rather than remove
 
 (defadvice! semantic-company-a (orig-fun &rest args)
   "Do nothing when inside a string or a comment."
@@ -678,3 +715,99 @@
 (setf +format-on-save-enabled-modes
       (append +format-on-save-enabled-modes
               (list 'org-mode)))
+
+;;; move ibuffer keybindings
+
+(setf ibuffer-expert t
+      ibuffer-display-summary nil)
+
+(after! ibuffer
+  (map! :map ibuffer-mode-map
+        :n [?t] 'ibuffer-toggle-marks
+        :n [?~] 'ibuffer-do-toggle-modified
+        :n [?/] 'ibuffer-do-kill-lines
+        :n [?g ?r] 'ibuffer-update
+        :n [?d] 'ibuffer-do-delete
+        :n [?D] 'ibuffer-mark-for-delete))
+;;; Exit minibuffer with C-j
+
+(map! :map minibuffer-local-map
+      [?\C-j] 'exit-minibuffer)
+
+;;; find-file is good enough!
+
+(map! :leader
+      [32] 'find-file)
+
+;;; More avy keys
+
+(setq avy-keys (nconc
+                (number-sequence ?a ?z)
+                (number-sequence ?A ?Z)))
+
+;;; Don't use ido!
+(setf projectile-completion-system 'default)
+
+;;; use rg.el
+
+(use-package! rg
+  :commands (rg)
+  :config
+  (setq rg-group-result t
+        rg-hide-command t
+        rg-show-columns nil
+        rg-show-header t
+        rg-custom-type-aliases nil
+        rg-default-alias-fallback "all")
+
+  (rg-define-search prot/rg-vc-or-dir
+                    "RipGrep in project root or present directory."
+                    :query ask
+                    :format regexp
+                    :files "everything"
+                    :dir (let ((vc (vc-root-dir)))
+                           (if vc
+                               vc                ; search root project dir
+                             default-directory)) ; or from the current dir
+                    :confirm prefix
+                    :flags ("--hidden -g !.git"))
+
+  (rg-define-search prot/rg-ref-in-dir
+                    "RipGrep for thing at point in present directory."
+                    :query point
+                    :format regexp
+                    :files "everything"
+                    :dir default-directory
+                    :confirm prefix
+                    :flags ("--hidden -g !.git"))
+  :bind (:map rg-mode-map
+         ("s" . prot/rg-save-search-as-name)
+         ("C-n" . next-line)
+         ("C-p" . previous-line)
+         ("M-n" . rg-next-file)
+         ("M-p" . rg-prev-file)))
+
+;;; flyspell dummy is wiser than a dummy popup
+
+(use-package! flyspell-correct
+  :commands flyspell-correct-at-point flyspell-correct-previous
+  :config
+  (setf flyspell-correct-interface 'flyspell-correct-dummy))
+
+;;; enable flyspell for text modes
+(add-hook! '(text-mode-hook) #'flyspell-mode)
+
+;;; Use `completing-read' for company
+
+(map! (:when (featurep! :completion company)
+       (:after company
+        (:map company-active-map
+         "C-S-s" 'durand-company-completing))))
+
+;;; Why is `rainbow-mode' missing?
+
+(use-package! rainbow-mode
+  :commands rainbow-mode
+  :config
+  (setq rainbow-ansi-colors nil)
+  (setq rainbow-x-colors nil))

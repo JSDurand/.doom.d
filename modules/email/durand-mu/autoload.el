@@ -222,12 +222,12 @@
     (message "Update begins.")))
 
 ;;;###autoload
-(defun mu4e-contacts-show-time (&rest args)
+(defun mu4e-contacts-show-time (&rest _args)
   "show time"
-  (after! mu4e
-    (mu4e-index-message "Temps: %s, contacts: %d"
-                        (format-time-string "%k:%M:%S")
-                        (hash-table-count mu4e~contacts))))
+  (require 'mu4e)
+  (mu4e-index-message "Temps: %s, contacts: %d"
+                      (format-time-string "%k:%M:%S")
+                      (hash-table-count mu4e~contacts)))
 
 ;;;###autoload
 (defun durand-mu4e (&optional arg)
