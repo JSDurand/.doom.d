@@ -191,7 +191,50 @@ Add this to `minibuffer-exit-hook'."
   "Advice to wrap function to use vertical display in icomplete."
   (interactive
    (lambda (old-interactive-spec)
-     (icomplete-vertical-do '(:separator "\n"
-                              :height (/ (frame-height) 4))
+     (icomplete-vertical-do '(:height (/ (frame-height) 4))
        (advice-eval-interactive-spec
         old-interactive-spec)))))
+
+;;;###autoload
+(defun durand-icomplete-vertical-around (orig-func &rest _args)
+  "Advice to wrap function to use vertical display in icomplete.
+This is an /around/ advice."
+  (icomplete-vertical-do
+      '(:height (/ (frame-height) 4))
+    (funcall orig-func)))
+
+;;;###autoload
+(defun durand-icomplete-backward-updir ()
+  "Delete char before or go up directory.
+Don't kill, delete instead."
+  (interactive)
+  (let ((meta (completion--field-metadata (icomplete--field-beg))))
+    (cond
+     ((and (eq (char-before) ?/)
+           (eq (car-safe meta) 'metadata)
+           (eq (alist-get 'category (cdr meta))
+               'file)
+           ;; (eq (icomplete--category) 'file)
+           )
+      (delete-region
+       (point)
+       (progn
+         (forward-char -1)
+         (unwind-protect
+             (search-forward "/" nil nil -1)
+           (backward-char -1))
+         (point))))
+     (t
+      (call-interactively 'backward-delete-char)))))
+
+;;;###autoload
+(defun durand-company-style-dispatcher (_pattern _index _total)
+  "When completing using `company', use the regexp style.
+Using other more /loose/ styles oft results in a lot more
+candidates for company, which slows down the typing speed with an
+insurmountable difference, so I choose the regexp style, and it
+works well.
+PATTERN, INDEX, and TOTAL are as described as in the docs
+of `orderless-style-dispatchers'."
+  (when company-candidates
+    'orderless-regexp))

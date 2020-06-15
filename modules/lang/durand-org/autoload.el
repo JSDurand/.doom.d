@@ -2788,8 +2788,9 @@ keyword but not archived, instead of A_VOIR."
                                    (list (durand-org-filter-dates title)
                                          position
                                          file))))))))
-    (let* ((choix (completing-read "Chois un titre à mettre à jour: " cands
-                                   nil t))
+    (let* ((choix (icomplete-vertical-do '(:height (/ (frame-height) 4))
+                      (completing-read "Chois un titre à mettre à jour: " cands
+                                       nil t)))
            (item (cl-assoc choix cands :test #'string=)))
       (with-current-file (caddr item) nil
         (goto-char (cadr item))
@@ -3430,7 +3431,9 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
 (defun durand-capture ()
   "Use `completing-read' to choose a key."
   (interactive)
-  (let* ((temps (org-capture-upgrade-templates org-capture-templates))
+  (let* ((temps (org-contextualize-keys
+                 (org-capture-upgrade-templates org-capture-templates)
+                 org-capture-templates-contexts))
          (choix (mapcar (lambda (x)
                           (cons (string-join (list (car x)
                                                    (cadr x))

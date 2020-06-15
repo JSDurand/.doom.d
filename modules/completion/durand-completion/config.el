@@ -17,23 +17,25 @@
 
   (add-hook 'icomplete-minibuffer-setup-hook 'prot/icomplete-minibuffer-truncate)
 
-  :bind (:map icomplete-minibuffer-map
+  :bind (:map minibuffer-local-map
+         ("<backspace>" . durand-icomplete-backward-updir)
+         ("<delete>" . durand-icomplete-backward-updir)
+         :map icomplete-minibuffer-map
 
-         ("<tab>" . 'minibuffer-force-complete)
-         ("<down>" . 'icomplete-forward-completions)
-         ("<right>" . 'icomplete-forward-completions)
-         ("C-n" . 'icomplete-forward-completions)
-         ("<up>" . 'icomplete-backward-completions)
-         ("<left>" . 'icomplete-backward-completions)
-         ("C-p" . 'icomplete-backward-completions)
-         ("<return>" . 'icomplete-force-complete-and-exit)
-         ("C-j" . 'exit-minibuffer)))
+         ("<tab>" . minibuffer-force-complete)
+         ("<down>" . icomplete-forward-completions)
+         ("<right>" . icomplete-forward-completions)
+         ("C-n" . icomplete-forward-completions)
+         ("<up>" . icomplete-backward-completions)
+         ("<left>" . icomplete-backward-completions)
+         ("C-p" . icomplete-backward-completions)
+         ("<return>" . icomplete-force-complete-and-exit)
+         ("C-j" . exit-minibuffer)))
 
 (use-package! icomplete-vertical
   :after icomplete
-  :bind (:map icomplete-minibuffer-map
-         ("C-v" . 'icomplete-vertical-toggle))
   :config
+  (define-key icomplete-minibuffer-map [?\C-v] 'icomplete-vertical-toggle)
   ;; add advices so that some functions show no candidates without input
   (advice-add 'helpful-callable :before 'prot/icomplete-empty-input-no-list)
   (advice-add 'helpful-variable :before 'prot/icomplete-empty-input-no-list)
@@ -41,27 +43,30 @@
 
 (use-package! embark
   :after (icomplete orderless)
-  :bind (:map minibuffer-local-completion-map
-         ("M-o" . 'embark-act)
-         ("C-o" . 'embark-export))
   :config
+(define-key minibuffer-local-completion-map [?\M-o] 'embark-act)
+(define-key minibuffer-local-completion-map [?\C-o] 'embark-export)
   ;; Make C-h {f,v,o} use vertical layout with icomplete-mode.
   (advice-add 'describe-function :before 'durand-icomplete-vertical)
   (advice-add 'describe-variable :before 'durand-icomplete-vertical)
-  (advice-add 'describe-symbol   :before 'durand-icomplete-vertical)
-  (advice-add 'helpful-callable  :before 'durand-icomplete-vertical)
-  (advice-add 'helpful-variable  :before 'durand-icomplete-vertical)
-  (advice-add 'helpful-symbol    :before 'durand-icomplete-vertical)
+  (advice-add 'describe-symbol :before 'durand-icomplete-vertical)
+  (advice-add 'helpful-callable :before 'durand-icomplete-vertical)
+  (advice-add 'helpful-variable :before 'durand-icomplete-vertical)
+  (advice-add 'helpful-symbol :before 'durand-icomplete-vertical)
+  (advice-add 'doom/help-package-config :before 'durand-icomplete-vertical)
+  (advice-add 'doom/goto-private-packages-file :before 'durand-icomplete-vertical)
+  (advice-add 'doom/help-package-homepage :before 'durand-icomplete-vertical)
+  (advice-add 'doom/help-packages :before 'durand-icomplete-vertical)
+  (advice-add 'find-file :before 'durand-icomplete-vertical)
+  (advice-add 'doom/find-file-in-private-config :around 'durand-icomplete-vertical-around)
   ;; no multiple embark occur buffers!
   (add-hook 'minibuffer-exit-hook 'prot/embark-live-occur-single-buffer))
 
 (use-package! minibuffer
-  :bind (:map minibuffer-local-completion-map
-         ("<return>" . 'minibuffer-force-complete-and-exit)
-         ("C-j" . 'exit-minibuffer)
-         ("SPC" . nil))
-
   :config
+  (define-key minibuffer-local-completion-map [return] 'minibuffer-force-complete-and-exit)
+  (define-key minibuffer-local-completion-map [?\C-j] 'exit-minibuffer)
+  (define-key minibuffer-local-completion-map [32] nil)
 
   (setf enable-recursive-minibuffers t))
 
@@ -77,6 +82,11 @@
           orderless-regexp
           orderless-prefixes
           orderless-literal))
+
+  (setf orderless-style-dispatchers
+        '(durand-company-style-dispatcher))
+
+  (setf orderless-component-separator "[ &]+")
 
   (setq-default indent-tabs-mode nil)
 

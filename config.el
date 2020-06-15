@@ -249,10 +249,16 @@
 (setq frame-resize-pixelwise t)
 (setq revert-without-query '(".*"))
 
-;;; org-agenda and magit should start with emacs state
+;;; org-agenda and magit and gnus should start with emacs state
 
 (set-evil-initial-state!
-  '(org-agenda-mode magit-status-mode)
+  '(org-agenda-mode
+    magit-status-mode
+    gnus-group-mode
+    gnus-summary-mode
+    gnus-article-mode
+    gnus-server-mode
+    gnus-browse-mode)
   'emacs)
 
 ;;; remove org-agenda in motion states

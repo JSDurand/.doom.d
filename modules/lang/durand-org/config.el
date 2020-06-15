@@ -13,6 +13,7 @@
 ;; (after! org-tempo
 ;;   (add-to-list 'org-structure-template-alist '("g" . "src durand-greek")))
 (after! org
+  (add-to-list 'org-modules 'ol-gnus)
   (setq org-todo-keywords
         '((sequence "TODO(t)" "START(s)" "WORKING(w)" "HARD-WORKING(h)" "ALMOST(a)" "|" "DONE(d)")
           (sequence "TO-THINK(c)" "PENDING(p)" "HARD(r)" "IMPOSSIBLE(i)" "|" "SOLVED(v)"))
@@ -180,6 +181,7 @@
 
 ;; The original org-protocol-convert handles youtube links wrong
 (after! org-capture
+
   (setq org-capture-templates
         '(("m" "Account records" entry
            (file+olp+datetree "~/org/account/account.org")
@@ -196,6 +198,11 @@
           ("l" "Store links" entry
            (file+headline "~/org/notes.org" "Links")
            "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
+          ("g" "GNUS" entry
+           (file "~/org/notes.org")
+           "* TO-THINK %:subject\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n  %:from\n  %:to\n  %a\n  %?"
+           :empty-lines 1
+           :kill-buffer t)
           ("L" "for storing webpages" entry
            (function org-determine-link-file)
            "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
@@ -228,6 +235,10 @@
            (file+headline "~/org/français/français.org" "Liste de mots français")
            "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
            :jump-to-captured t)))
+
+  (setf org-capture-templates-contexts
+        '(("g" ((in-mode . "gnus-summary-mode")
+                (in-mode . "gnus-article-mode")))))
 
   (add-hook 'org-capture-mode-hook (lambda ()
                                      "Activate account minor mode if in capturing accounts"

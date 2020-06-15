@@ -16,7 +16,8 @@
        durand-completion
        (company
         ;; +childframe
-        )      ; the ultimate code completion backend
+        )
+                                        ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;; ivy
@@ -193,6 +194,7 @@
        :email
        (mu4e +gmail)
        durand-mu                        ; My mu4e configurations
+       durand-gnus
        ;;notmuch
        ;;(wanderlust +gmail)
 
