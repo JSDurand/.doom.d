@@ -107,7 +107,12 @@
   "The map for space v. Generally the map for viewing things, like
 articles, bookmarks, youtube links, novels, or weblinks.")
 
+(defvar durand-download-map (make-keymap)
+  "The map for =space v d=. Generally the map for downloading things,
+like youtube videos or others.")
+
 (map! :map durand-view-map
+      [?a] durand-download-map
       [?l] #'org-open-articles
       [?b] #'org-open-bookmarks
       [?B] #'battery
@@ -120,6 +125,9 @@ articles, bookmarks, youtube links, novels, or weblinks.")
       [?p] #'durand-chercher-pdf
       [?d] #'durand-open-dashboard
       [?v] #'durand-view-videos)
+
+(map! :map durand-download-map
+      [?y] #'durand-download-youtube)
 
 ;; space: this is the leader of doom.
 

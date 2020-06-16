@@ -21,7 +21,9 @@
          ("<backspace>" . durand-icomplete-backward-updir)
          ("<delete>" . durand-icomplete-backward-updir)
          :map icomplete-minibuffer-map
-
+         ("<C-backspace>" . durand-crm-backward-delete-to-separator)
+         ("s-f" . durand-crm-forward-separator)
+         ("s-b" . durand-crm-backward-separator)
          ("<tab>" . minibuffer-force-complete)
          ("<down>" . icomplete-forward-completions)
          ("<right>" . icomplete-forward-completions)

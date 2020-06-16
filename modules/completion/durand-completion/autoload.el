@@ -238,3 +238,29 @@ PATTERN, INDEX, and TOTAL are as described as in the docs
 of `orderless-style-dispatchers'."
   (when company-candidates
     'orderless-regexp))
+
+;;;###autoload
+(defun durand-crm-forward-separator (&optional arg)
+  "Move forward ARG many separators."
+  (interactive "p")
+  (re-search-forward crm-separator nil t arg))
+
+;;;###autoload
+(defun durand-crm-backward-separator (&optional arg)
+  "Move backward ARG many separators."
+  (interactive "p")
+  (re-search-forward crm-separator nil t (- arg)))
+
+;;;###autoload
+(defun durand-crm-backward-delete-to-separator (&optional arg)
+  "kill backward past ARG many separators."
+  (interactive "p")
+  (unless (<= arg 0)
+    (while (looking-back crm-separator)
+      (replace-match ""))
+    (delete-region (point)
+                   (progn
+                     (unwind-protect
+                         (re-search-forward crm-separator nil nil (- arg))
+                       (backward-char -1))
+                     (point)))))

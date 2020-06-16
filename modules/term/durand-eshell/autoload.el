@@ -4,10 +4,13 @@
 (defun durand/eshell-complete-recent-dir ()
   "Choose a recent directory to go to."
   (interactive)
+  (unless (derived-mode-p 'eshell-mode)
+    (user-error "Not in eshell!"))
   (let* ((recent-dirs (ring-elements eshell-last-dir-ring))
-         (chosen-dir (completing-read
-                      "Chois un directoire:"
-                      recent-dirs nil t)))
+         (chosen-dir (icomplete-vertical-do '(:height (/ (frame-height) 4))
+                       (completing-read
+                        "Chois un directoire:"
+                        recent-dirs nil t))))
     (goto-char (point-max))
     (insert chosen-dir)
     (eshell-send-input)))
