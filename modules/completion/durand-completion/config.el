@@ -15,59 +15,71 @@
         icomplete-prospects-height 1
         icomplete-tidy-shadowed-file-names nil)
 
-  (add-hook 'icomplete-minibuffer-setup-hook 'prot/icomplete-minibuffer-truncate)
+  ;; NOTE: This is already covered by `icomplete-vertical-mode'.
+  ;; (add-hook 'icomplete-minibuffer-setup-hook 'prot/icomplete-minibuffer-truncate)
 
   :bind (:map minibuffer-local-map
          ("<backspace>" . durand-icomplete-backward-updir)
          ("<delete>" . durand-icomplete-backward-updir)
+         ;; ("<down>" . embark-forward-completions)
+         ;; ("<right>" . embark-forward-completions)
+         ;; ("C-n" . embark-forward-completions)
+         ;; ("<up>" . embark-backward-completions)
+         ;; ("<left>" . embark-backward-completions)
+         ;; ("C-p" . embark-backward-completions)
+         ;; ("<return>" . exit-minibuffer)
+         ;; ("C-j" . exit-minibuffer)
+         ;; :map minibuffer-local-completion-map
+         ;; ("<return>" . minibuffer-complete-and-exit)
+         ;; ("C-j" . exit-minibuffer)
+         :map read-expression-map
+         ("C-j" . exit-minibuffer)
          :map icomplete-minibuffer-map
+         ;; ("<return>" . minibuffer-complete-and-exit)
+         ("C-j" . exit-minibuffer)
          ("<C-backspace>" . durand-crm-backward-delete-to-separator)
+         ("C-w" . durand-crm-backward-delete-to-separator)
          ("s-f" . durand-crm-forward-separator)
          ("s-b" . durand-crm-backward-separator)
          ("<tab>" . minibuffer-force-complete)
-         ("<down>" . icomplete-forward-completions)
-         ("<right>" . icomplete-forward-completions)
-         ("C-n" . icomplete-forward-completions)
-         ("<up>" . icomplete-backward-completions)
-         ("<left>" . icomplete-backward-completions)
-         ("C-p" . icomplete-backward-completions)
-         ("<return>" . icomplete-force-complete-and-exit)
-         ("C-j" . exit-minibuffer)))
+         ("<return>" . icomplete-force-complete-and-exit)))
 
 (use-package! icomplete-vertical
   :after icomplete
   :config
   (define-key icomplete-minibuffer-map [?\C-v] 'icomplete-vertical-toggle)
   ;; add advices so that some functions show no candidates without input
-  (advice-add 'helpful-callable :before 'prot/icomplete-empty-input-no-list)
-  (advice-add 'helpful-variable :before 'prot/icomplete-empty-input-no-list)
-  (advice-add 'execute-extended-command :before 'prot/icomplete-empty-input-no-list))
+  ;; (advice-add 'helpful-callable :before 'prot/icomplete-empty-input-no-list)
+  ;; (advice-add 'helpful-variable :before 'prot/icomplete-empty-input-no-list)
+  ;; (advice-add 'execute-extended-command :before 'prot/icomplete-empty-input-no-list)
+  )
 
 (use-package! embark
   :after (icomplete orderless)
   :config
-(define-key minibuffer-local-completion-map [?\M-o] 'embark-act)
-(define-key minibuffer-local-completion-map [?\C-o] 'embark-export)
+  (define-key minibuffer-local-completion-map [?\M-o] 'embark-act)
+  (define-key minibuffer-local-completion-map [?\C-o] 'embark-export)
   ;; Make C-h {f,v,o} use vertical layout with icomplete-mode.
-  (advice-add 'describe-function :before 'durand-icomplete-vertical)
-  (advice-add 'describe-variable :before 'durand-icomplete-vertical)
-  (advice-add 'describe-symbol :before 'durand-icomplete-vertical)
-  (advice-add 'helpful-callable :before 'durand-icomplete-vertical)
-  (advice-add 'helpful-variable :before 'durand-icomplete-vertical)
-  (advice-add 'helpful-symbol :before 'durand-icomplete-vertical)
-  (advice-add 'doom/help-package-config :before 'durand-icomplete-vertical)
-  (advice-add 'doom/goto-private-packages-file :before 'durand-icomplete-vertical)
-  (advice-add 'doom/help-package-homepage :before 'durand-icomplete-vertical)
-  (advice-add 'doom/help-packages :before 'durand-icomplete-vertical)
-  (advice-add 'find-file :before 'durand-icomplete-vertical)
-  (advice-add 'doom/find-file-in-private-config :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'describe-function :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'describe-variable :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'describe-symbol :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'helpful-callable :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'helpful-variable :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'helpful-symbol :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'doom/help-package-config :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'doom/goto-private-packages-file :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'doom/help-package-homepage :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'doom/help-packages :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'find-file :around 'durand-icomplete-vertical-around)
+  ;; (advice-add 'doom/find-file-in-private-config :around 'durand-icomplete-vertical-around)
   ;; no multiple embark occur buffers!
-  (add-hook 'minibuffer-exit-hook 'prot/embark-live-occur-single-buffer))
+  ;; (add-hook 'minibuffer-exit-hook 'prot/embark-live-occur-single-buffer)
+  (advice-add 'embark-live-occur :after 'durand-embark-switch-to-minibuffer-a))
 
 (use-package! minibuffer
   :config
-  (define-key minibuffer-local-completion-map [return] 'minibuffer-force-complete-and-exit)
-  (define-key minibuffer-local-completion-map [?\C-j] 'exit-minibuffer)
+  ;; (define-key minibuffer-local-completion-map [return] 'minibuffer-force-complete-and-exit)
+  ;; (define-key minibuffer-local-completion-map [?\C-j] 'exit-minibuffer)
   (define-key minibuffer-local-completion-map [32] nil)
 
   (setf enable-recursive-minibuffers t))

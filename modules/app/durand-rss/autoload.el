@@ -187,7 +187,9 @@ Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
 (defun durand-elfeed-filter-complete ()
   "Complete filters for elfeed."
   (interactive)
-  (let* ((tags (elfeed-db-get-all-tags))
+  (let* ((elfeed-search-filter-active :live)
+         (crm-separator " ")
+         (tags (elfeed-db-get-all-tags))
          (tags (cl-loop for tag in tags
                         append (list
                                 (format "+%s" tag)
@@ -195,7 +197,8 @@ Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
          (filters (completing-read-multiple
                    "Filter: "
                    tags nil nil
-                   (replace-regexp-in-string " " "," elfeed-search-filter))))
+                   elfeed-search-filter)))
+    (ignore crm-separator elfeed-search-filter-active)
     (setf elfeed-search-filter
           (string-join filters " "))
     (elfeed-search-update :force)))

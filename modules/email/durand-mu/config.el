@@ -49,7 +49,8 @@
           ("/suivis" . ?s)
           ("/drafts" . ?d)))
   (map! :map mu4e-view-mode-map
-        [?o] 'mu4e-view-attach-emacs
+        :n [?o] 'mu4e-view-attach-emacs
+        :n [?!] (lambda! (evil-scroll-line-down 1))
         [escape] 'doom/escape)
   (add-to-list 'mu4e-view-actions
                '("Browse this mail" . mu4e-action-view-in-browser))
@@ -59,45 +60,67 @@
 
   (remove '("view as pdf" . mu4e-action-view-as-pdf) mu4e-view-actions)
   (setq mu4e-contexts
-        `(,(make-mu4e-context
-            :name "Awllower"
-            :enter-func (lambda () (mu4e-message "Entering Awllower context"))
-            :leave-func (lambda () (mu4e-message "Leaving Awllower context"))
-            ;; we match based on the contact-fields of the message
-            :match-func (lambda (msg)
-                          (when msg
-                            (or
-                             (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
-                             (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
-            :vars '((user-mail-address . "mmemmew@gmail.com")
-                    (user-full-name . "李俊緯")
-                    (mu4e-compose-signature . "#+BEGIN_EXPORT html
+        (list
+         (make-mu4e-context
+          :name "Awllower"
+          :enter-func (lambda () (mu4e-message "Entering Awllower context"))
+          :leave-func (lambda () (mu4e-message "Leaving Awllower context"))
+          ;; we match based on the contact-fields of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (or
+                           (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
+                           (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
+          :vars '((user-mail-address . "mmemmew@gmail.com")
+                  (user-full-name . "李俊緯")
+                  (mu4e-compose-signature . "#+BEGIN_EXPORT html
 <span style=\"color:rgb(6,144,255)\">生 俊緯</span>
 #+END_EXPORT")
-                    (mu4e-sent-folder . "/gmail/sent")
-                    (smtpmail-smtp-user . "mmemmew")
-                    (smtpmail-local-domain . "gmail.com")
-                    (smtpmail-default-smtp-server . "smtp.gmail.com")
-                    (smtpmail-smtp-server . "smtp.gmail.com")
-                    (smtpmail-smtp-service . 587)))
-          (\, (make-mu4e-context
-               :name "NCTS"
-               :enter-func (lambda () (mu4e-message "Switch to the NCTS context"))
-               :leave-func (lambda () (mu4e-message "Leave NCTS context"))
-               ;; no leave-func
-               ;; we match based on the maildir of the message
-               ;; this matches maildir /Arkham and its sub-directories
-               :match-func (lambda (msg)
-                             (when msg
-                               (or
-                                (mu4e-message-contact-field-matches msg :to "chunweilee@ncts.ntu.edu.tw")
-                                (mu4e-message-contact-field-matches msg :from "chunweilee@ncts.ntu.edu.tw"))))
-               :vars (quote ((user-mail-address . "chunweilee@ncts.ntu.edu.tw")
-                             (user-full-name . "李俊緯")
-                             (mu4e-compose-signature .
-                                                     (concat
-                                                      "Sincerely Yours,\n"
-                                                      "俊緯"))))))))
+                  (mu4e-sent-folder . "/gmail/sent")
+                  (smtpmail-smtp-user . "mmemmew")
+                  (smtpmail-local-domain . "gmail.com")
+                  (smtpmail-default-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-service . 587)))
+         (make-mu4e-context
+          :name "Durand"
+          :enter-func (lambda () (mu4e-message "Entering Durand context"))
+          :leave-func (lambda () (mu4e-message "Leaving Durand context"))
+          ;; we match based on the contact-fields of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (or
+                           (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
+                           (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
+          :vars '((user-mail-address . "mmemmew@gmail.com")
+                  (user-full-name . "Sévère Durand")
+                  (mu4e-compose-signature . "#+BEGIN_EXPORT html
+<span style=\"color:rgb(6,144,255)\">Sévère Durand</span>
+#+END_EXPORT")
+                  (mu4e-sent-folder . "/gmail/sent")
+                  (smtpmail-smtp-user . "mmemmew")
+                  (smtpmail-local-domain . "gmail.com")
+                  (smtpmail-default-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-service . 587)))
+         (make-mu4e-context
+          :name "NCTS"
+          :enter-func (lambda () (mu4e-message "Switch to the NCTS context"))
+          :leave-func (lambda () (mu4e-message "Leave NCTS context"))
+          ;; no leave-func
+          ;; we match based on the maildir of the message
+          ;; this matches maildir /Arkham and its sub-directories
+          :match-func (lambda (msg)
+                        (when msg
+                          (or
+                           (mu4e-message-contact-field-matches msg :to "chunweilee@ncts.ntu.edu.tw")
+                           (mu4e-message-contact-field-matches msg :from "chunweilee@ncts.ntu.edu.tw"))))
+          :vars (quote ((user-mail-address . "chunweilee@ncts.ntu.edu.tw")
+                        (user-full-name . "李俊緯")
+                        (mu4e-compose-signature .
+                                                (concat
+                                                 "Sincerely Yours,\n"
+                                                 "俊緯")))))))
   (setq mu4e-context-policy 'pick-first
         mu4e-attachment-dir "~/Downloads"
         mu4e-mu-binary "/usr/local/bin/mu")

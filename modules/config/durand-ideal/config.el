@@ -22,7 +22,8 @@
 
   (map! :leader
         "," 'durand-switch-buffer
-        :n [?b ?v] 'ibuffer))
+        :n [?b ?v] 'ibuffer
+        :n [?b ?b] 'durand-buffers-major-mode))
 
 (map! :leader "wa" #'ace-window)
 

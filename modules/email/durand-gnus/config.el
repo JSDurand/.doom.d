@@ -22,12 +22,14 @@
 (use-package! gnus-agent
   :after gnus
   :bind (:map gnus-agent-summary-mode-map
+         ("$" . previous-line)
+         ("ù" . next-line)
          ("n" . gnus-summary-next-article)
          ("p" . gnus-summary-prev-article)
          ("N" . gnus-summary-next-unread-article)
          ("P" . gnus-summary-prev-unread-article)
          ("o" . delete-other-windows)
-         ("y" . evil-avy-goto-char-timer)
+         ("y" . evil-avy-goto-line)
          ("M-n" . gnus-summary-next-thread)
          ("M-p" . gnus-summary-prev-thread)
          ("C-M-n" . gnus-summary-next-group)

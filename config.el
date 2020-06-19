@@ -786,6 +786,14 @@
                     :dir default-directory
                     :confirm prefix
                     :flags ("--hidden -g !.git"))
+
+  (set-popup-rule! "^\\*rg\\*"
+    :size 0.3
+    :side 'bottom
+    :select t
+    :ttl 5
+    :modeline nil)
+
   :bind (:map rg-mode-map
          ("s" . prot/rg-save-search-as-name)
          ("C-n" . next-line)
@@ -817,3 +825,43 @@
   :config
   (setq rainbow-ansi-colors nil)
   (setq rainbow-x-colors nil))
+
+;;; advices for icomplete-vertical
+
+;;; NOTE: I have to define the advice function first before I use it to advice a
+;;; function.
+
+;;;###autoload
+(defun durand-icomplete-vertical (&rest _args)
+  "Advice to wrap function to use vertical display in icomplete."
+  (interactive
+   (lambda (old-interactive-spec)
+     (icomplete-vertical-do (:height (/ (frame-height) 4))
+       (advice-eval-interactive-spec
+        old-interactive-spec)))))
+
+;;;###autoload
+(defun durand-icomplete-vertical-and-no-list-no-input (&rest _args)
+  "Advice to initially hide candidates and use vertical display."
+  (interactive
+   (lambda (old-interactive-spec)
+     (icomplete-vertical-do (:height (/ (frame-height) 4))
+       (let (icomplete-show-matches-on-no-input)
+         (advice-eval-interactive-spec old-interactive-spec))))))
+
+(advice-add 'describe-function :before 'durand-icomplete-vertical)
+(advice-add 'describe-variable :before 'durand-icomplete-vertical)
+(advice-add 'describe-symbol :before 'durand-icomplete-vertical)
+;; (advice-add 'helpful-callable :before 'durand-icomplete-vertical)
+;; (advice-add 'helpful-variable :before 'durand-icomplete-vertical)
+(advice-add 'helpful-symbol :before 'durand-icomplete-vertical)
+(advice-add 'doom/help-package-config :around 'durand-icomplete-vertical-around)
+(advice-add 'doom/goto-private-packages-file :before 'durand-icomplete-vertical-around)
+(advice-add 'doom/help-package-homepage :around 'durand-icomplete-vertical-around)
+(advice-add 'doom/help-packages :around 'durand-icomplete-vertical-around)
+(advice-add 'find-file :before 'durand-icomplete-vertical)
+(advice-add 'doom/find-file-in-private-config :around 'durand-icomplete-vertical-around)
+
+(advice-add 'helpful-callable :before 'durand-icomplete-vertical-and-no-list-no-input)
+(advice-add 'helpful-variable :before 'durand-icomplete-vertical-and-no-list-no-input)
+(advice-add 'execute-extended-command :before 'durand-icomplete-vertical-and-no-list-no-input)

@@ -298,3 +298,4 @@ effect."
    ((eq (doom-fallback-buffer) buf) nil)
    (t (when (kill-buffer buf)
         'kill))))
+

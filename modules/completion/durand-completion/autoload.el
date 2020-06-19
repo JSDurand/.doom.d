@@ -117,32 +117,36 @@ Use as a value for `completion-in-region-function'."
         (insert completion)
         t))))
 
+;; NOTE: This is already covered by `icomplete-vertical-mode'.
 ;;;###autoload
-(defun prot/icomplete-minibuffer-truncate ()
-    "Truncate minibuffer lines in `icomplete-mode'.
-  This should only affect the horizontal layout and is meant to
-  enforce `icomplete-prospects-height' being set to 1.
+;; (defun prot/icomplete-minibuffer-truncate ()
+;;     "Truncate minibuffer lines in `icomplete-mode'.
+;;   This should only affect the horizontal layout and is meant to
+;;   enforce `icomplete-prospects-height' being set to 1.
 
-  Hook it to `icomplete-minibuffer-setup-hook'."
-    (when (and (minibufferp)
-               (bound-and-true-p icomplete-mode))
-      (setq truncate-lines t)))
+;;   Hook it to `icomplete-minibuffer-setup-hook'."
+;;     (when (and (minibufferp)
+;;                (bound-and-true-p icomplete-mode))
+;;       (setq truncate-lines nil)))
 
 ;;; show no candidates without input for certain functions
 
 ;;;###autoload
-(defun prot/icomplete-empty-input-no-list (&rest _args)
-  "Advice to initially hide candidates in `icomplete-mode'."
-  (interactive
-   (lambda (old-interactive-spec)
-     (let ((icomplete-show-matches-on-no-input nil))
-       (ignore icomplete-show-matches-on-no-input)
-       (advice-eval-interactive-spec old-interactive-spec)))))
+;; (defun prot/icomplete-empty-input-no-list (&rest _args)
+;;   "Advice to initially hide candidates in `icomplete-mode'."
+;;   (interactive
+;;    (lambda (old-interactive-spec)
+;;      (let ((icomplete-show-matches-on-no-input nil))
+;;        (ignore icomplete-show-matches-on-no-input)
+;;        (advice-eval-interactive-spec old-interactive-spec)))))
 
-(defun durand-icomplete-empty-input-no-list (old-fun &rest args)
+;;;###autoload
+(defun durand-icomplete-empty-input-no-list (old-fun &rest _args)
   "Advice to initially hide candidates in `icomplete-mode'.
 Add an around advice to the function to effect."
-  )
+  (let ((icomplete-show-matches-on-no-input nil))
+    (ignore icomplete-show-matches-on-no-input)
+    (call-interactively old-fun)))
 
 ;;;###autoload
 (defun prot/icomplete-yank-kill-ring ()
@@ -167,12 +171,12 @@ normally would when calling `yank' followed by `yank-pop'."
        (completing-read "Yank from kill ring: " kills nil t)))))
 
 ;;;###autoload
-(defun prot/embark-live-occur-single-buffer ()
-  "Do not spawn multiple `embark-live-occur' buffers.
-Add this to `minibuffer-exit-hook'."
-  (let ((eo "*Embark Live Occur*"))
-    (when (get-buffer eo)
-      (kill-buffer eo))))
+;; (defun prot/embark-live-occur-single-buffer ()
+;;   "Do not spawn multiple `embark-live-occur' buffers.
+;; Add this to `minibuffer-exit-hook'."
+;;   (let ((eo "*Embark Live Occur*"))
+;;     (when (get-buffer eo)
+;;       (kill-buffer eo))))
 
 ;;;###autoload
 (defun contrib/with-embark-live-occur (&rest _args)
@@ -187,13 +191,19 @@ Add this to `minibuffer-exit-hook'."
        (advice-eval-interactive-spec old-interactive-spec)))))
 
 ;;;###autoload
-(defun durand-icomplete-vertical (&rest _args)
-  "Advice to wrap function to use vertical display in icomplete."
-  (interactive
-   (lambda (old-interactive-spec)
-     (icomplete-vertical-do '(:height (/ (frame-height) 4))
-       (advice-eval-interactive-spec
-        old-interactive-spec)))))
+(defun durand-embark-switch-to-minibuffer-a ()
+  "Switch back to minibuffer."
+  (when-let ((mini-window (active-minibuffer-window)))
+    (select-window mini-window)))
+
+;;;###autoload
+;; (defun durand-icomplete-vertical (&rest _args)
+;;   "Advice to wrap function to use vertical display in icomplete."
+;;   (interactive
+;;    (lambda (old-interactive-spec)
+;;      (icomplete-vertical-do (:height (/ (frame-height) 4))
+;;        (advice-eval-interactive-spec
+;;         old-interactive-spec)))))
 
 ;;;###autoload
 (defun durand-icomplete-vertical-around (orig-func &rest _args)
@@ -201,7 +211,8 @@ Add this to `minibuffer-exit-hook'."
 This is an /around/ advice."
   (icomplete-vertical-do
       '(:height (/ (frame-height) 4))
-    (funcall orig-func)))
+    (let (icomplete-show-matches-on-no-input)
+      (call-interactively orig-func))))
 
 ;;;###autoload
 (defun durand-icomplete-backward-updir ()
@@ -261,6 +272,99 @@ of `orderless-style-dispatchers'."
     (delete-region (point)
                    (progn
                      (unwind-protect
-                         (re-search-forward crm-separator nil nil (- arg))
-                       (backward-char -1))
+                         (re-search-forward crm-separator nil 'go (- arg))
+                       (backward-char -1)
+                       (cursor-sensor--move-to-tangible (selected-window)))
                      (point)))))
+
+;;;###autoload
+(defun durand-buffers-major-mode (&optional arg)
+  "Select buffers that match the current buffer's major mode.
+With \\[universal-argument] produce an `ibuffer' filtered
+accordingly.  Else use standard completion.
+---
+This is taken from Protesilaos dotemacs.
+I changed it to have no delay when completing and the /headlong/ effect."
+  (interactive "P")
+  (let* ((icomplete-compute-delay 0)
+         (major major-mode)
+         (prompt "Buffers for ")
+         (mode-string (format "%s" major))
+         (mode-string-pretty (propertize mode-string 'face 'success)))
+    (ignore icomplete-compute-delay)
+    (if arg
+        (ibuffer nil (concat "*" prompt mode-string "*")
+                 (list (cons 'used-mode major)))
+      (switch-to-buffer
+       (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+         (read-buffer
+          (concat prompt mode-string-pretty ": ") nil t
+          (lambda (pair)                ; pair is (name-string . buffer-object)
+            (with-current-buffer (cdr pair) (derived-mode-p major)))))))))
+
+;;;###autoload
+(defun embark-forward-completions (&optional n)
+  "Step forward completions by N entry.
+The N-th entry becomes the first and can be selected with
+`minibuffer-force-complete-and-exit'."
+  (interactive "p")
+  (let* ((beg (if (window-minibuffer-p)
+                  (minibuffer-prompt-end)
+                (nth 0 completion-in-region--data)))
+         (end (if (window-minibuffer-p)
+                  (point-max)
+                (nth 1 completion-in-region--data)))
+         (comps (completion-all-sorted-completions beg end))
+         (tail (cdr (last comps))))
+    (when comps
+      ;; make it a real list
+      (setf (cdr (last comps)) nil)
+      ;; Rotating an entire round is the same as no rotation at all.
+      (setf n (mod n (length comps)))
+      ;; rotating
+      (setf comps (append (nthcdr n comps)
+                          (butlast comps (- (length comps) n)))
+            ;; adjoin the tail back
+            (cdr (last comps)) tail)
+      (completion--cache-all-sorted-completions
+       beg end comps))
+    (embark-occur--update-linked)))
+
+;;;###autoload
+(defun embark-backward-completions (&optional n)
+  "Step backward completions by N entry.
+The N-th-to-last entry becomes the first and can be selected with
+`minibuffer-force-complete-and-exit'."
+  (interactive "p")
+  (let* ((beg (if (window-minibuffer-p)
+                  (minibuffer-prompt-end)
+                (nth 0 completion-in-region--data)))
+         (end (if (window-minibuffer-p)
+                  (point-max)
+                (nth 1 completion-in-region--data)))
+         (comps (completion-all-sorted-completions beg end))
+	       (tail (cdr (last comps))))
+    (when comps
+      ;; make it a real list
+      (setf (cdr (last comps)) nil)
+      ;; Rotating an entire round is the same as no rotation at all.
+      (setf n (mod n (length comps)))
+      ;; rotate
+      (setf comps (append (nthcdr (- (length comps) n) comps)
+                          (butlast comps n))
+            ;; adjoin the tail back
+            (cdr (last comps)) tail)
+      (completion--cache-all-sorted-completions beg end comps))
+    (embark-occur--update-linked)))
+
+;;;###autoload
+(defun embark-minibuffer-candidates ()
+  "Return all current completion candidates from the minibuffer.
+Modified by Durand."
+  (when (minibufferp)
+    (let* ((all (completion-all-sorted-completions
+                 (minibuffer-prompt-end)
+                 (point-max)))
+           (last (last all)))
+      (when last (setcdr last nil))
+      all)))
