@@ -229,16 +229,16 @@ See `durand-greek-search-replace-generic' for more details.")
 (map! :map durand-greek-search-mode-map
       :n [?j] 'durand-goto-greek-search-result
       :n [?n] 'forward-line
-      :n [?p] (lambda! (forward-line -1)))
+      :n [?p] (cmd! (forward-line -1)))
 
 (map! :map durand-greek-mode-map
       :niv [?ù] 'durand-transform-code-to-greek
-      :i [?§] (lambda! (insert "\\"))
-      :i [?:] (lambda! (insert "/"))
-      :i [?/] (lambda! (insert ":"))
-      :i [?ç] (lambda! (insert "·"))
-      :i [?à] (lambda! (insert "*"))
-      ;; :i [?|] (lambda! (turn-on-orgtbl) (insert "|"))
+      :i [?§] (cmd! (insert "\\"))
+      :i [?:] (cmd! (insert "/"))
+      :i [?/] (cmd! (insert ":"))
+      :i [?ç] (cmd! (insert "·"))
+      :i [?à] (cmd! (insert "*"))
+      ;; :i [?|] (cmd! (turn-on-orgtbl) (insert "|"))
       :i [?\M-\r] 'org-insert-item)
 ;; (define-key durand-greek-mode-map [?ù] #'durand-transform-code-to-greek)
 ;; (define-key durand-greek-mode-map [?§] (lambda () (interactive) (insert "\\")))

@@ -16,7 +16,7 @@
 (setf +doom-dashboard-functions '(doom-dashboard-widget-banner
                                   doom-dashboard-widget-shortmenu
                                   doom-dashboard-widget-loaded)
-      +doom-dashboard-banner-padding '(1 . 3))
+      +doom-dashboard-banner-padding '(0 . 1))
 
 (setf +doom-dashboard-menu-sections
       '(;; ("Open articles"

@@ -4,6 +4,8 @@
   :hook (doom-first-input . icomplete-mode)
   :config
 
+  (fido-mode -1)
+
   (setf icomplete-show-matches-on-no-input t
         icomplete-hide-common-prefix nil
         icomplete-separator (propertize " ┆ " 'face 'shadow)
@@ -13,7 +15,7 @@
         icomplete-with-completion-tables t
         icomplete-in-buffer t
         icomplete-prospects-height 1
-        icomplete-tidy-shadowed-file-names nil)
+        icomplete-tidy-shadowed-file-names t)
 
   ;; NOTE: This is already covered by `icomplete-vertical-mode'.
   ;; (add-hook 'icomplete-minibuffer-setup-hook 'prot/icomplete-minibuffer-truncate)
@@ -37,6 +39,8 @@
          :map icomplete-minibuffer-map
          ;; ("<return>" . minibuffer-complete-and-exit)
          ("C-j" . exit-minibuffer)
+         ("C-n" . icomplete-forward-completions)
+         ("C-p" . icomplete-backward-completions)
          ("<C-backspace>" . durand-crm-backward-delete-to-separator)
          ("C-w" . durand-crm-backward-delete-to-separator)
          ("s-f" . durand-crm-forward-separator)
@@ -88,10 +92,12 @@
   :after icomplete
   :config
 
-  (setf completion-styles '(orderless partial-completion))
-
+  ;; NOTE: flex style is added after emacs 27.
+  ;; (setf completion-styles '(flex orderless partial-completion))
+  (setq completion-styles
+        '(flex partial-completion))
   (setf orderless-matching-styles
-        '(orderless-flex
+        '(;; orderless-flex
           orderless-strict-leading-initialism
           orderless-regexp
           orderless-prefixes

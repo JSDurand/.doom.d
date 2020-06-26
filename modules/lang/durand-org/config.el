@@ -499,8 +499,8 @@ This should be setted by the PERIOD-FUNC argument.")
 
 ;; set up org-pdfview
 
-(use-package! org-pdfview
-  :after-call org-open-articles)
+;; (use-package! org-pdfview
+;;   :after-call org-open-articles)
 
 ;;; subtree map
 (defvar durand-org-subtree-map (make-sparse-keymap)

@@ -56,7 +56,7 @@
        ;; vc-gutter         ; vcs diff in the fringe
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        ;; window-select     ; visually switch windows
-       workspaces             ; tab emulation, persistence & separate workspaces
+       ;; workspaces             ; tab emulation, persistence & separate workspaces
 
        :editor
        (evil +everywhere)             ; come to the dark side, we have cookies
@@ -106,7 +106,7 @@
         +dictionary             ; a dictionary in emacs is good.
         ;; +docsets
         )               ; ...or in Dash docsets locally
-       lsp
+       (lsp +eglot)
        ;;macos             ; MacOS-specific commands
        magit                    ; a git porcelain for Emacs
        ;;make              ; run make tasks from Emacs
@@ -143,7 +143,7 @@
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ;
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
-       javascript           ; all(hope(abandon(ye(who(enter(here))))))
+       ;; javascript           ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
        (latex
@@ -180,9 +180,9 @@
        ;;rest              ; Emacs as a REST client
        ;;rst               ; ReST in peace
        ;;ruby              ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-       (rust
-        +lsp
-        )              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       ;; (rust
+       ;;  +lsp
+       ;;  )              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        ;;scheme            ; a fully conniving family of lisps
        sh     ; she sells {ba,z,fi}sh shells on the C xor
@@ -192,14 +192,14 @@
        ;;web               ; the tubes
 
        :email
-       (mu4e +gmail)
-       durand-mu                        ; My mu4e configurations
+       ;; (mu4e +gmail)
+       ;; durand-mu                        ; My mu4e configurations
        durand-gnus
        ;;notmuch
        ;;(wanderlust +gmail)
 
        :app
-       calendar
+       ;; calendar
        ;; irc               ; how neckbeards socialize
        (rss +org)                       ; emacs as an RSS reader
        durand-rss                       ; my elfeed configs

@@ -5,7 +5,13 @@
   :bind (:map durand-view-map
          ("g" . gnus))
   :config
- 
+
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-stream-type 'starttls
+        smtpmail-default-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 587)
+
   (setf gnus-select-method
         '(nntp "news.gmane.io"))
 
@@ -30,6 +36,7 @@
          ("P" . gnus-summary-prev-unread-article)
          ("o" . delete-other-windows)
          ("y" . evil-avy-goto-line)
+         ("!" . gnus-summary-mark-as-processable)
          ("M-n" . gnus-summary-next-thread)
          ("M-p" . gnus-summary-prev-thread)
          ("C-M-n" . gnus-summary-next-group)
@@ -57,7 +64,7 @@
         '((not gnus-article-sort-by-number)
           (not gnus-article-sort-by-date))
         gnus-html-frame-width 80
-        gnus-inhibit-images t
+        gnus-inhibit-images nil
         gnus-max-image-proportion 0.7))
 
 ;;; Summary settings

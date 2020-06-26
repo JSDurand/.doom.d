@@ -92,7 +92,7 @@
 
 (define-prefix-command 'durand-evil-dollar-map)
 
-(map! :n [?z ?b] (lambda! (recenter -1))
+(map! :n [?z ?b] (cmd! (recenter -1))
       :n [?z ?k] 'outline-previous-visible-heading)
 
 (map! :map durand-evil-dollar-map

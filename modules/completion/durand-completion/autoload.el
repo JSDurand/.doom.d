@@ -222,6 +222,15 @@ Don't kill, delete instead."
   (let ((meta (completion--field-metadata (icomplete--field-beg))))
     (cond
      ((and (eq (char-before) ?/)
+           (string= (icomplete--field-string) "~/")
+           (eq (car-safe meta) 'metadata)
+           (eq (alist-get 'category (cdr meta))
+               'file))
+      (delete-region (point) (- (point) 2))
+      (insert (file-name-directory
+               (directory-file-name
+                (expand-file-name "~/")))))
+     ((and (eq (char-before) ?/)
            (eq (car-safe meta) 'metadata)
            (eq (alist-get 'category (cdr meta))
                'file)

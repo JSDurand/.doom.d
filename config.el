@@ -113,7 +113,7 @@
 (after! org
   (when (keymapp 'durand-evil-dollar-map)
     (map! :map durand-evil-dollar-map
-          [?b] (lambda! (recenter -1))
+          [?b] (cmd! (recenter -1))
           [?k] 'outline-previous-visible-heading)))
 
 (after! dired
@@ -177,7 +177,7 @@
 
 (map! :prefix "g" :m "b" 'evil-goto-line)
 ;; (map! :n (kbd "s-q") 'load-config)
-(map! :n [?\s-q] (lambda! (message "Don't use s-q!")))
+(map! :n [?\s-q] (cmd! (message "Don't use s-q!")))
 
 ;;; set lispy key
 (after! (evil-collection lispy)
@@ -271,13 +271,13 @@
 
 ;;; modeline config
 
-(setf doom-modeline-height 20
+(setf doom-modeline-height 10
       doom-modeline-enable-word-count nil
       doom-modeline-buffer-encoding nil
       doom-modeline-indent-info nil
-      doom-modeline-evil-state-icon t
+      doom-modeline-modal-icon t
       doom-modeline-project-detection 'project
-      doom-modeline-mu4e t)
+      doom-modeline-mu4e nil)
 (setq inhibit-compacting-font-caches t)
 
 (frame-init-behaviour)
@@ -365,7 +365,12 @@
 
 (map! :map doom-leader-notes-map
       [?n] #'+default/browse-notes
-      [?j] 'evil-ex-nohighlight)
+      [?j] 'evil-ex-nohighlight
+      :map doom-leader-buffer-map
+      [?v] 'ibuffer
+      [?b] 'durand-buffers-major-mode
+      :leader
+      [?,] 'durand-switch-buffer)
 
 (map! :g
       [f5] #'durand-file-size
@@ -458,13 +463,20 @@
   :quit t
   :select t)
 
+;;; don't handle gnus buffers
+
+(set-popup-rule! "\\*\\(Summary\\|Group\\|Article\\|Server\\)"
+  :ignore t)
+
+
 ;;; consider doom fallback buffer real
 
 (add-to-list 'doom-real-buffer-functions (lambda (buf) (eq buf (doom-fallback-buffer))) t)
 
 ;;; workspace switch to
 
-(define-key doom-leader-workspace-map [?t] '+workspace/switch-to)
+(when (featurep! :ui workspaces)
+  (define-key doom-leader-workspace-map [?t] '+workspace/switch-to))
 
 ;;; kill karabiner
 
@@ -578,14 +590,14 @@
 ;; (after! pyim (pyim-basedict-enable))
 
 ;; (map! :map pyim-mode-map
-;;       [?,] (lambda! (pyim-page-select-word-by-number 2))
-;;       [?\;] (lambda! (pyim-page-select-word-by-number 3))
-;;       [?:] (lambda! (pyim-page-select-word-by-number 4))
-;;       [?=] (lambda! (pyim-page-select-word-by-number 5))
+;;       [?,] (cmd! (pyim-page-select-word-by-number 2))
+;;       [?\;] (cmd! (pyim-page-select-word-by-number 3))
+;;       [?:] (cmd! (pyim-page-select-word-by-number 4))
+;;       [?=] (cmd! (pyim-page-select-word-by-number 5))
 ;;       [?\&] (lambda! (pyim-entered-backward-point))
-;;       [?\é] (lambda! (pyim-entered-forward-point))
-;;       [?\"] (lambda! (pyim-page-previous-page 1))
-;;       [?\'] (lambda! (pyim-page-next-page 1)))
+;;       [?\é] (cmd! (pyim-entered-forward-point))
+;;       [?\"] (cmd! (pyim-page-previous-page 1))
+;;       [?\'] (cmd! (pyim-page-next-page 1)))
 
 ;; But it still too slow for me to use fluently: mainly because of the dearth of
 ;; a sufficiently large dictionary. It is kind of OK to input Chinese words by
@@ -865,3 +877,15 @@
 (advice-add 'helpful-callable :before 'durand-icomplete-vertical-and-no-list-no-input)
 (advice-add 'helpful-variable :before 'durand-icomplete-vertical-and-no-list-no-input)
 (advice-add 'execute-extended-command :before 'durand-icomplete-vertical-and-no-list-no-input)
+
+;;; org-mime
+
+;; NOTE: I use plain-text email now.
+;; (use-package! org-mime
+;;   :after (org)
+;;   :config (setq org-mime-library 'mml))
+
+;;; company backend for text mode
+
+(set-company-backend! 'text-mode
+  '(company-dabbrev company-yasnippet company-ispell))

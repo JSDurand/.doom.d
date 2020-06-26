@@ -83,15 +83,23 @@ See `durand-play-with-mpv' also."
 
 ;;;###autoload
 (defun durand-download-youtube (url &optional title)
-  "Download the URL with youtube-dl"
+  "Download the URL with youtube-dl.
+URL can be a list of space-separated urls."
   (interactive (list (read-string "URL of video: ")))
   (let ((current-prefix-arg '(4)))
     (call-interactively 'eshell))
   (insert "cd ~/Desktop/Centre/Vidéos")
   (eshell-send-input)
-  (insert (if (not title)
-              (format "youtube-dl -f 22 \"%s\"" url)
-            (format "youtube-dl -f 22 \"%s\" -o \"%s.mp4\"" url title)))
+  (let* ((urls (mapcar
+                (lambda (s) (format "\"%s\"" s))
+                (cl-remove-if
+                 (lambda (s)
+                   (= (length s) 0))
+                 (split-string url " "))))
+         (url (string-join urls " ")))
+    (insert (if (not title)
+                (format "youtube-dl %s" url)
+              (format "youtube-dl %s -o \"%s.mp4\"" url title))))
   (eshell-send-input)
   (if title
       (message "Downloading %s as %s.mp4" url title)
@@ -99,8 +107,7 @@ See `durand-play-with-mpv' also."
 
 ;;;###autoload
 (defun elfeed-download-youtube ()
-  "
-Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
+  "Play in mpv if entry link matches `elfeed-mpv-patterns'; do nothing otherwise."
   (interactive)
   (let* ((entry (if (eq major-mode 'elfeed-show-mode)
                     elfeed-show-entry

@@ -14,6 +14,7 @@
    :follow #'org-mu4e-open
    :store #'org-mu4e-store-link)
 
+  (setf mu4e-view-use-gnus t)
   (setf mu4e-confirm-quit nil)
   (setq mu4e-maildir (expand-file-name "~/mbsync"))
   (setq mu4e-get-mail-command "mbsync gmail") ; mbsync works a lot better!
@@ -50,7 +51,7 @@
           ("/drafts" . ?d)))
   (map! :map mu4e-view-mode-map
         :n [?o] 'mu4e-view-attach-emacs
-        :n [?!] (lambda! (evil-scroll-line-down 1))
+        :n [?!] (cmd! (evil-scroll-line-down 1))
         [escape] 'doom/escape)
   (add-to-list 'mu4e-view-actions
                '("Browse this mail" . mu4e-action-view-in-browser))
@@ -162,7 +163,16 @@
         :localleader
         :n [?n] 'mu4e-view-headers-next
         :n [?p] 'mu4e-view-headers-prev)
-        (add-hook! mu4e-main-mode :append 'mu4e-clear-quit))
+  (add-hook! mu4e-main-mode :append 'mu4e-clear-quit)
+
+  (map! :map mu4e-view-mode-map
+        :n [?o] 'mu4e-view-attach-emacs
+        :n [?!] (cmd! (evil-scroll-line-down 1))
+        [escape] 'doom/escape
+        :map mu4e-headers-mode-map
+        :n [?!] (cmd! (evil-scroll-line-down 1))
+        :leader
+        [?!] 'mu4e-headers-mark-for-read))
 
 (after! evil
   (set-evil-initial-state!
@@ -212,6 +222,14 @@
              nil))
            (* 24 60 60) ;; a day
            #'durand-mu4e-close-if-necessary))))
+
+;;; org-msg
+
+;; (use-package! org-msg
+;;   :after mu4e
+;;   :config
+;;   )
+
 
 ;; ARCHIVE
 ;; (\, (make-mu4e-context

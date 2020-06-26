@@ -242,7 +242,7 @@
 ;;   (set (make-local-variable 'TeX-electric-math)
 ;;        (cons "\\(" "\\)")))
 
-(map! :map LaTeX-mode-map :i [?$] (lambda! (sp-insert-pair "\\(")))
+(map! :map LaTeX-mode-map :i [?$] (cmd! (sp-insert-pair "\\(")))
 
 ;; (add-hook! (TeX-mode LaTeX-mode) 'turn-off-smartparens-mode)
 
