@@ -104,15 +104,16 @@ If ARG is non-nil, show the full name of the buffer."
 
 ;;; kill karabiner
 
+;; REVIEW: This is not needed anymore.
 ;;;###autoload
-(defun kill-karabiner ()
-  "Kill karabiner elements so that it can function again."
-  (interactive)
-  (shell-command
-   (concat
-    "echo "
-    (shell-quote-argument (read-passwd "Password? "))
-    " | sudo -S killall karabiner_grabber karabiner_observer")))
+;; (defun kill-karabiner ()
+;;   "Kill karabiner elements so that it can function again."
+;;   (interactive)
+;;   (shell-command
+;;    (concat
+;;     "echo "
+;;     (shell-quote-argument (read-passwd "Password? "))
+;;     " | sudo -S killall karabiner_grabber karabiner_observer")))
 
 ;;; get advice of a function
 
@@ -226,64 +227,68 @@ This function is meant to be mapped to a key in `rg-mode-map'."
     (rg-save-search-as-name (concat "«" pattern "»"))))
 
 ;;;###autoload
-(defun +default/search-cwd (&optional arg)
-  "Conduct a text search in files under the current folder.
+(when (featurep! :completion durand-completion)
+  (defun +default/search-cwd (&optional arg)
+    "Conduct a text search in files under the current folder.
 If prefix ARG is set, prompt for a directory to search from."
-  (interactive "P")
-  (let ((default-directory
-          (if arg
-              (read-directory-name "Search directory: ")
-            default-directory)))
-    (cond ((featurep! :completion ivy)
-           (call-interactively #'+ivy/project-search-from-cwd))
-          ((featurep! :completion helm)
-           (call-interactively #'+helm/project-search-from-cwd))
-          (t
-           (rg (read-string "Search: ") "everything" default-directory)))))
+    (interactive "P")
+    (let ((default-directory
+            (if arg
+                (read-directory-name "Search directory: ")
+              default-directory)))
+      (cond ((featurep! :completion ivy)
+             (call-interactively #'+ivy/project-search-from-cwd))
+            ((featurep! :completion helm)
+             (call-interactively #'+helm/project-search-from-cwd))
+            (t
+             (rg (read-string "Search: ") "everything" default-directory))))))
 
 ;;;###autoload
-(defun +default/org-notes-search ()
-  "Perform a text search on `org-directory'."
-  (interactive)
-  (require 'org)
-  (cond
-   ((or
-     (featurep! :completion ivy)
-     (featurep! :completion helm))
-    (let ((default-directory org-directory))
-      (+default/search-project-for-symbol-at-point "")))
-   (t
-    (rg-literal (read-string "Search for: ")
-                "everything" org-directory))))
+(when (featurep! :completion durand-completion)
+  (defun +default/org-notes-search ()
+    "Perform a text search on `org-directory'."
+    (interactive)
+    (require 'org)
+    (cond
+     ((or
+       (featurep! :completion ivy)
+       (featurep! :completion helm))
+      (let ((default-directory org-directory))
+        (+default/search-project-for-symbol-at-point "")))
+     (t
+      (rg-literal (read-string "Search for: ")
+                  "everything" org-directory)))))
 
 ;;; recentf handling
 
 ;;;###autoload
-(defadvice! durand-recentf (&optional _files _buffer-name)
-  "Select a file from `recentf-list'.
+(when (featurep! :completion durand-completion)
+  (defadvice! durand-recentf (&optional _files _buffer-name)
+    "Select a file from `recentf-list'.
 FILES and BUFFER-NAME are the same as for `recentf-open-files'."
-  :override 'recentf-open-files
-  (interactive)
-  (let ((icomplete-compute-delay 0))
-    (ignore icomplete-compute-delay)
-    (icomplete-vertical-do '()
-      (find-file
-       (completing-read "Recentf: "
-                        recentf-list
-                        nil t)))))
+    :override 'recentf-open-files
+    (interactive)
+    (let ((icomplete-compute-delay 0))
+      (ignore icomplete-compute-delay)
+      (icomplete-vertical-do '()
+        (find-file
+         (completing-read "Recentf: "
+                          recentf-list
+                          nil t))))))
 
 ;;; company selection using `completing-read'
 
 ;;;###autoload
-(defun durand-company-completing ()
-  "Use `completing-read' for company.
+(when (featurep! :completion durand-completion)
+  (defun durand-company-completing ()
+    "Use `completing-read' for company.
 Runs `contrib/completing-read-in-region' on the word at point in
 effect."
-  (interactive)
-  (let ((bds (bounds-of-thing-at-point 'word)))
-    (contrib/completing-read-in-region (car bds)
-                                       (cdr bds)
-                                       company-candidates)))
+    (interactive)
+    (let ((bds (bounds-of-thing-at-point 'word)))
+      (contrib/completing-read-in-region (car bds)
+                                         (cdr bds)
+                                         company-candidates))))
 
 ;;; ibuffer should not delete doom buffer
 
@@ -299,3 +304,43 @@ effect."
    (t (when (kill-buffer buf)
         'kill))))
 
+;;; buffers with the same major mode
+
+;;;###autoload
+(defun durand-buffers-major-mode (&optional arg)
+  "Select buffers that match the current buffer's major mode.
+With \\[universal-argument] produce an `ibuffer' filtered
+accordingly.  Else use standard completion.
+---
+This is taken from Protesilaos dotemacs.
+I changed it to have no delay when completing and the /headlong/ effect.
+---
+Now I use ivy to achieve this behaviour."
+  (interactive "P")
+  (let* ((major major-mode)
+         (prompt "Buffers for ")
+         (durand-buffer-same-mode-var major)
+         (mode-string (format "%s" major))
+         (mode-string-pretty (propertize mode-string 'face 'success)))
+    (if arg
+        (ibuffer nil (concat "*" prompt mode-string "*")
+                 (list (cons 'used-mode major)))
+      (reset-durand-headlong)
+      (ivy-read (concat prompt mode-string-pretty ": ")
+                #'durand-complete-buffer-same-mode
+                :dynamic-collection t
+                :initial-input "^"
+                :action '(1
+                          ("o" switch-to-buffer
+                           "Switch to buffer")
+                          ("k" (lambda (x)
+                                 (interactive)
+                                 (and (get-buffer x)
+                                      (kill-buffer x))
+                                 (ivy--reset-state ivy-last))
+                           "Kill"))
+                :update-fn 'durand-self-insert-complete-and-exit
+                :re-builder (if current-prefix-arg 'ivy--regex-ignore-order 'ivy--regex-fuzzy)
+                :unwind 'reset-durand-changed
+                :caller 'ivy-switch-buffer
+                :keymap 'durand-switch-buffer-map))))

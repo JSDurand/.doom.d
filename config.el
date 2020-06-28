@@ -251,15 +251,16 @@
 
 ;;; org-agenda and magit and gnus should start with emacs state
 
-(set-evil-initial-state!
-  '(org-agenda-mode
-    magit-status-mode
-    gnus-group-mode
-    gnus-summary-mode
-    gnus-article-mode
-    gnus-server-mode
-    gnus-browse-mode)
-  'emacs)
+(after! evil
+  (set-evil-initial-state!
+    '(org-agenda-mode
+      magit-status-mode
+      gnus-group-mode
+      gnus-summary-mode
+      gnus-article-mode
+      gnus-server-mode
+      gnus-browse-mode)
+    'emacs))
 
 ;;; remove org-agenda in motion states
 (setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes))
@@ -730,6 +731,7 @@
 
 ;;; don't format in org mode
 
+;; NOTE: I append org-mode here since that list begins with 'not.
 (setf +format-on-save-enabled-modes
       (append +format-on-save-enabled-modes
               (list 'org-mode)))
@@ -747,15 +749,18 @@
         :n [?g ?r] 'ibuffer-update
         :n [?d] 'ibuffer-do-delete
         :n [?D] 'ibuffer-mark-for-delete))
+
 ;;; Exit minibuffer with C-j
 
-(map! :map minibuffer-local-map
-      [?\C-j] 'exit-minibuffer)
+(when (featurep! :completion durand-completion)
+  (map! :map minibuffer-local-map
+        [?\C-j] 'exit-minibuffer))
 
 ;;; find-file is good enough!
 
-(map! :leader
-      [32] 'find-file)
+(when (featurep! :completion durand-completion)
+  (map! :leader
+        [32] 'find-file))
 
 ;;; More avy keys
 
@@ -764,12 +769,14 @@
                 (number-sequence ?A ?Z)))
 
 ;;; Don't use ido!
-(setf projectile-completion-system 'default)
+(when (featurep! :completion durand-completion)
+  (setf projectile-completion-system 'default))
 
-;;; use rg.el
+;;; use rg.el when not using ivy.
 
 (use-package! rg
   :commands (rg)
+  :when (featurep! :completion durand-completion)
   :config
   (setq rg-group-result t
         rg-hide-command t
@@ -818,17 +825,19 @@
 (use-package! flyspell-correct
   :commands flyspell-correct-at-point flyspell-correct-previous
   :config
-  (setf flyspell-correct-interface 'flyspell-correct-dummy))
+  (when (featurep! :completion durand-completion)
+    (setf flyspell-correct-interface 'flyspell-correct-dummy)))
 
 ;;; enable flyspell for text modes
 (add-hook! '(text-mode-hook) #'flyspell-mode)
 
 ;;; Use `completing-read' for company
 
-(map! (:when (featurep! :completion company)
-       (:after company
-        (:map company-active-map
-         "C-S-s" 'durand-company-completing))))
+(when (featurep! :completion durand-completion)
+  (map! (:when (featurep! :completion company)
+         (:after company
+          (:map company-active-map
+           "C-S-s" 'durand-company-completing)))))
 
 ;;; Why is `rainbow-mode' missing?
 
@@ -837,53 +846,6 @@
   :config
   (setq rainbow-ansi-colors nil)
   (setq rainbow-x-colors nil))
-
-;;; advices for icomplete-vertical
-
-;;; NOTE: I have to define the advice function first before I use it to advice a
-;;; function.
-
-;;;###autoload
-(defun durand-icomplete-vertical (&rest _args)
-  "Advice to wrap function to use vertical display in icomplete."
-  (interactive
-   (lambda (old-interactive-spec)
-     (icomplete-vertical-do (:height (/ (frame-height) 4))
-       (advice-eval-interactive-spec
-        old-interactive-spec)))))
-
-;;;###autoload
-(defun durand-icomplete-vertical-and-no-list-no-input (&rest _args)
-  "Advice to initially hide candidates and use vertical display."
-  (interactive
-   (lambda (old-interactive-spec)
-     (icomplete-vertical-do (:height (/ (frame-height) 4))
-       (let (icomplete-show-matches-on-no-input)
-         (advice-eval-interactive-spec old-interactive-spec))))))
-
-(advice-add 'describe-function :before 'durand-icomplete-vertical)
-(advice-add 'describe-variable :before 'durand-icomplete-vertical)
-(advice-add 'describe-symbol :before 'durand-icomplete-vertical)
-;; (advice-add 'helpful-callable :before 'durand-icomplete-vertical)
-;; (advice-add 'helpful-variable :before 'durand-icomplete-vertical)
-(advice-add 'helpful-symbol :before 'durand-icomplete-vertical)
-(advice-add 'doom/help-package-config :around 'durand-icomplete-vertical-around)
-(advice-add 'doom/goto-private-packages-file :before 'durand-icomplete-vertical-around)
-(advice-add 'doom/help-package-homepage :around 'durand-icomplete-vertical-around)
-(advice-add 'doom/help-packages :around 'durand-icomplete-vertical-around)
-(advice-add 'find-file :before 'durand-icomplete-vertical)
-(advice-add 'doom/find-file-in-private-config :around 'durand-icomplete-vertical-around)
-
-(advice-add 'helpful-callable :before 'durand-icomplete-vertical-and-no-list-no-input)
-(advice-add 'helpful-variable :before 'durand-icomplete-vertical-and-no-list-no-input)
-(advice-add 'execute-extended-command :before 'durand-icomplete-vertical-and-no-list-no-input)
-
-;;; org-mime
-
-;; NOTE: I use plain-text email now.
-;; (use-package! org-mime
-;;   :after (org)
-;;   :config (setq org-mime-library 'mml))
 
 ;;; company backend for text mode
 

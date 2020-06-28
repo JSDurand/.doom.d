@@ -59,30 +59,9 @@
   (add-to-list 'mu4e-view-actions
                '("view attachment in pdf-view" . mu4e-view-attach-emacs))
 
-  (remove '("view as pdf" . mu4e-action-view-as-pdf) mu4e-view-actions)
+  ;; (remove '("view as pdf" . mu4e-action-view-as-pdf) mu4e-view-actions)
   (setq mu4e-contexts
         (list
-         (make-mu4e-context
-          :name "Awllower"
-          :enter-func (lambda () (mu4e-message "Entering Awllower context"))
-          :leave-func (lambda () (mu4e-message "Leaving Awllower context"))
-          ;; we match based on the contact-fields of the message
-          :match-func (lambda (msg)
-                        (when msg
-                          (or
-                           (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
-                           (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
-          :vars '((user-mail-address . "mmemmew@gmail.com")
-                  (user-full-name . "李俊緯")
-                  (mu4e-compose-signature . "#+BEGIN_EXPORT html
-<span style=\"color:rgb(6,144,255)\">生 俊緯</span>
-#+END_EXPORT")
-                  (mu4e-sent-folder . "/gmail/sent")
-                  (smtpmail-smtp-user . "mmemmew")
-                  (smtpmail-local-domain . "gmail.com")
-                  (smtpmail-default-smtp-server . "smtp.gmail.com")
-                  (smtpmail-smtp-server . "smtp.gmail.com")
-                  (smtpmail-smtp-service . 587)))
          (make-mu4e-context
           :name "Durand"
           :enter-func (lambda () (mu4e-message "Entering Durand context"))
@@ -94,10 +73,25 @@
                            (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
                            (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
           :vars '((user-mail-address . "mmemmew@gmail.com")
-                  (user-full-name . "Sévère Durand")
-                  (mu4e-compose-signature . "#+BEGIN_EXPORT html
-<span style=\"color:rgb(6,144,255)\">Sévère Durand</span>
-#+END_EXPORT")
+                  (user-full-name . "Durand")
+                  (mu4e-compose-signature . "Sévère Durand")
+                  (mu4e-sent-folder . "/gmail/sent")
+                  (smtpmail-smtp-user . "mmemmew")
+                  (smtpmail-local-domain . "gmail.com")
+                  (smtpmail-default-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-service . 587)))
+         (make-mu4e-context
+          :name "Student"
+          :enter-func (lambda () (mu4e-message "Entering Student context"))
+          :leave-func (lambda () (mu4e-message "Leaving Student context"))
+          ;; we match based on the contact-fields of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (mu4e-message-contact-field-matches msg :from "tan\\|mlh\\|hsialc")))
+          :vars '((user-mail-address . "mmemmew@gmail.com")
+                  (user-full-name . "李俊緯")
+                  (mu4e-compose-signature . "生 俊緯")
                   (mu4e-sent-folder . "/gmail/sent")
                   (smtpmail-smtp-user . "mmemmew")
                   (smtpmail-local-domain . "gmail.com")
@@ -150,6 +144,8 @@
         mu4e-update-interval 3600)
   (mu4e-alert-enable-mode-line-display))
 
+(after! org-mu4e
+  (setf org-mu4e-convert-to-html nil))
 
 (after! mu4e
   ;; Je ne veux pas quitter mu4e quand je touche "q".

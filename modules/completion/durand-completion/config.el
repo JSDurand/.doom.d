@@ -17,6 +17,51 @@
         icomplete-prospects-height 1
         icomplete-tidy-shadowed-file-names t)
 
+;;; advices for icomplete-vertical
+
+;;; NOTE: I have to define the advice function first before I use it to advice a
+;;; function.
+
+;;;###autoload
+  (defun durand-icomplete-vertical (&rest _args)
+    "Advice to wrap function to use vertical display in icomplete."
+    (interactive
+     (lambda (old-interactive-spec)
+       (icomplete-vertical-do (:height (/ (frame-height) 4))
+                              (advice-eval-interactive-spec
+                               old-interactive-spec)))))
+
+;;;###autoload
+  (defun durand-icomplete-vertical-and-no-list-no-input (&rest _args)
+    "Advice to initially hide candidates and use vertical display."
+    (interactive
+     (lambda (old-interactive-spec)
+       (icomplete-vertical-do (:height (/ (frame-height) 4))
+                              (let (icomplete-show-matches-on-no-input)
+                                (advice-eval-interactive-spec old-interactive-spec))))))
+
+  ;; NOTE: enable this block for icomplete
+  (advice-add 'describe-function :before 'durand-icomplete-vertical)
+  (advice-add 'describe-variable :before 'durand-icomplete-vertical)
+  (advice-add 'describe-symbol :before 'durand-icomplete-vertical)
+
+  ;; (advice-add 'helpful-callable :before 'durand-icomplete-vertical)
+  ;; (advice-add 'helpful-variable :before 'durand-icomplete-vertical)
+
+  ;; NOTE: enable this block for icomplete
+  (advice-add 'helpful-symbol :before 'durand-icomplete-vertical)
+  (advice-add 'doom/help-package-config :around 'durand-icomplete-vertical-around)
+  (advice-add 'doom/goto-private-packages-file :before 'durand-icomplete-vertical-around)
+  (advice-add 'doom/help-package-homepage :around 'durand-icomplete-vertical-around)
+  (advice-add 'doom/help-packages :around 'durand-icomplete-vertical-around)
+  (advice-add 'find-file :before 'durand-icomplete-vertical)
+  (advice-add 'doom/find-file-in-private-config :around 'durand-icomplete-vertical-around)
+
+  ;; NOTE: enable this block for icomplete
+  (advice-add 'helpful-callable :before 'durand-icomplete-vertical-and-no-list-no-input)
+  (advice-add 'helpful-variable :before 'durand-icomplete-vertical-and-no-list-no-input)
+  (advice-add 'execute-extended-command :before 'durand-icomplete-vertical-and-no-list-no-input)
+
   ;; NOTE: This is already covered by `icomplete-vertical-mode'.
   ;; (add-hook 'icomplete-minibuffer-setup-hook 'prot/icomplete-minibuffer-truncate)
 
@@ -95,13 +140,14 @@
   ;; NOTE: flex style is added after emacs 27.
   ;; (setf completion-styles '(flex orderless partial-completion))
   (setq completion-styles
-        '(flex partial-completion))
+        '(flex orderless partial-completion))
   (setf orderless-matching-styles
         '(;; orderless-flex
-          orderless-strict-leading-initialism
+          ;; orderless-strict-leading-initialism
           orderless-regexp
-          orderless-prefixes
-          orderless-literal))
+          ;; orderless-prefixes
+          ;; orderless-literal
+          ))
 
   (setf orderless-style-dispatchers
         '(durand-company-style-dispatcher))

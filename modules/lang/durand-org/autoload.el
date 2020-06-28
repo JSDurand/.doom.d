@@ -1260,12 +1260,18 @@ description."
                             (t
                              (let* ((icomplete-compute-delay 0)
                                     (choice
-                                     (icomplete-vertical-do '(:height (/ (frame-height) 4))
-                                       (completing-read
-                                        "Chois un lien à remplaçer: "
-                                        (mapcar (lambda (x)
-                                                  (concat (cadr x) " - " (car x)))
-                                                contained-links)))))
+                                     (completing-read
+                                      "Chois un lien à remplaçer: "
+                                      (mapcar (lambda (x)
+                                                (concat (cadr x) " - " (car x)))
+                                              contained-links))
+                                     ;; (icomplete-vertical-do '(:height (/ (frame-height) 4))
+                                     ;;   (completing-read
+                                     ;;    "Chois un lien à remplaçer: "
+                                     ;;    (mapcar (lambda (x)
+                                     ;;              (concat (cadr x) " - " (car x)))
+                                     ;;            contained-links)))
+                                     ))
                                (ignore icomplete-compute-delay)
                                (cl-find choice contained-links
                                         :test (lambda (x y)
@@ -2161,8 +2167,10 @@ The two lists should have the same lengths."
                   (org-map-entries #'durand-org-link-info "bookmarks")))
          (choice (let ((icomplete-compute-delay 0))
                    (ignore icomplete-compute-delay)
-                   (icomplete-vertical-do '(:height (/ (frame-height) 4))
-                     (durand-choose-list cands nil "Chois un lien: ")))))
+                   (durand-choose-list cands nil "Chois un lien: ")
+                   ;; (icomplete-vertical-do '(:height (/ (frame-height) 4))
+                   ;;                        (durand-choose-list cands nil "Chois un lien: "))
+                   )))
     (mapc
      (lambda (x)
        (mapc #'durand-org-open-link
@@ -2221,70 +2229,75 @@ See the documentation of the function for more details.")
   "This variable controls whether `durand-choose-list' wants to exclude some candidate.")
 
 ;;;###autoload
-;; (defun durand-choose-list (cands &optional all texte non-quick display-cadr no-require-match)
-;;   "Choose from an alist. Multiple selection is supported.
-;; If ALL is non-nil, add a choice to select all of them.
-;; If NON-QUICK is non-nil, then offer the selection even when there is only one candidate.
-;; If DISPLAY-CADR is non-nil, then display cadr rather than car.
-;; If NO-REQUIRE-MATCH is t, then don't require the selection to match."
-;;   (if (and (= (length cands) 1) (null non-quick))
-;;       (list (caar cands))
-;;     (let ((cands (if all (cons '("all") cands) cands))
-;;           (question (or texte "Chois un: ")))
-;;       (setf durand-choose-list-result nil
-;;             durand-choose-list-det nil
-;;             durand-choose-list-exc nil)
-;;       (setf ivy--index 0
-;;             cands (mapcar (lambda (x)
-;;                             (cond
-;;                              ((null display-cadr)
-;;                               (cons (car x) x))
-;;                              ((and (listp x) (> (length x) 1))
-;;                               (cons (cadr x) x))
-;;                              ((listp x)
-;;                               (cons (car x) x))
-;;                              (t
-;;                               (user-error "durand-choose-list: argument not a list: %s" x))))
-;;                           cands))
-;;       (while (null durand-choose-list-det)
-;;         (setf durand-choose-list-det t
-;;               durand-choose-list-exc nil)
-;;         (let* ((ivy-format-functions-alist
-;;                 '((durand-choose-list . (lambda (cands)
-;;                                           (durand-choose-list-format-function cands durand-choose-list-result)))))
-;;                (ele (ivy-read question cands
-;;                               :require-match (not no-require-match)
-;;                               :action '(1
-;;                                         ("o" identity "default")
-;;                                         ("m" (lambda (x)
-;;                                                (setf durand-choose-list-det nil))
-;;                                          "continue")
-;;                                         ("e" (lambda (x)
-;;                                                (setf durand-choose-list-det nil
-;;                                                      ivy--index 0
-;;                                                      durand-choose-list-exc t))
-;;                                          "exclude"))
-;;                               :preselect ivy--index
-;;                               :caller 'durand-choose-list)))
-;;           (ignore ivy-format-functions-alist)
-;;           (unless durand-choose-list-exc (push ele durand-choose-list-result))
-;;           (when durand-choose-list-exc
-;;             (setf cands
-;;                   (cl-remove-if
-;;                    (lambda (y)
-;;                      (string= (if (listp y) (car y) y)
-;;                               (if (stringp ele) ele (car ele))))
-;;                    cands)))))
-;;       (when (member "all" durand-choose-list-result) (setf durand-choose-list-result (mapcar #'car (cdr cands))))
-;;       (setf durand-choose-list-result (cl-remove-duplicates durand-choose-list-result :test #'string=)
-;;             durand-choose-list-result
-;;             (mapcar
-;;              (lambda (x)
-;;                (cond ((assoc x cands #'string=)
-;;                       (cadr (assoc x cands #'string=)))
-;;                      (t x)))
-;;              durand-choose-list-result))
-;;       durand-choose-list-result)))
+(defun durand-choose-list (cands &optional all texte non-quick display-cadr no-require-match
+                                 no-sort)
+  "Choose from an alist. Multiple selection is supported.
+NO-SORT has no effect here: it is here to conform with the
+arg-list of another functions with the same name, that I defined
+when I am not using ivy.
+If ALL is non-nil, add a choice to select all of them.
+If NON-QUICK is non-nil, then offer the selection even when there is only one candidate.
+If DISPLAY-CADR is non-nil, then display cadr rather than car.
+If NO-REQUIRE-MATCH is t, then don't require the selection to match."
+  (ignore no-sort)
+  (if (and (= (length cands) 1) (null non-quick))
+      (list (caar cands))
+    (let ((cands (if all (cons '("all") cands) cands))
+          (question (or texte "Chois un: ")))
+      (setf durand-choose-list-result nil
+            durand-choose-list-det nil
+            durand-choose-list-exc nil)
+      (setf ivy--index 0
+            cands (mapcar (lambda (x)
+                            (cond
+                             ((null display-cadr)
+                              (cons (car x) x))
+                             ((and (listp x) (> (length x) 1))
+                              (cons (cadr x) x))
+                             ((listp x)
+                              (cons (car x) x))
+                             (t
+                              (user-error "durand-choose-list: argument not a list: %s" x))))
+                          cands))
+      (while (null durand-choose-list-det)
+        (setf durand-choose-list-det t
+              durand-choose-list-exc nil)
+        (let* ((ivy-format-functions-alist
+                '((durand-choose-list . (lambda (cands)
+                                          (durand-choose-list-format-function cands durand-choose-list-result)))))
+               (ele (ivy-read question cands
+                              :require-match (not no-require-match)
+                              :action '(1
+                                        ("o" identity "default")
+                                        ("m" (lambda (x)
+                                               (setf durand-choose-list-det nil))
+                                         "continue")
+                                        ("e" (lambda (x)
+                                               (setf durand-choose-list-det nil
+                                                     ivy--index 0
+                                                     durand-choose-list-exc t))
+                                         "exclude"))
+                              :preselect ivy--index
+                              :caller 'durand-choose-list)))
+          (ignore ivy-format-functions-alist)
+          (unless durand-choose-list-exc (push ele durand-choose-list-result))
+          (when durand-choose-list-exc
+            (setf cands
+                  (cl-remove-if
+                   (lambda (y)
+                     (string= (if (listp y) (car y) y)
+                              (if (stringp ele) ele (car ele))))
+                   cands)))))
+      (when (member "all" durand-choose-list-result) (setf durand-choose-list-result (mapcar #'car (cdr cands))))
+      (setf durand-choose-list-result (cl-remove-duplicates durand-choose-list-result :test #'string=)
+            durand-choose-list-result
+            (mapcar
+             (lambda (x)
+               (cond ((assoc x cands #'string=)
+                      (cadr (assoc x cands #'string=)))
+                     (t x)))
+             durand-choose-list-result))
+      durand-choose-list-result)))
 
 ;;;###autoload
 (defun durand-browse-url (url)
@@ -2716,11 +2729,11 @@ If ARG is (64), then execute `(durand-update-article t)'."
                         tag)))
             cands (reverse cands))
       (let ((liste-de-choix
-             (let* ((icomplete-compute-delay 0)
+             (let* ((ivy-height 7)
                     (sel
                      (durand-choose-list cands nil "Chois un article: "
                                          nil nil nil t)))
-               (ignore icomplete-compute-delay)
+               (ignore ivy-height)
                (cl-loop
                 for x in sel
                 append
@@ -2788,9 +2801,11 @@ keyword but not archived, instead of A_VOIR."
                                    (list (durand-org-filter-dates title)
                                          position
                                          file))))))))
-    (let* ((choix (icomplete-vertical-do '(:height (/ (frame-height) 4))
-                      (completing-read "Chois un titre à mettre à jour: " cands
-                                       nil t)))
+    (let* ((choix (completing-read "Chois un titre à mettre à jour: " cands nil t)
+            ;; (icomplete-vertical-do '(:height (/ (frame-height) 4))
+            ;;     (completing-read "Chois un titre à mettre à jour: " cands
+            ;;                      nil t))
+            )
            (item (cl-assoc choix cands :test #'string=)))
       (with-current-file (caddr item) nil
         (goto-char (cadr item))
@@ -2831,9 +2846,12 @@ the link comes from the most recently stored link, so choose carefully the targe
           cands (reverse cands))
     (let* ((choix (let ((icomplete-compute-delay 0))
                     (ignore icomplete-compute-delay)
-                    (icomplete-vertical-do '(:height (/ (frame-height) 4))
-                      (completing-read "Chois un lien à mettre à jour: " cands
-                                       nil t))))
+                    (completing-read "Chois un lien à mettre à jour: " cands
+                                     nil t)
+                    ;; (icomplete-vertical-do '(:height (/ (frame-height) 4))
+                    ;;   (completing-read "Chois un lien à mettre à jour: " cands
+                    ;;                    nil t))
+                    ))
            (item (cl-assoc choix cands :test #'string=))
            (link (plist-get org-store-link-plist :link))
            (desc (file-name-nondirectory
@@ -3440,16 +3458,16 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
                                              ": ")
                                 (car x)))
                         temps))
-         (clé (assoc-default (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
-                               (completing-read "Chois un clé: " choix
-                                                nil t "^"))
+         (clé (assoc-default ;; (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+                             ;;   (completing-read "Chois un clé: " choix
+                             ;;                    nil t "^"))
 
-                             ;; (ivy-read "Chois un clé: " choix
-                             ;;           :require-match t
-                             ;;           :caller 'durand-capture
-                             ;;           :update-fn 'durand-self-insert-complete-and-exit
-                             ;;           :unwind 'reset-durand-changed
-                             ;;           :initial-input "^")
+                             (ivy-read "Chois un clé: " choix
+                                       :require-match t
+                                       :caller 'durand-capture
+                                       :update-fn 'durand-self-insert-complete-and-exit
+                                       :unwind 'reset-durand-changed
+                                       :initial-input "^")
                              choix)))
     (org-capture nil clé)))
 

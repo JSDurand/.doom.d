@@ -21,7 +21,7 @@
 (package! rg :recipe (:host github :repo "dajva/rg.el")
   :pin "87fed01062e9d9b1ecf948cc1997111ee75465fb")
 
-;; (package! mu4e-alert)
+(package! mu4e-alert)
 
 ;; try out vivendi
 (package! modus-vivendi-theme)

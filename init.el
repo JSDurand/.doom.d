@@ -13,19 +13,19 @@
 (setq evil-respect-visual-line-mode nil)
 
 (doom! :completion
-       durand-completion
+       ;; durand-completion
        (company
         ;; +childframe
         )
                                         ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
-       ;; ivy
+       ivy
        ;; (ivy
        ;;  ;; +childframe
        ;;  +fuzzy)
                                         ; a search engine for love and life
-       ;; durand-ivy
+       durand-ivy
 
        :ui
        deft                   ; notational velocity for Emacs
@@ -192,8 +192,8 @@
        ;;web               ; the tubes
 
        :email
-       ;; (mu4e +gmail)
-       ;; durand-mu                        ; My mu4e configurations
+       (mu4e +gmail)
+       durand-mu                        ; My mu4e configurations
        durand-gnus
        ;;notmuch
        ;;(wanderlust +gmail)

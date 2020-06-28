@@ -244,7 +244,7 @@ If mu4e is not turned on, then tell the user this fact."
     (message "mu4e is turned off now."))
    (arg
     (mu4e))
-   ((> mu4e-alert-mode-line 0) (mu4e-alert-view-unread-mails))
+   (mu4e-alert-mode-line (mu4e-alert-view-unread-mails))
    ;; ((eq last-command 'durand-mu4e) (mu4e))
    ((and (memq last-command `(durand-mu4e ,(intern "general-hydra/lambda-,m")))
          mu4e~update-timer)
