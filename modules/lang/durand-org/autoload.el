@@ -1540,13 +1540,17 @@ and whose `caddr' is a list of strings, the content of the note."
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
 ;;;###autoload
-(defun durand-org-view-all-logs (&optional match file start-date end-date)
+(defun durand-org-view-all-logs (&optional match file start-date end-date
+                                           number-of-months-per-row)
   "View all logs recorded in FILE, including archived files matched bt MATCH.
 
 If FILE is nil or omitted, then it defaults to \"aujourdhui.org\".
 
 START-DATE and END-DATE, if non-nil, specify the start and the
-end date of the search, respectively."
+end date of the search, respectively.
+
+NUMBER-OF-MONTHS-PER-ROW if non-nil specifies the number of months
+to draw on one line. It defaults to (floor (window-text-width) 20)."
   (interactive)
   (unless (stringp (or match "run"))
     (user-error "MATCH should be a stirng."))
@@ -1597,15 +1601,24 @@ end date of the search, respectively."
                                     (file-name-extension file))))))
     (setf logs (cl-sort logs 'time-less-p))
     (switch-to-buffer log-buffer-name)
-    (durand-draw-calendar-days logs)
-    (durand-org-notes-mode)))
+    (durand-draw-calendar-days logs number-of-months-per-row)
+    (durand-org-notes-mode)
+    (when (fboundp 'writegood-mode)
+      (writegood-mode -1))))
 
-;; FIXME: The `cl-mapcar' at the end is an anti-pattern. I shall use a list for
-;; handling a variable number of elements to draw on one row.
+;; NOTE: This is a helper for `durand-draw-calendar-days'.
 ;;;###autoload
-(defun durand-draw-calendar-days (days-list)
+(defun durand-pop-all (list-of-lists)
+  "Pop each list in LIST-OF-LISTS. Return the list of poped results."
+  (cl-loop for tail on list-of-lists by 'cdr
+           collect (pop (car tail))))
+
+;;;###autoload
+(defun durand-draw-calendar-days (days-list &optional number-of-months-per-row)
   "Draw days in calendar format.
-DAYS-LIST should be a list of time values."
+DAYS-LIST should be a list of time values.
+NUMBER-OF-MONTHS-PER-ROW is the number of months to draw in one line.
+If it is nil, then it defaults to (floor (window-text-width) 20)."
   (let* ((start-day (car days-list))
          (months-list (list-months-between start-day (current-time)))
          ;; arg of `calendar-day-of-week' : (list month day year)
@@ -1636,6 +1649,8 @@ DAYS-LIST should be a list of time values."
                                    "Sa"
                                    'font-lock-face 'calendar-weekend-header))
                                  " "))
+         (number-of-months-per-row (or number-of-months-per-row
+                                       (floor (window-text-width) 20)))
          ;; res-objs format : a list of lists of the form (year month week-of-start-of-month days)
          res-objs res-strings)
     (while months-list
@@ -1685,7 +1700,7 @@ DAYS-LIST should be a list of time values."
                                                        (if (member day-num special)
                                                            (propertize
                                                             (number-to-string day-num)
-                                                            'font-lock-face '(:foreground "gold"))
+                                                            'font-lock-face 'warning)
                                                          (number-to-string day-num))))
                                                  (push (pad-string-to day-str 2 32)
                                                        temp))))
@@ -1698,7 +1713,7 @@ DAYS-LIST should be a list of time values."
                                               (if (member day-num special)
                                                   (propertize
                                                    (number-to-string day-num)
-                                                   'font-lock-face '(:foreground "gold"))
+                                                   'font-lock-face 'warning)
                                                 (number-to-string day-num))))
                                         (push (pad-string-to day-str 2 32)
                                               temp)))
@@ -1710,38 +1725,23 @@ DAYS-LIST should be a list of time values."
               res-strings)))
     (setf res-strings (nreverse res-strings))
     (while res-strings
-      (let* ((alpha (pop res-strings))
-             (beta (pop res-strings))
-             (gamma (pop res-strings))
-             (delta (pop res-strings))
-             (epsilon (pop res-strings))
-             (max-num (max (length alpha) (length beta) (length gamma)
-                           (length delta) (length epsilon))))
-        (setf alpha (append alpha
-                            (make-list (- max-num (length alpha)) (make-string 20 32)))
-              beta (append beta
-                           (make-list (- max-num (length beta)) (make-string 20 32)))
-              gamma (append gamma
-                            (make-list (- max-num (length gamma)) (make-string 20 32)))
-              delta (append delta
-                            (make-list (- max-num (length delta)) (make-string 20 32)))
-              epsilon (append epsilon
-                              (make-list (- max-num (length epsilon)) (make-string 20 32))))
-        (cl-mapcar (lambda (alpha-element
-                            beta-element gamma-element
-                            delta-element epsilon-element)
-                     (insert alpha-element)
-                     (insert "  ")
-                     (insert beta-element)
-                     (insert "  ")
-                     (insert gamma-element)
-                     (insert "  ")
-                     (insert delta-element)
-                     (insert "  ")
-                     (insert epsilon-element)
-                     (insert "\n"))
-                   alpha beta gamma delta epsilon)
-        (insert "\n")))))
+      (let* ((row (-take number-of-months-per-row res-strings))
+             (max-num (apply 'max (mapcar 'length row)))
+             row-strs)
+        (setf res-strings
+              (nthcdr number-of-months-per-row res-strings)
+              row
+              (cl-loop for element in row
+                       collect
+                       (append element
+                               (make-list (- max-num (length element))
+                                          (make-string 20 32))))
+              row-strs
+              (cl-loop while (cl-some 'consp row)
+                       collect (string-join (durand-pop-all row) "  ")))
+        (cl-loop for str in row-strs
+                 do (progn (insert str) (newline)))
+        (newline)))))
 
 ;;;###autoload
 (defun month-length (month year)
@@ -3850,6 +3850,17 @@ in Lisp code use `org-set-tags' instead."
 	             (looking-at-p " "))
       (forward-char))))
 
+;;;###autoload
+(defvar durand-org-fill-column 90
+  "The variable controlling the fill-column in Org buffers.
+Set this locally to a different value so as to bypass hook problems.")
+
+;;;###autoload
+(defun durand-org-activate-auto-fill ()
+  "Activate auto-fill-mode.
+Set the fill-column to `durand-org-fill-column'."
+  (setf fill-column durand-org-fill-column)
+  (auto-fill-mode 1))
 
 ;; FIXME: This is not working!
 ;;;###autoload

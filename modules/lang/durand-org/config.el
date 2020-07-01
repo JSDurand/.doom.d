@@ -406,11 +406,7 @@ This should be setted by the PERIOD-FUNC argument.")
 
 ;; I like auto-fill-mode a lot.
 
-(add-hook 'org-mode-hook (lambda ()
-                           "Activate `auto-fill-mode'."
-                           (interactive)
-                           (setq-local fill-column 90)
-                           (auto-fill-mode 1)) t)
+(add-hook 'org-mode-hook 'durand-org-activate-auto-fill t)
 
 (after! org-capture
   (add-hook 'org-capture-mode-hook (lambda ()
