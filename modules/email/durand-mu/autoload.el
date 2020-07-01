@@ -230,6 +230,31 @@
                       (hash-table-count mu4e~contacts)))
 
 ;;;###autoload
+(defun durand-mu4e-next-thread (&optional n)
+  "Move to the next thread."
+  (interactive "p")
+  (let* ((n (or n 1))
+         (backwardp (< n 0))
+         (n (abs n)))
+    (cl-loop
+     for _i from 1 to n
+     do (mu4e-headers-find-if-next
+         (lambda (msg)
+           (let ((thread (mu4e-msg-field msg :thread)))
+             (or
+              (= (plist-get thread :level) 0)
+              (plist-get thread :empty-parent))))
+         backwardp))))
+
+;;;###autoload
+(defun durand-mu4e-prev-thread (&optional n)
+  "Move to the previous thread."
+  (interactive "p")
+  (durand-mu4e-next-thread (cond
+                            (n (- n))
+                            (t -1))))
+
+;;;###autoload
 (defun durand-mu4e (&optional arg)
   "If there are unread mails, view them; else, show the time until the next update,
 unless called multiple times, in which case execute `mu4e'.

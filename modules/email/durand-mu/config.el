@@ -9,10 +9,11 @@
 
   (setq org-mu4e-link-query-in-headers-mode nil)
 
-  (org-link-set-parameters
-   "mu4e"
-   :follow #'org-mu4e-open
-   :store #'org-mu4e-store-link)
+  ;;; REVIEW: This is done by default in the new version of mu4e
+  ;; (org-link-set-parameters
+  ;;  "mu4e"
+  ;;  :follow #'org-mu4e-open
+  ;;  :store #'org-mu4e-store-link)
 
   (setf mu4e-view-use-gnus t)
   (setf mu4e-confirm-quit nil)
@@ -161,12 +162,18 @@
         :n [?p] 'mu4e-view-headers-prev)
   (add-hook! mu4e-main-mode :append 'mu4e-clear-quit)
 
+  ;; set fill-columns properly
+  (add-hook! 'mu4e-compose-mode-hook :append
+    (setq-local durand-org-fill-column 70))
+
   (map! :map mu4e-view-mode-map
         :n [?o] 'mu4e-view-attach-emacs
         :n [?!] (cmd! (evil-scroll-line-down 1))
         [escape] 'doom/escape
         :map mu4e-headers-mode-map
         :n [?!] (cmd! (evil-scroll-line-down 1))
+        :n [?\M-n] 'durand-mu4e-next-thread
+        :n [?\M-p] 'durand-mu4e-prev-thread
         :leader
         [?!] 'mu4e-headers-mark-for-read))
 

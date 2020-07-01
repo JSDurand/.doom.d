@@ -194,6 +194,9 @@ URL can be a list of space-separated urls."
 (defun durand-elfeed-filter-complete ()
   "Complete filters for elfeed."
   (interactive)
+  ;; NOTE: Make sure space is not bound
+  (require 'crm)
+  (define-key crm-local-completion-map [32] nil)
   (let* ((elfeed-search-filter-active :live)
          (crm-separator " ")
          (tags (elfeed-db-get-all-tags))
