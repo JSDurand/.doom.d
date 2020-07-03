@@ -1550,7 +1550,7 @@ START-DATE and END-DATE, if non-nil, specify the start and the
 end date of the search, respectively.
 
 NUMBER-OF-MONTHS-PER-ROW if non-nil specifies the number of months
-to draw on one line. It defaults to (floor (window-text-width) 20)."
+to draw on one line. It defaults to (floor (+ (window-text-width) 2) 22)."
   (interactive)
   (unless (stringp (or match "run"))
     (user-error "MATCH should be a stirng."))
@@ -1618,7 +1618,7 @@ to draw on one line. It defaults to (floor (window-text-width) 20)."
   "Draw days in calendar format.
 DAYS-LIST should be a list of time values.
 NUMBER-OF-MONTHS-PER-ROW is the number of months to draw in one line.
-If it is nil, then it defaults to (floor (window-text-width) 20)."
+If it is nil, then it defaults to (floor (+ (window-text-width) 2) 22)."
   (let* ((start-day (car days-list))
          (months-list (list-months-between start-day (current-time)))
          ;; arg of `calendar-day-of-week' : (list month day year)
@@ -1650,7 +1650,7 @@ If it is nil, then it defaults to (floor (window-text-width) 20)."
                                    'font-lock-face 'calendar-weekend-header))
                                  " "))
          (number-of-months-per-row (or number-of-months-per-row
-                                       (floor (window-text-width) 20)))
+                                       (floor (+ (window-text-width) 2) 22)))
          ;; res-objs format : a list of lists of the form (year month week-of-start-of-month days)
          res-objs res-strings)
     (while months-list
