@@ -275,18 +275,18 @@ The list is in the variable `durand-o-things-list'"
   (interactive)
   (reset-durand-changed)
   (reset-durand-headlong)
-  (let ((thing (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
-                 (completing-read
-                  "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
-                  nil t "^"))
-               ;; (ivy-read "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
-               ;;           :require-match t
-               ;;           :initial-input "^"
-               ;;           ;; :dynamic-collection t
-               ;;           :unwind 'reset-durand-changed
-               ;;           :update-fn 'durand-self-insert-complete-and-exit
-               ;;           :caller 'durand-insert-o-things
-               ;;           :re-builder 'ivy--regex-plus)
+  (let ((thing ;; (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
+               ;;   (completing-read
+               ;;    "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
+               ;;    nil t "^"))
+               (ivy-read "Chois une chose associée à \"o\":" (mapcar 'car durand-o-things-list)
+                         :require-match t
+                         :initial-input "^"
+                         ;; :dynamic-collection t
+                         :unwind 'reset-durand-changed
+                         :update-fn 'durand-self-insert-complete-and-exit
+                         :caller 'durand-insert-o-things
+                         :re-builder 'ivy--regex-plus)
                ))
     (insert (format "\\%s" (assoc-default thing durand-o-things-list #'string=)))))
 
