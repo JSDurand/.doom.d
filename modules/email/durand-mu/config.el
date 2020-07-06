@@ -18,7 +18,7 @@
   (setf mu4e-view-use-gnus t)
   (setf mu4e-confirm-quit nil)
   (setq mu4e-maildir (expand-file-name "~/mbsync"))
-  (setq mu4e-get-mail-command "mbsync gmail") ; mbsync works a lot better!
+  (setq mu4e-get-mail-command "mbsync -a") ; mbsync works a lot better!
   (setq mu4e-change-filenames-when-moving t)
   (setq mu4e-view-show-addresses t)     ; show full addresses!
   (setq mu4e-view-show-images t)
@@ -64,32 +64,15 @@
   (setq mu4e-contexts
         (list
          (make-mu4e-context
-          :name "Durand"
-          :enter-func (lambda () (mu4e-message "Entering Durand context"))
-          :leave-func (lambda () (mu4e-message "Leaving Durand context"))
-          ;; we match based on the contact-fields of the message
-          :match-func (lambda (msg)
-                        (when msg
-                          (or
-                           (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
-                           (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
-          :vars '((user-mail-address . "mmemmew@gmail.com")
-                  (user-full-name . "Durand")
-                  (mu4e-compose-signature . "Sévère Durand")
-                  (mu4e-sent-folder . "/gmail/sent")
-                  (smtpmail-smtp-user . "mmemmew")
-                  (smtpmail-local-domain . "gmail.com")
-                  (smtpmail-default-smtp-server . "smtp.gmail.com")
-                  (smtpmail-smtp-server . "smtp.gmail.com")
-                  (smtpmail-smtp-service . 587)))
-         (make-mu4e-context
           :name "Student"
           :enter-func (lambda () (mu4e-message "Entering Student context"))
           :leave-func (lambda () (mu4e-message "Leaving Student context"))
           ;; we match based on the contact-fields of the message
           :match-func (lambda (msg)
                         (when msg
-                          (mu4e-message-contact-field-matches msg :from "tan\\|mlh\\|hsialc")))
+                          (or
+                           (mu4e-message-contact-field-matches msg :from "tan\\|mlh\\|hsialc")
+                           (mu4e-message-contact-field-matches msg :to "tan\\|mlh\\|hsialc"))))
           :vars '((user-mail-address . "mmemmew@gmail.com")
                   (user-full-name . "李俊緯")
                   (mu4e-compose-signature . "生 俊緯")
@@ -116,7 +99,26 @@
                         (mu4e-compose-signature .
                                                 (concat
                                                  "Sincerely Yours,\n"
-                                                 "俊緯")))))))
+                                                 "俊緯")))))
+         (make-mu4e-context
+          :name "Durand"
+          :enter-func (lambda () (mu4e-message "Entering Durand context"))
+          :leave-func (lambda () (mu4e-message "Leaving Durand context"))
+          ;; we match based on the contact-fields of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (or
+                           (mu4e-message-contact-field-matches msg :to "mmemmew@gmail.com")
+                           (mu4e-message-contact-field-matches msg :from "mmemmew@gmail.com"))))
+          :vars '((user-mail-address . "mmemmew@gmail.com")
+                  (user-full-name . "Durand")
+                  (mu4e-compose-signature . "Sévère Durand")
+                  (mu4e-sent-folder . "/gmail/sent")
+                  (smtpmail-smtp-user . "mmemmew")
+                  (smtpmail-local-domain . "gmail.com")
+                  (smtpmail-default-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-service . 587)))))
   (setq mu4e-context-policy 'pick-first
         mu4e-attachment-dir "~/Downloads"
         mu4e-mu-binary "/usr/local/bin/mu")
