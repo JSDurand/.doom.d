@@ -759,7 +759,7 @@ With ARG \\[universal-argument]\\[universal-argument], close browser."
                   ("math" . "https://math.stackexchange.com/questions")
                   ("fb" . "https://facebook.com")
                   ("twitter" . "https://twitter.com")
-                  ("messages" . "https://facebook.com/messages/t")
+                  ("messages" . "https://www.facebook.com/messages/t/100000372457423")
                   ("YT" . "https://youtube.com")))
          (choix (when (equal arg '(4)) (completing-read "Chois un lien: " cands)))
          (link (when choix
