@@ -344,7 +344,7 @@ If mu4e is not turned on, then tell the user this fact."
                                          `(,mins "min")
                                          `(,secs "sec")))
          (update-info (if (get-process "mu4e-update") "Updating, " "")))
-    (after! mu4e (mu4e-message "%s%s" update-info str))))
+    (message "[mu4e] %s%s" update-info str)))
 
 ;;;###autoload
 (defun mu4e-update-show-time (oldfun &rest info)
