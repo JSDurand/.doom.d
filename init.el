@@ -200,6 +200,7 @@
        ;;(wanderlust +gmail)
 
        :app
+       durand-bongo
        ;; calendar
        ;; irc               ; how neckbeards socialize
        (rss +org)                       ; emacs as an RSS reader
