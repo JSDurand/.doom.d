@@ -19,6 +19,9 @@
           (swiper-multi . swiper--all-format-function)
           (t . durand-ivy-format-function-arrow)))
 
+  (ivy-add-actions 'counsel-find-file
+                   '(("g" durand-find-file-go-to-dir-action "Go to directory")))
+
   (when (boundp 'ivy-re-builders-alist)
     (setq ivy-re-builders-alist
           '((swiper . ivy--regex-ignore-order)
@@ -50,56 +53,56 @@
 
 ;; some ivy-rich functionalities
 (after! ivy
-	(ivy-set-display-transformer 'durand-switch-buffer nil)
+  (ivy-set-display-transformer 'durand-switch-buffer nil)
   (when (boundp 'ivy-rich-display-transformers-list)
     (plist-put!
      ivy-rich-display-transformers-list
      'durand-switch-buffer
      '(:columns ((ivy-rich-candidate (:width 30)) ; return the candidate itself
-	               (ivy-rich-switch-buffer-size (:width 7)) ; return the buffer size
+                 (ivy-rich-switch-buffer-size (:width 7)) ; return the buffer size
                  ;; (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
                                         ; return the buffer indicators
-	               (ivy-rich-switch-buffer-major-mode (:width 12 :face durand-buffer-major-mode-face))
+                 (ivy-rich-switch-buffer-major-mode (:width 12 :face durand-buffer-major-mode-face))
                                         ; return the major mode info
                  ;; (ivy-rich-switch-buffer-project (:width 15 :face success))
                                         ; return project name using `projectile'
-	               (ivy-rich-switch-buffer-path
-		              (:width (lambda (x)
-			                      (truncate-string-to-width
-			                       (ivy-rich-switch-buffer-shorten-path
-			                        x
-			                        (ivy-rich-minibuffer-width 0.4))
-			                       (ivy-rich-minibuffer-width 0.4))))))
+                 (ivy-rich-switch-buffer-path
+                  (:width (lambda (x)
+                            (truncate-string-to-width
+                             (ivy-rich-switch-buffer-shorten-path
+                              x
+                              (ivy-rich-minibuffer-width 0.4))
+                             (ivy-rich-minibuffer-width 0.4))))))
                                         ; return file path relative to project root or `default-directory' if project is nil
-	              :predicate (lambda (cand)
-			                       (get-buffer cand))))
+       :predicate (lambda (cand)
+                    (get-buffer cand))))
     (plist-put!
      ivy-rich-display-transformers-list
      'counsel-describe-function
      '(:columns ((counsel-describe-function-transformer
-		              (:width 40))
-	               (ivy-rich-counsel-function-docstring
-		              (:face font-lock-doc-face :width 0.5)))))
+                  (:width 40))
+                 (ivy-rich-counsel-function-docstring
+                  (:face font-lock-doc-face :width 0.5)))))
     (plist-put
      ivy-rich-display-transformers-list
      'counsel-find-file
      '(:columns ((ivy-read-file-transformer
-		              (:width 0.7))
-	               (ivy-file-name-extension
-		              (:face warning :width 15)))))
+                  (:width 0.7))
+                 (ivy-file-name-extension
+                  (:face warning :width 15)))))
     (plist-put
      ivy-rich-display-transformers-list
      'durand-bookmark-jump-headlong
      '(:columns ((identity
-		              (:width 25))
-	               (durand-ivy-rich-bookmark-file-path
-		              (:face durand-buffer-major-mode-face
-		                     :width (lambda (x)
-				                          (truncate-string-to-width
-				                           (ivy-rich-switch-buffer-shorten-path
-				                            x
-				                            (ivy-rich-minibuffer-width 0.7))
-				                           (ivy-rich-minibuffer-width 0.7))))))))))
+                  (:width 25))
+                 (durand-ivy-rich-bookmark-file-path
+                  (:face durand-buffer-major-mode-face
+                   :width (lambda (x)
+                            (truncate-string-to-width
+                             (ivy-rich-switch-buffer-shorten-path
+                              x
+                              (ivy-rich-minibuffer-width 0.7))
+                             (ivy-rich-minibuffer-width 0.7))))))))))
 
 (when (featurep! :completion ivy +childframe)
   (after! ivy-posframe

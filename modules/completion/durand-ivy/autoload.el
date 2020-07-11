@@ -44,3 +44,14 @@
               (file-directory-p file))
          "dir")
         (t "")))
+
+;;;###autoload
+(defun durand-find-file-go-to-dir-action (path)
+  "Go to the directory containing PATH."
+  (interactive)
+  (let ((dir (expand-file-name
+              (file-name-directory path)
+              (when-let ((root (doom-project-root)))
+                root))))
+    (cl-assert (file-directory-p dir))
+    (dired dir)))
