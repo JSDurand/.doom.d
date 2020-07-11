@@ -127,6 +127,7 @@
 ;; (set-face-attribute 'italic nil :foreground "light blue")
 
 (advice-add 'org-agenda-later :around 'durand-agenda-advice)
+(advice-add 'org-agenda-goto-date :around 'durand-agenda-advice)
 (advice-add 'org-agenda-goto-today :around 'durand-agenda-advice-for-today)
 
 ;; (map! :map org-agenda-mode-map [?g] #'durand-redo-agenda)

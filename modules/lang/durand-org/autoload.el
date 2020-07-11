@@ -569,11 +569,25 @@ EXCLUDE-TYPE can be nil or a regexp matching what would not be summed."
   "Convert a date string STR to time.
 Date string should separated by either space, dash, or underline."
   (let* ((splitted (split-string str "[ |_|-]+"))
-         (splitted-list (mapcar #'string-to-number splitted)))
-    (encode-time 0 0 0
+         (splitted-list (mapcar #'string-to-number splitted))
+         (time
+          (append
+           (list 0 0 0
                  (caddr splitted-list)
                  (cadr splitted-list)
-                 (car splitted-list))))
+                 (car splitted-list))
+           (nthcdr 6 (decode-time)))))
+    (encode-time time)))
+
+;;;###autoload
+(defun durand-account-normalize-time (time-value)
+  "Normalize TIME-VALUE.
+The result will have second, minute, and hour all equal to 0."
+  (let* ((decoded (decode-time time-value)))
+    (encode-time
+     (append
+      (list 0 0 0)
+      (nthcdr 3 decoded)))))
 
 ;;;###autoload
 (defun durand-account-match-last-unit (str &optional unit)
@@ -618,10 +632,14 @@ or a custom specifier of time period."
                           (cadr str-list))
                          (t
                           "+0")))
-               (beg (org-read-date nil t beg-str "Chois le début:"))
-               (end (org-read-date nil t end-str "Chois la fin:")))
-          (and (time-less-p beg str-time)
-               (time-less-p str-time end))))
+               (beg (durand-account-normalize-time
+                     (org-read-date nil t beg-str "Chois le début:")))
+               (end (durand-account-normalize-time
+                     (org-read-date nil t end-str "Chois la fin:"))))
+          (and (or (time-less-p beg str-time)
+                   (time-equal-p beg str-time))
+               (or (time-less-p str-time end)
+                   (time-equal-p str-time end)))))
        (_
         (user-error "Unknown UNIT: %s" unit))))))
 
@@ -783,11 +801,15 @@ Press \\[durand-view-last-day] to view the last day;
 
 ;;;###autoload
 (defun durand-view-go-to-account-day ()
-  "go to the corresponding date"
+  "Go to the corresponding date.
+If executed conitnuously, then scroll down the account buffer."
   (interactive)
   (unless (string= (buffer-name) "*ACCOUNT REPORT*")
     (user-error "This should only be executed in account report buffer."))
   (cond
+   ((eq last-command this-command)
+    (select-window (get-buffer-window "account.org"))
+    (evil-scroll-line-down (/ (window-body-height) 2)))
    ((save-excursion
       (beginning-of-line)
       (looking-at "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"))
