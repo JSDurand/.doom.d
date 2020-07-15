@@ -1516,6 +1516,62 @@ and whose `caddr' is a list of strings, the content of the note."
                         (string-to-number (match-string 2))))))))))))
 
 ;;;###autoload
+(defun durand-list-str-valued-plist-p (x)
+  "Return t if X is a plist with values all lists of strings."
+  (while (consp x)
+    (setf x
+          (cond
+           ((not
+             (and (keywordp (car x))
+                  (consp (cdr x))))
+            'not-plist)
+           ((not (and (listp (cadr x))
+                      (cl-every 'stringp
+                                (cadr x))))
+            'not-list-of-string-valued)
+           (t
+            (cddr x)))))
+  (null x))
+
+;;;###autoload
+(defun durand-org-map-entries (func &optional match)
+  "Call FUNC for each entry that matches MATCH.
+MATCH is a plist whose following keys have special meanings.
+:str => list of literal string search strings
+:regexp => list of regular expressions
+:tags => list of tags to search."
+  (require 'org)
+  (cl-assert (derived-mode-p 'org-mode))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (cl-loop while (re-search-forward org-heading-regexp nil t)
+               when
+               (save-excursion
+                 (goto-char (match-beginning 0))
+                 (let ((limit (save-excursion
+                                (outline-next-heading)
+                                (point)))
+                       (tags (org-get-tags (point))))
+                   (and (or (null (plist-get match :str))
+                            (cl-some
+                             (lambda (str)
+                               (save-excursion (search-forward str limit t)))
+                             (plist-get match :str)))
+                        (or (null (plist-get match :regexp))
+                            (cl-some
+                             (lambda (re)
+                               (save-excursion (re-search-forward re limit t)))
+                             (plist-get match :regexp)))
+                        (or (null (plist-get match :tags))
+                            (cl-every
+                             (lambda (tag)
+                               (cl-member tag tags :test 'string=))
+                             (plist-get match :tags))))))
+               collect (save-excursion (funcall func))))))
+
+;;;###autoload
 (defun durand-org-view-notes ()
   "View the notes entries in a separate buffer"
   (interactive)
@@ -1524,60 +1580,78 @@ and whose `caddr' is a list of strings, the content of the note."
          (logs (cl-sort logs 'time-less-p))
          (len (length notes)))
     (with-current-buffer-window
-     "*durand-org-view-notes*"
-     nil nil
-     (goto-char (point-min))
-     (insert "#+STARTUP: showall\n")
-     ;; insert log graph if any
-     (ignore-errors
-       (when (not (null logs))
-         (insert "LOGS:\n")
-         ;; (durand-draw-days logs)
-         (durand-draw-calendar-days logs)))
-     (insert "\n")
-     ;; insert notes
-     (let ((times (mapcar #'car notes))
-           (metas (mapcar #'cadr notes))
-           (contents (mapcar #'caddr notes)))
-       (if (/= 0 len)
-           (dotimes (i len)
-             (insert (concat
-                      "\n"
-                      (propertize "*" :note-meta (elt metas i))
-                      " Note on "
-                      (elt times i)
-                      "\n"
-                      (elt contents i)
-                      "\n")))
-         (insert "No notes found!")))
-     (goto-char (point-min))
-     (durand-org-notes-mode)
-     ;; (let ((temp-map (make-sparse-keymap)))
-     ;;   (set-keymap-parent temp-map org-mode-map)
-     ;;   (map! :map temp-map
-     ;;         :n [?q] 'quit-window)
-     ;;   (use-local-map temp-map))
-     )
+        "*durand-org-view-notes*"
+        nil nil
+      (goto-char (point-min))
+      (insert "#+STARTUP: showall\n")
+      ;; insert log graph if any
+      (ignore-errors
+        (when (not (null logs))
+          (insert "LOGS:\n")
+          ;; (durand-draw-days logs)
+          (durand-draw-calendar-days logs)))
+      (insert "\n")
+      ;; insert notes
+      (let ((times (mapcar #'car notes))
+            (metas (mapcar #'cadr notes))
+            (contents (mapcar #'caddr notes)))
+        (if (/= 0 len)
+            (dotimes (i len)
+              (insert (concat
+                       "\n"
+                       (propertize "*" :note-meta (elt metas i))
+                       " Note on "
+                       (elt times i)
+                       "\n"
+                       (elt contents i)
+                       "\n")))
+          (insert "No notes found!")))
+      (goto-char (point-min))
+      (durand-org-notes-mode)
+      ;; (let ((temp-map (make-sparse-keymap)))
+      ;;   (set-keymap-parent temp-map org-mode-map)
+      ;;   (map! :map temp-map
+      ;;         :n [?q] 'quit-window)
+      ;;   (use-local-map temp-map))
+      )
     (message "%s note%s found" (if (= 0 len) "No" (number-to-string len))
              (cond ((= len 0) "s") ((<= len 1) "") (t "s")))))
 
 ;;;###autoload
 (defun durand-org-view-all-logs (&optional match file start-date end-date
                                            number-of-months-per-row)
-  "View all logs recorded in FILE, including archived files matched bt MATCH.
+  "View all logs recorded in FILE, including archived files matched by MATCH.
+MATCH has the following possibilities:
 
-If FILE is nil or omitted, then it defaults to \"aujourdhui.org\".
+- a string          => use regular expression to search.
+- a list of strings => list of tags to search.
+- a plist           =>
+  + :STR    => list of literal search strings
+  + :REGEXP => list of regular expressions to search
+  + :TAGS   => list of tags to search
+
+If FILE is nil or omitted, then it defaults to
+\"aujourdhui.org\".
 
 START-DATE and END-DATE, if non-nil, specify the start and the
 end date of the search, respectively.
 
-NUMBER-OF-MONTHS-PER-ROW if non-nil specifies the number of months
-to draw on one line. It defaults to (floor (+ (window-text-width) 2) 22)."
+NUMBER-OF-MONTHS-PER-ROW if non-nil specifies the number of
+months to draw on one line. It defaults
+to (floor (+ (window-text-width) 2) 22)."
   (interactive)
-  (unless (stringp (or match "run"))
-    (user-error "MATCH should be a stirng."))
-  (let* ((match (or match "run"))
-         (log-buffer-name (concat "*logs: " match " *"))
+  (let* ((match
+          (cond
+           ((null match) (list :tags (list "run")))
+           ((stringp match) (list :regexp (list match)))
+           ((and (listp match)
+                 (cl-every 'stringp match))
+            (list :tags match))
+           ((durand-list-str-valued-plist-p match) match)
+           (t (user-error
+               "MATCH should be either nil, a string, a list of strings, or a plist, but got %s"
+               match))))
+         (log-buffer-name (format "*logs: %S" match " *"))
          (archive-number -1)
          (file (or file "/Users/durand/org/aujourdhui.org"))
          logs)
@@ -1591,11 +1665,11 @@ to draw on one line. It defaults to (floor (+ (window-text-width) 2) 22)."
                     "."
                     (file-name-extension file)))))
       (while (file-exists-p archive-file)
-        (message "%d, %s" archive-number archive-file)
+        ;; (message "%d, %s" archive-number archive-file)
         (with-current-file archive-file nil
           (setf logs (append logs
                              (apply 'append
-                                    (org-map-entries 'durand-org-get-logs match))))
+                                    (durand-org-map-entries 'durand-org-get-logs match))))
           (when start-date
             (setf logs
                   (cl-remove-if (lambda (time-value)
@@ -2561,76 +2635,76 @@ a link."
     (let* ((context
             ;; Only consider supported types, even if they are not the
             ;; closest one.
-	          (org-element-lineage
-	           (org-element-context)
-	           '(clock comment comment-block footnote-definition
-		                 footnote-reference headline inline-src-block inlinetask
-		                 keyword link node-property planning src-block timestamp)
-	           t))
-	         (type (org-element-type context))
-	         (value (org-element-property :value context)))
+            (org-element-lineage
+             (org-element-context)
+             '(clock comment comment-block footnote-definition
+                     footnote-reference headline inline-src-block inlinetask
+                     keyword link node-property planning src-block timestamp)
+             t))
+           (type (org-element-type context))
+           (value (org-element-property :value context)))
       (cond
        ((not type) (user-error "No link found"))
        ;; No valid link at point.  For convenience, look if something
        ;; looks like a link under point in some specific places.
        ((memq type '(comment comment-block node-property keyword))
-	      (call-interactively #'org-open-at-point-global))
+        (call-interactively #'org-open-at-point-global))
        ;; On a headline or an inlinetask, but not on a timestamp,
        ;; a link, a footnote reference.
        ((memq type '(headline inlinetask))
-	      (org-match-line org-complex-heading-regexp)
-	      (if (and (match-beginning 5)
-		             (>= (point) (match-beginning 5))
-		             (< (point) (match-end 5)))
+        (org-match-line org-complex-heading-regexp)
+        (if (and (match-beginning 5)
+                 (>= (point) (match-beginning 5))
+                 (< (point) (match-end 5)))
             ;; On tags.
-	          (org-tags-view arg (substring (match-string 5) 0 -1))
+            (org-tags-view arg (substring (match-string 5) 0 -1))
           ;; Not on tags.
-	        (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
-	          (`(nil . ,_)
-	           (require 'org-attach)
-	           (org-attach-reveal 'if-exists))
-	          (`(,links . ,links-end)
-	           (dolist (link (if (stringp links) (list links) links))
-	             (search-forward link nil links-end)
-	             (goto-char (match-beginning 0))
-	             (org-open-at-point))))))
+          (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
+            (`(nil . ,_)
+             (require 'org-attach)
+             (org-attach-reveal 'if-exists))
+            (`(,links . ,links-end)
+             (dolist (link (if (stringp links) (list links) links))
+               (search-forward link nil links-end)
+               (goto-char (match-beginning 0))
+               (org-open-at-point))))))
        ;; On a footnote reference or at definition's label.
        ((or (eq type 'footnote-reference)
-	          (and (eq type 'footnote-definition)
-		             (save-excursion
+            (and (eq type 'footnote-definition)
+                 (save-excursion
                    ;; Do not validate action when point is on the
                    ;; spaces right after the footnote label, in order
                    ;; to be on par with behavior on links.
-		               (skip-chars-forward " \t")
-		               (let ((begin
-			                    (org-element-property :contents-begin context)))
-		                 (if begin (< (point) begin)
-		                   (= (org-element-property :post-affiliated context)
-			                    (line-beginning-position)))))))
-	      (org-footnote-action))
+                   (skip-chars-forward " \t")
+                   (let ((begin
+                          (org-element-property :contents-begin context)))
+                     (if begin (< (point) begin)
+                       (= (org-element-property :post-affiliated context)
+                          (line-beginning-position)))))))
+        (org-footnote-action))
        ;; On a planning line.  Check if we are really on a timestamp.
        ((and (eq type 'planning)
-	           (org-in-regexp org-ts-regexp-both nil t))
-	      (org-follow-timestamp-link))
+             (org-in-regexp org-ts-regexp-both nil t))
+        (org-follow-timestamp-link))
        ;; On a clock line, make sure point is on the timestamp
        ;; before opening it.
        ((and (eq type 'clock)
-	           value
-	           (>= (point) (org-element-property :begin value))
-	           (<= (point) (org-element-property :end value)))
-	      (org-follow-timestamp-link))
+             value
+             (>= (point) (org-element-property :begin value))
+             (<= (point) (org-element-property :end value)))
+        (org-follow-timestamp-link))
        ((eq type 'src-block) (org-babel-open-src-block-result))
        ;; Do nothing on white spaces after an object.
        ((>= (point)
-	          (save-excursion
-	            (goto-char (org-element-property :end context))
-	            (skip-chars-backward " \t")
-	            (point)))
-	      (user-error "No link found"))
+            (save-excursion
+              (goto-char (org-element-property :end context))
+              (skip-chars-backward " \t")
+              (point)))
+        (user-error "No link found"))
        ((eq type 'inline-src-block) (org-babel-open-src-block-result))
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ((eq type 'link)
-	      (let* ((type (org-element-property :type context))
+        (let* ((type (org-element-property :type context))
                ;; NOTE: I changed this part.
                (path (cond
                       ;; ((string-prefix-p "http" type)
@@ -3895,3 +3969,133 @@ Set the fill-column to `durand-org-fill-column'."
 ;;     (run-at-time "0.5 sec" nil
 ;;                  (lambda ()
 ;;                    (kill-buffer (get-file-buffer doc-file-name))))))
+
+;;;###autoload
+(defvar durand-org-capture-account-which-list
+  '("breakfast" "brunch" "brunverage" "lunch" "dinner" "beverage" "snack" "fruit")
+  "The list of purposes of accounts in the capture-template for accounting.")
+
+;;;###autoload
+(defun durand-org-capture-account-template ()
+  "Org capture template for account."
+  (let* ((shop-and-items (durand-org-complete-capture-account))
+         (which (completing-read
+                 "For what? "
+                 durand-org-capture-account-which-list))
+         (cost (number-to-string
+                (read-number "Cost: " 0)))
+         (from (completing-read "From: " '("Cash" "etique")))
+         (active-time (format-time-string
+                       (cdr org-time-stamp-formats)))
+         (inactive-time
+          (let ((temp active-time))
+            (while (string-match "<\\|>" temp)
+              (setf temp
+                    (replace-match
+                     (cond
+                      ((string= (match-string-no-properties 0 temp) "<") "[")
+                      ((string= (match-string-no-properties 0 temp) ">") "]"))
+                     nil nil temp)))
+            temp)))
+    (format "%s\n  :PROPERTIES:\n  :cost: %s\n  :FROM: %s\n  :RECORD_TIME: %s\n  :END: \n  %s%%?"
+            which cost from inactive-time shop-and-items)))
+
+;;;###autoload
+(defadvice! durand-org-capture-default-h ()
+  "Define my own defaults."
+  :override '+org-init-capture-defaults-h
+  (setq org-capture-templates
+        '(("m" "Account records" entry
+           (file+olp+datetree "~/org/account/account.org")
+           "* %(durand-org-capture-account-template)"
+           ;; "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %(number-to-string (read-number \"COST:\" 0))\n  :FROM: %(completing-read \"FROM: \" '(\"Cash\" \"etique\"))\n  :RECORD_TIME: %U\n  :END:\n  %(durand-org-complete-capture-account)%?"
+           :jump-to-captured t)
+          ("d" "Record Diaries" entry
+           (file+olp+datetree "~/org/diary.org")
+           "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
+           :jump-to-captured t)
+          ("w" "Withdrawal records" entry
+           (file+headline "~/org/wiki.org" "Money Withdrawal")
+           "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
+           :kill-buffer t)
+          ("l" "Store links" entry
+           (file+headline "~/org/notes.org" "Links")
+           "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
+          ("g" "GNUS" entry
+           (file "~/org/notes.org")
+           "* TO-THINK %:subject\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n  %:from\n  %:to\n  %a\n  %?"
+           :empty-lines 1
+           :kill-buffer t)
+          ("L" "for storing webpages" entry
+           #'org-determine-link-file
+           "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
+           :empty-lines 1
+           :kill-buffer t
+           :immediate-finish t)
+          ("t" "TODO" entry
+           (file "~/org/aujourdhui.org")
+           "* TODO %? %^{Date to do:}t\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
+           :kill-buffer t)
+          ("b" "Blog posts" entry
+           (file+headline "~/org/notes.org" "Blog posts")
+           "* %? %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%i\n")
+          ("a" "Abstractions" entry
+           (file+headline "~/org/wiki.org" "Abstractions")
+           "* ABSTRACT %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n")
+          ("A" "Agenda" entry
+           (file+headline "~/org/agenda.org" "Agenda")
+           "* TODO %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :DURATION: %^{Date: }t\n  :END:\n\n")
+          ("y" "YiFu" entry
+           (file+headline "~/org/wiki.org" "Yi Fu Tips")
+           "* MEMO %^{word}\n  :PROPERTIES:\n  :STORY: %\\2\n  :MEANING: %\\3\n  :END:\n** Yi Fu story\n   %^{story}\n** Meaning\n   %^{meaning}"
+           :kill-buffer t
+           :immediate-finish t)
+          ("c" "Chansons" entry
+           (file+headline "~/org/wiki.org" "Liste de Chansons")
+           "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: [[%^{link}][%^{description}]]\n  :END:\n  %?"
+           :jump-to-captured t)
+          ("f" "français" entry
+           (file+headline "~/org/français/français.org" "Liste de mots français")
+           "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
+           :jump-to-captured t)))
+  (setq org-default-notes-file
+        (expand-file-name +org-capture-notes-file org-directory)
+        +org-capture-journal-file
+        (expand-file-name +org-capture-journal-file org-directory))
+
+  ;; Kill capture buffers by default (unless they've been visited)
+  (after! org-capture
+    (org-capture-put :kill-buffer t))
+
+  ;; Fix #462: when refiling from org-capture, Emacs prompts to kill the
+  ;; underlying, modified buffer. This fixes that.
+  (add-hook 'org-after-refile-insert-hook #'save-buffer)
+
+  ;; HACK Doom doesn't support `customize'. Best not to advertise it as an
+  ;;      option in `org-capture's menu.
+  (defadvice! +org--remove-customize-option-a (orig-fn table title &optional prompt specials)
+    :around #'org-mks
+    (funcall orig-fn table title prompt
+             (remove '("C" "Customize org-capture-templates")
+                     specials)))
+
+  (defadvice! +org--capture-expand-variable-file-a (file)
+    "If a variable is used for a file path in `org-capture-template', it is used
+as is, and expanded relative to `default-directory'. This changes it to be
+relative to `org-directory', unless it is an absolute path."
+    :filter-args #'org-capture-expand-file
+    (if (and (symbolp file) (boundp file))
+        (expand-file-name (symbol-value file) org-directory)
+      file))
+
+  (add-hook! 'org-capture-mode-hook
+    (defun +org-show-target-in-capture-header-h ()
+      (setq header-line-format
+            (format "%s%s%s"
+                    (propertize (abbreviate-file-name (buffer-file-name (buffer-base-buffer)))
+                                'face 'font-lock-string-face)
+                    org-eldoc-breadcrumb-separator
+                    header-line-format))))
+
+  (when (featurep! :editor evil)
+    (add-hook 'org-capture-mode-hook #'evil-insert-state)))
