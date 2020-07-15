@@ -144,7 +144,7 @@
   :config
   (setf mu4e-alert-interesting-mail-query
         "date:7d..now AND NOT maildir:/trash AND NOT maildir:/archive AND flag:unread"
-        mu4e-update-interval 3600)
+        mu4e-update-interval nil)
   (mu4e-alert-enable-mode-line-display))
 
 (after! org-mu4e
@@ -191,42 +191,42 @@
       mu4e-view-mode)
     'emacs))
 
-(setf durand-mu4e-open-timer
-      (unless (boundp 'durand-mu4e-open-timer)
-        (let* ((cur (decode-time (current-time)))
-               (cur-year (nth 5 cur))
-               (cur-month (nth 4 cur))
-               (cur-day (nth 3 cur))
-               (cur-hour (nth 2 cur)))
-          (run-with-timer
-           (float-time
-            (time-subtract
-             (cond
-              ((>= cur-hour 9)
-               (encode-time 0 0 9 (1+ cur-day) cur-month cur-year))
-              (t
-               (encode-time 0 0 9 cur-day cur-month cur-year)))
-             nil))
-           (* 24 60 60) ;; a day
-           #'durand-mu4e-open-if-necessary)))
-      durand-mu4e-close-timer
-      (unless (boundp 'durand-mu4e-close-timer)
-        (let* ((cur (decode-time (current-time)))
-               (cur-year (nth 5 cur))
-               (cur-month (nth 4 cur))
-               (cur-day (nth 3 cur))
-               (cur-hour (nth 2 cur)))
-          (run-with-timer
-           (float-time
-            (time-subtract
-             (cond
-              ((>= cur-hour 22)
-               (encode-time 0 0 22 (1+ cur-day) cur-month cur-year))
-              (t
-               (encode-time 0 0 22 cur-day cur-month cur-year)))
-             nil))
-           (* 24 60 60) ;; a day
-           #'durand-mu4e-close-if-necessary))))
+;; (setf durand-mu4e-open-timer
+;;       (unless (boundp 'durand-mu4e-open-timer)
+;;         (let* ((cur (decode-time (current-time)))
+;;                (cur-year (nth 5 cur))
+;;                (cur-month (nth 4 cur))
+;;                (cur-day (nth 3 cur))
+;;                (cur-hour (nth 2 cur)))
+;;           (run-with-timer
+;;            (float-time
+;;             (time-subtract
+;;              (cond
+;;               ((>= cur-hour 9)
+;;                (encode-time 0 0 9 (1+ cur-day) cur-month cur-year))
+;;               (t
+;;                (encode-time 0 0 9 cur-day cur-month cur-year)))
+;;              nil))
+;;            (* 24 60 60) ;; a day
+;;            #'durand-mu4e-open-if-necessary)))
+;;       durand-mu4e-close-timer
+;;       (unless (boundp 'durand-mu4e-close-timer)
+;;         (let* ((cur (decode-time (current-time)))
+;;                (cur-year (nth 5 cur))
+;;                (cur-month (nth 4 cur))
+;;                (cur-day (nth 3 cur))
+;;                (cur-hour (nth 2 cur)))
+;;           (run-with-timer
+;;            (float-time
+;;             (time-subtract
+;;              (cond
+;;               ((>= cur-hour 22)
+;;                (encode-time 0 0 22 (1+ cur-day) cur-month cur-year))
+;;               (t
+;;                (encode-time 0 0 22 cur-day cur-month cur-year)))
+;;              nil))
+;;            (* 24 60 60) ;; a day
+;;            #'durand-mu4e-close-if-necessary))))
 
 ;;; org-msg
 

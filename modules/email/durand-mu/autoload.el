@@ -237,7 +237,7 @@
          (backwardp (< n 0))
          (n (abs n)))
     (cl-loop
-     for _i from 1 to n
+     for i from 1 to n
      do (mu4e-headers-find-if-next
          (lambda (msg)
            (let ((thread (mu4e-msg-field msg :thread)))
@@ -271,26 +271,31 @@ If mu4e is not turned on, then tell the user this fact."
     (mu4e))
    (mu4e-alert-mode-line (mu4e-alert-view-unread-mails))
    ;; ((eq last-command 'durand-mu4e) (mu4e))
-   ((and (memq last-command `(durand-mu4e ,(intern "general-hydra/lambda-,m")))
+   ((memq last-command '(durand-mu4e))
+    (when (timerp mu4e~update-timer)
+      (cancel-timer mu4e~update-timer))
+    (setf mu4e~update-timer nil
+          mu4e-update-interval nil)
+    (mu4e))
+   ;; ((memq last-command `(durand-mu4e ,(intern "general-hydra/lambda-,m")))
+   ;;  (mu4e)
+   ;;  ;; (setq mu4e~update-timer
+   ;;  ;;       (run-at-time
+   ;;  ;;        0 mu4e-update-interval
+   ;;  ;;        (lambda () (mu4e-update-mail-and-index
+   ;;  ;;                    mu4e-index-update-in-background))))
+   ;;  )
+   ((get-process " *mu4e-proc*")
+    (when (timerp mu4e~update-timer)
+      (cancel-timer mu4e~update-timer))
+    (setf mu4e~update-timer nil
+          mu4e-update-interval nil)
+    (mu4e))
+   ((and (not (get-process " *mu4e-proc*"))
          mu4e~update-timer)
-    (mu4e)
-    (mu4e-next-update-seconds))
-   ((memq last-command `(durand-mu4e ,(intern "general-hydra/lambda-,m")))
-    (mu4e)
-    (setq mu4e~update-timer
-          (run-at-time
-           0 mu4e-update-interval
-           (lambda () (mu4e-update-mail-and-index
-                       mu4e-index-update-in-background)))))
-   ((and (get-process " *mu4e-proc*")
-         mu4e~update-timer)
-    (mu4e-next-update-seconds))
-   ((or (and (not (get-process " *mu4e-proc*"))
-             mu4e~update-timer)
-        (and (get-process " *mu4e-proc*")
-             (null mu4e~update-timer)))
-    (mu4e-quit)
-    (user-error "Fixé une erreur."))
+    (setf mu4e~update-timer nil
+          mu4e-update-interval nil)
+    (message "mu4e is not active right now."))
    (t
     (message "mu4e is not active right now."))))
 
