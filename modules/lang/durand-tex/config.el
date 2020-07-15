@@ -264,9 +264,10 @@ where the macro part is without the backslash.")
 (setf durand-o-things-list
       (list
        (cons "x" "otimes")
+       (cons "s" "sum")
+       (cons "p" "prod")
        (cons "+" "oplus")
        (cons "o" "circ")))
-
 
 ;;;###autoload
 (defun durand-insert-o-things ()
