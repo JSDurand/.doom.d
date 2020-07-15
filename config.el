@@ -145,6 +145,14 @@
       "v" #'TeX-view
       "t" #'TeX-command-run-all)
 
+;;; show aux and toc files so that I can delete them
+
+(setq-hook! 'dired-mode-hook
+  dired-omit-extensions
+  (cl-remove ".aux"
+             (cl-remove ".toc" dired-omit-extensions :test 'string=)
+             :test 'string=))
+
 ;; toggle hl-todo-mode
 
 (map! :map doom-leader-toggle-map
