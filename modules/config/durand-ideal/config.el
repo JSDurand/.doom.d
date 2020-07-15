@@ -39,6 +39,10 @@
       [?o] 'kill-other-buffer-window
       [?k] 'kill-current-buffer)
 
+;;; don't let pop up system handle my pdf search buffer
+
+(set-popup-rule! "\\*chercher pdf\\*" :ignore t)
+
 (set-evil-initial-state!
   '(durand-pdf-mode)
   'emacs)

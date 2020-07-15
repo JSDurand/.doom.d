@@ -694,9 +694,7 @@ Version 2018-06-04"
         (nom (concat "*" nom "*")))
     (when (get-buffer chercher-buffer)
       (kill-buffer chercher-buffer))
-    (switch-to-buffer chercher-buffer)
-    ;; (pop-to-buffer-same-window chercher-buffer)
-    ;; (delete-other-windows)
+    (pop-to-buffer-same-window chercher-buffer)
     (delete-region (point-min) (point-max))
     (dolist (dir pdf-dir-list)
       (let ((pro (make-process
