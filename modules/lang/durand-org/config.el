@@ -183,59 +183,59 @@
 ;; The original org-protocol-convert handles youtube links wrong
 (after! org-capture
 
-  (setq org-capture-templates
-        '(("m" "Account records" entry
-           (file+olp+datetree "~/org/account/account.org")
-           "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %(number-to-string (read-number \"COST:\" 0))\n  :FROM: %(completing-read \"FROM: \" '(\"Cash\" \"etique\"))\n  :RECORD_TIME: %U\n  :END:\n  %(durand-org-complete-capture-account)%?"
-           :jump-to-captured t)
-          ("d" "Record Diaries" entry
-           (file+olp+datetree "~/org/diary.org")
-           "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
-           :jump-to-captured t)
-          ("w" "Withdrawal records" entry
-           (file+headline "~/org/wiki.org" "Money Withdrawal")
-           "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
-           :kill-buffer t)
-          ("l" "Store links" entry
-           (file+headline "~/org/notes.org" "Links")
-           "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
-          ("g" "GNUS" entry
-           (file "~/org/notes.org")
-           "* TO-THINK %:subject\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n  %:from\n  %:to\n  %a\n  %?"
-           :empty-lines 1
-           :kill-buffer t)
-          ("L" "for storing webpages" entry
-           (function org-determine-link-file)
-           "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
-           :empty-lines 1
-           :kill-buffer t
-           :immediate-finish t)
-          ("t" "TODO" entry
-           (file "~/org/aujourdhui.org")
-           "* TODO %? %^{Date to do:}t\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
-           :kill-buffer t)
-          ("b" "Blog posts" entry
-           (file+headline "~/org/notes.org" "Blog posts")
-           "* %? %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%i\n")
-          ("a" "Abstractions" entry
-           (file+headline "~/org/wiki.org" "Abstractions")
-           "* ABSTRACT %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n")
-          ("A" "Agenda" entry
-           (file+headline "~/org/agenda.org" "Agenda")
-           "* TODO %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :DURATION: %^{Date: }t\n  :END:\n\n")
-          ("y" "YiFu" entry
-           (file+headline "~/org/wiki.org" "Yi Fu Tips")
-           "* MEMO %^{word}\n  :PROPERTIES:\n  :STORY: %\\2\n  :MEANING: %\\3\n  :END:\n** Yi Fu story\n   %^{story}\n** Meaning\n   %^{meaning}"
-           :kill-buffer t
-           :immediate-finish t)
-          ("c" "Chansons" entry
-           (file+headline "~/org/wiki.org" "Liste de Chansons")
-           "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: [[%^{link}][%^{description}]]\n  :END:\n  %?"
-           :jump-to-captured t)
-          ("f" "français" entry
-           (file+headline "~/org/français/français.org" "Liste de mots français")
-           "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
-           :jump-to-captured t)))
+  ;; (setq org-capture-templates
+  ;;       '(("m" "Account records" entry
+  ;;          (file+olp+datetree "~/org/account/account.org")
+  ;;          "* %^{ITEM|breakfast|brunch|brunverage|lunch|dinner|beverage|snack|fruit}\n  :PROPERTIES:\n  :cost: %(number-to-string (read-number \"COST:\" 0))\n  :FROM: %(completing-read \"FROM: \" '(\"Cash\" \"etique\"))\n  :RECORD_TIME: %U\n  :END:\n  %(durand-org-complete-capture-account)%?"
+  ;;          :jump-to-captured t)
+  ;;         ("d" "Record Diaries" entry
+  ;;          (file+olp+datetree "~/org/diary.org")
+  ;;          "* %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
+  ;;          :jump-to-captured t)
+  ;;         ("w" "Withdrawal records" entry
+  ;;          (file+headline "~/org/wiki.org" "Money Withdrawal")
+  ;;          "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
+  ;;          :kill-buffer t)
+  ;;         ("l" "Store links" entry
+  ;;          (file+headline "~/org/notes.org" "Links")
+  ;;          "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
+  ;;         ("g" "GNUS" entry
+  ;;          (file "~/org/notes.org")
+  ;;          "* TO-THINK %:subject\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n  %:from\n  %:to\n  %a\n  %?"
+  ;;          :empty-lines 1
+  ;;          :kill-buffer t)
+  ;;         ("L" "for storing webpages" entry
+  ;;          (function org-determine-link-file)
+  ;;          "* PENDING %(org-filter-title) %(org-determine-tag)\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n  %(org-filtered-link)\n  %i\n  %?"
+  ;;          :empty-lines 1
+  ;;          :kill-buffer t
+  ;;          :immediate-finish t)
+  ;;         ("t" "TODO" entry
+  ;;          (file "~/org/aujourdhui.org")
+  ;;          "* TODO %? %^{Date to do:}t\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n"
+  ;;          :kill-buffer t)
+  ;;         ("b" "Blog posts" entry
+  ;;          (file+headline "~/org/notes.org" "Blog posts")
+  ;;          "* %? %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%i\n")
+  ;;         ("a" "Abstractions" entry
+  ;;          (file+headline "~/org/wiki.org" "Abstractions")
+  ;;          "* ABSTRACT %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :END:\n\n")
+  ;;         ("A" "Agenda" entry
+  ;;          (file+headline "~/org/agenda.org" "Agenda")
+  ;;          "* TODO %?\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :DURATION: %^{Date: }t\n  :END:\n\n")
+  ;;         ("y" "YiFu" entry
+  ;;          (file+headline "~/org/wiki.org" "Yi Fu Tips")
+  ;;          "* MEMO %^{word}\n  :PROPERTIES:\n  :STORY: %\\2\n  :MEANING: %\\3\n  :END:\n** Yi Fu story\n   %^{story}\n** Meaning\n   %^{meaning}"
+  ;;          :kill-buffer t
+  ;;          :immediate-finish t)
+  ;;         ("c" "Chansons" entry
+  ;;          (file+headline "~/org/wiki.org" "Liste de Chansons")
+  ;;          "* MEMO %^{title}\n  :PROPERTIES:\n  :RECORD_TIME: %U\n  :LINK: [[%^{link}][%^{description}]]\n  :END:\n  %?"
+  ;;          :jump-to-captured t)
+  ;;         ("f" "français" entry
+  ;;          (file+headline "~/org/français/français.org" "Liste de mots français")
+  ;;          "* MEMO %^{mot} :drill:\n  :PROPERTIES:\n  :DRILL_CARD_TYPE: français\n  :RECORD_TIME: %U\n  :MEANING: %^{ce qu'il veut dire}\n  :END:\n\n  MEANING: %\\2\n%?"
+  ;;          :jump-to-captured t)))
 
   (setf org-capture-templates-contexts
         '(("g" ((in-mode . "gnus-summary-mode")

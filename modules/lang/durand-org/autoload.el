@@ -590,6 +590,22 @@ The result will have second, minute, and hour all equal to 0."
       (nthcdr 3 decoded)))))
 
 ;;;###autoload
+(defun durand-account-time-p (x)
+  "Return t if X is a time object.
+A time object is a list of the form (sec-high sec-low microsec picosec)
+The formula is SEC = sec-high * 2^{16} + sec-low + microsec * 10^{-6} + picosec * 10^{-12}."
+  (let ((l (length x)))
+    (and (listp x)
+         (>= l 2)
+         (<= l 4)
+         (=
+          (cl-loop for element in x
+                   sum (cond ((integerp element)
+                              1)
+                             (t 0)))
+          l))))
+
+;;;###autoload
 (defun durand-account-match-last-unit (str &optional unit)
   "Match the last UNIT. UNIT can be `day', `week', `month', `year',
 or a custom specifier of time period."
@@ -624,6 +640,18 @@ or a custom specifier of time period."
              (= last-year str-year)))
        ('year
         (= last-year str-year))
+       ((pred
+         (lambda (x)
+           (and (listp x)
+                (= (length x) 2)
+                (durand-account-time-p (car x))
+                (durand-account-time-p (cadr x)))))
+        (let* ((beg (durand-account-normalize-time (car unit)))
+               (end (durand-account-normalize-time (cadr unit))))
+          (and (or (time-less-p beg str-time)
+                   (time-equal-p beg str-time))
+               (or (time-less-p str-time end)
+                   (time-equal-p str-time end)))))
        ((pred stringp)
         (let* ((str-list (split-string unit ":"))
                (beg-str (car str-list))
@@ -711,9 +739,12 @@ or a custom specifier of time period."
 (defun durand-view-last-custom ()
   "Match a custom time period"
   (interactive)
-  (let ((beg (read-string "Le début: "))
-        (end (read-string "La fin: ")))
-    (durand-change-parameter :unit (string-join (list beg end) ":"))))
+  (let (;; (beg (read-string "Le début: "))
+        (beg (org-read-date t t nil "Le début"))
+        ;; (end (read-string "La fin: "))
+        (end (org-read-date t t nil "La fin")))
+    ;; (durand-change-parameter :unit (string-join (list beg end) ":"))
+    (durand-change-parameter :unit (list beg end))))
 
 ;;;###autoload
 (defun durand-view-include ()
@@ -1696,11 +1727,15 @@ to (floor (+ (window-text-width) 2) 22)."
                                     "."
                                     (file-name-extension file))))))
     (setf logs (cl-sort logs 'time-less-p))
-    (switch-to-buffer log-buffer-name)
-    (durand-draw-calendar-days logs number-of-months-per-row)
-    (durand-org-notes-mode)
-    (when (fboundp 'writegood-mode)
-      (writegood-mode -1))))
+    (unless (get-buffer log-buffer-name)
+      (get-buffer-create log-buffer-name))
+    (with-current-buffer log-buffer-name
+      (erase-buffer)
+      (durand-draw-calendar-days logs number-of-months-per-row)
+      (durand-org-notes-mode)
+      (when (fboundp 'writegood-mode)
+        (writegood-mode -1)))
+    (switch-to-buffer log-buffer-name)))
 
 ;; NOTE: This is a helper for `durand-draw-calendar-days'.
 ;;;###autoload
