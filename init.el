@@ -40,7 +40,6 @@
        ;;indent-guides     ; highlighted indent columns
        (modeline
         ;; +light
-        ;; +battery
         )                             ; snazzy, Atom-inspired modeline, plus API
        durand-modeline                ; my mode line configs
        ;; nav-flash         ; blink the current line after jumping

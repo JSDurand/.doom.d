@@ -41,10 +41,11 @@
 
 ;;; Fonts
 
-(setq doom-font "DejaVu Sans Mono for Powerline 20"
-      doom-variable-pitch-font nil      ; inherits `doom-font''s :size
-      doom-unicode-font nil
-      doom-big-font nil)
+(setq!
+ doom-font "Droid Sans Mono for Powerline-20"
+ doom-variable-pitch-font "Avenir" ; inherits `doom-font''s :size
+ doom-unicode-font nil
+ doom-big-font nil)
 
 ;;; disable line numbers, as that is a performace killer for me.
 
@@ -147,6 +148,9 @@
 
 ;;; show aux and toc files so that I can delete them
 
+(add-hook! 'dired-load-hook
+           (require 'dired-x))
+
 (setq-hook! 'dired-mode-hook
   dired-omit-extensions
   (cl-remove ".aux"
@@ -244,12 +248,13 @@
 
 ;;; default frames behaviour
 
-(setq initial-frame-alist '((width . 118)
-                            (alpha . 90)))
+(setq initial-frame-alist
+      '((width . 118)
+        (alpha . 90)))
 (set-frame-width nil 118)
 (set-frame-parameter nil 'alpha 90)
 (add-to-list 'default-frame-alist '(width . 118))
-(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono for Powerline 20"))
+(add-to-list 'default-frame-alist '(font . "Droid Sans Mono for Powerline-20"))
 (add-to-list 'default-frame-alist '(alpha . 90))
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
@@ -280,7 +285,7 @@
 
 ;;; modeline config
 
-(setf doom-modeline-height 10
+(setf ;; doom-modeline-height 10
       doom-modeline-enable-word-count nil
       doom-modeline-buffer-encoding nil
       doom-modeline-indent-info nil
