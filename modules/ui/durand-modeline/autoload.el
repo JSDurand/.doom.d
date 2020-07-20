@@ -1,7 +1,9 @@
 ;;; ui/durand-modeline/autoload.el -*- lexical-binding: t; -*-
+;;;###if (not (featurep! :ui modeline +light))
 
 ;;;###autoload
-(defvar durand-buffer-name-max 50)
+(defvar durand-buffer-name-max 50
+  "The maximal length of the buffer name in modeline.")
 
 ;;;###autoload
 (defun doom-modeline-segment--buffer-info-durand ()
@@ -14,6 +16,11 @@ but it truncates the buffer name within `durand-buffer-name-max'."
                "...")))
 
 (byte-compile 'doom-modeline-segment--buffer-info-durand)
+
+;;;###autoload
+(defun durand-doom-modeline--font-height-a ()
+  "Advice to `doom-modeline--font-height'."
+  (+ (frame-char-height) 3))
 
 ;;;###autoload
 (defvar doom-modeline--buffer-narrow-icon nil
