@@ -5,19 +5,19 @@
 ;;;###autoload
 (defface durand-arrow-face
   '((t
-     (:inherit minibuffer-prompt :foreground "gold" :height 300)))
+     (:inherit minibuffer-prompt :foreground "gold" :height 250)))
   "Face for the arrow used by `durand-ivy-format-function-arrow'.")
 
 ;;;###autoload
 (defun durand-ivy-format-function-arrow (cands)
-  "Transform CANDS into a string for minibuffer using \"☸\" instead of \">\"."
+  "Transform CANDS into a string for minibuffer using an icon instead of \">\"."
   (ivy--format-function-generic
    (lambda (str)
-     (concat (propertize "☸ "
-                         'face
-                         'durand-arrow-face)
-             ;; '(:foreground "gold" :height 300))
-             (ivy--add-face str 'ivy-current-match)))
+     (concat
+      (propertize
+       (format "%s "
+               (all-the-icons-material "school" :face 'durand-arrow-face)))
+      (ivy--add-face str 'ivy-current-match)))
    (lambda (str)
      (concat "   " str))
    cands
@@ -55,3 +55,8 @@
                 root))))
     (cl-assert (file-directory-p dir))
     (dired dir)))
+
+;;; Archive
+;; (propertize "☸ "
+;;             'face
+;;             'durand-arrow-face)

@@ -2339,11 +2339,15 @@ If ARG is `youtube' or `all', then return (text list point)"
   "Format candidates to `durand-choose-list'."
   (ivy--format-function-generic
    (lambda (e)
-     (concat (propertize "☸ " 'face 'durand-arrow-face)
+     (concat (propertize
+              (format "%s "
+                      (all-the-icons-material "school" :face 'durand-arrow-face)))
              (ivy--add-face e 'ivy-current-match)))
    (lambda (e)
      (if (cl-member e matched :test #'string=)
-         (concat (propertize "☸ " 'face 'durand-arrow-face)
+         (concat (propertize
+                  (format "%s "
+                          (all-the-icons-material "school" :face 'durand-arrow-face)))
                  (ivy--add-face e 'ivy-current-match))
        (concat "   " e)))
    cands "\n"))
