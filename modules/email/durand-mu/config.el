@@ -8,6 +8,7 @@
   (require 'org-mu4e)
 
   (setq org-mu4e-link-query-in-headers-mode nil)
+  (setf mu4e~update-buffer-height 5)
 
   ;;; REVIEW: This is done by default in the new version of mu4e
   ;; (org-link-set-parameters

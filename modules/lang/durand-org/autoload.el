@@ -1639,6 +1639,8 @@ MATCH is a plist whose following keys have special meanings.
           (insert "No notes found!")))
       (goto-char (point-min))
       (durand-org-notes-mode)
+      (when (fboundp 'writegood-mode)
+        (writegood-mode -1))
       ;; (let ((temp-map (make-sparse-keymap)))
       ;;   (set-keymap-parent temp-map org-mode-map)
       ;;   (map! :map temp-map
