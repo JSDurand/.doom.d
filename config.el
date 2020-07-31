@@ -863,4 +863,4 @@
 ;;; company backend for text mode
 
 (set-company-backend! 'text-mode
-  '(company-dabbrev company-yasnippet company-ispell))
+  '(company-dabbrev company-yasnippet))
