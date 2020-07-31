@@ -784,13 +784,19 @@ With ARG \\[universal-argument]\\[universal-argument], close browser."
     (message "%s closed." durand-browser)))
 
 ;;;###autoload
-(defun durand-open-preferences ()
+(defun durand-open-preferences (&optional arg)
   "Open system preferences pane."
-  (interactive)
-  (make-process
-   :name "durand system preferences"
-   :command '("open" "x-apple.systempreferences:")
-   :buffer nil))
+  (interactive "P")
+  (let ((url
+         (cond
+          (arg
+           "x-apple.systempreferences:com.apple.preference.screentime")
+          (t
+           "x-apple.systempreferences:"))))
+    (make-process
+     :name "durand system preferences"
+     :command (list "open" url)
+     :buffer nil)))
 
 ;;;###autoload
 (defvar durand-stop-music-map (let ((map (make-sparse-keymap)))
