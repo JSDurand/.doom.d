@@ -276,7 +276,8 @@
     'emacs))
 
 ;;; remove org-agenda in motion states
-(setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes))
+(add-transient-hook! #'durand-agenda
+  (setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes)))
 
 ;;; dired should start with the normal state
 (set-evil-initial-state!
