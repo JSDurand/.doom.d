@@ -2627,12 +2627,23 @@ With \\[universal-argument] \\[universal-argument], don't kill the entry."
 (defun durand-org-open-link (str)
   "Since `org-open-link-from-string' does not handle links with brackets correctly, this function
 attempts to handle them."
-  (org-link-open-from-string
-   (org-link-make-string
-    (org-link-decode (if (stringp str)
-                         str
-                       (car str)))
-    "fake link")))
+  ;; HACK: PDF-view will error out if I open a pdf file while already inside a
+  ;; pdf buffer. So I first switch to a non-pdf buffer. In any case, since a
+  ;; buffer whose name begins with a space will not be inside the usual buffer
+  ;; list after we switch buffers again, this switching will not have any effect
+  ;; to the user.
+  (let ((orig-buffer (current-buffer)))
+    (switch-to-buffer " *server*")
+    (condition-case err
+        (org-link-open-from-string
+         (org-link-make-string
+          (org-link-decode (if (stringp str)
+                               str
+                             (car str)))
+          "fake link"))
+      ((error user-error)
+       (switch-to-buffer orig-buffer)
+       (user-error "%s" err)))))
 
 ;; Escape bracket chars as well
 ;; (add-to-list org-link-escape-chars 20)

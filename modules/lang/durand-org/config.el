@@ -241,6 +241,8 @@
         '(("g" ((in-mode . "gnus-summary-mode")
                 (in-mode . "gnus-article-mode")))))
 
+  (set-face-attribute 'org-document-title nil :font "Snell Roundhand-30")
+
   (add-hook 'org-capture-mode-hook (lambda ()
                                      "Activate account minor mode if in capturing accounts"
                                      (when (s-suffix? "account.org" (buffer-name))
