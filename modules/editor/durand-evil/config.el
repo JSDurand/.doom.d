@@ -268,12 +268,15 @@ like youtube videos or others.")
   (when (and (fboundp 'define-and-bind-text-object)
              (fboundp 'define-and-bind-quote-text-object))
     (define-and-bind-quote-text-object "dollar" "$" ?$)
-    (define-and-bind-text-object "slash" "/" "/" "/")
-    (define-and-bind-text-object "pipe" "|" "|" "|")
-    (define-and-bind-text-object "star" "*" "*" "*")
+    ;; NOTE: For LaTeX there is a special kind of math environment markers.
+    (define-and-bind-text-object "latexdollar" "§" "\\\\\\((\\|\\[\\)" "\\\\\\()\\|\\]\\)")
+    (define-and-bind-quote-text-object "slash" "/" ?/)
+    (define-and-bind-quote-text-object "pipe" "|" ?|)
+    (define-and-bind-quote-text-object "star" "*" ?*)
+    (define-and-bind-quote-text-object "verbose" "=" ?=)
     (define-and-bind-text-object "frenchquote" "«" "«" "»")
     (define-and-bind-text-object
       "tikz" "z"
       "\\(\\\\bpi\\|\\\\tikzpicture\\).*$"
       "\\(\\\\epi\\|\\\\endtikzpicture\\)")
-    (define-and-bind-text-object "environment" "e" "\\\\begin{[^{}]+}$" "\\\\end{[^{}]+}")))
+    (define-and-bind-text-object "environment" "e" "\\\\begin{[^{}]+}" "\\\\end{[^{}]+}")))
