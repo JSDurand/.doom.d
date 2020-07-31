@@ -6,11 +6,16 @@
   :config
 
   (require 'org-mu4e)
+  (require 'message)
+  (setf message-confirm-send t)
 
-  (setq org-mu4e-link-query-in-headers-mode nil)
+
+  (remove-hook 'mu4e-view-mode-hook #'evil-emacs-state)
+
+  (setq mu4e-org-link-query-in-headers-mode nil)
   (setf mu4e~update-buffer-height 5)
 
-  ;;; REVIEW: This is done by default in the new version of mu4e
+;;; REVIEW: This is done by default in the new version of mu4e
   ;; (org-link-set-parameters
   ;;  "mu4e"
   ;;  :follow #'org-mu4e-open
@@ -18,7 +23,8 @@
 
   (setf mu4e-view-use-gnus t)
   (setf mu4e-confirm-quit nil)
-  (setq mu4e-maildir (expand-file-name "~/mbsync"))
+  ;; NOTE: This is determined by the server now.
+  ;; (setq mu4e-maildir (expand-file-name "~/mbsync"))
   (setq mu4e-get-mail-command "mbsync -a") ; mbsync works a lot better!
   (setq mu4e-change-filenames-when-moving t)
   (setq mu4e-view-show-addresses t)     ; show full addresses!
@@ -95,12 +101,12 @@
                           (or
                            (mu4e-message-contact-field-matches msg :to "chunweilee@ncts.ntu.edu.tw")
                            (mu4e-message-contact-field-matches msg :from "chunweilee@ncts.ntu.edu.tw"))))
-          :vars (quote ((user-mail-address . "chunweilee@ncts.ntu.edu.tw")
-                        (user-full-name . "李俊緯")
-                        (mu4e-compose-signature .
-                                                (concat
-                                                 "Sincerely Yours,\n"
-                                                 "俊緯")))))
+          :vars '((user-mail-address . "chunweilee@ncts.ntu.edu.tw")
+                  (user-full-name . "李俊緯")
+                  (mu4e-compose-signature .
+                                          (concat
+                                           "Sincerely Yours,\n"
+                                           "俊緯"))))
          (make-mu4e-context
           :name "Durand"
           :enter-func (lambda () (mu4e-message "Entering Durand context"))
@@ -187,10 +193,11 @@
       mu4e~update-mail-mode)
     'normal)
 
-  (set-evil-initial-state!
-    '(mu4e-headers-mode
-      mu4e-view-mode)
-    'emacs))
+  ;; (set-evil-initial-state!
+  ;;   '(mu4e-headers-mode
+  ;;     mu4e-view-mode)
+  ;;   'emacs)
+  )
 
 ;; (setf durand-mu4e-open-timer
 ;;       (unless (boundp 'durand-mu4e-open-timer)
