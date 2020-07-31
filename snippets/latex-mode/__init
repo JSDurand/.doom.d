@@ -44,6 +44,7 @@
 
 \newcommand{\n}{\mathbb{N}}
 \newcommand{\z}{\mathbb{Z}}
+\newcommand{\q}{\mathbb{Q}}
 
 \begin{document}
 
