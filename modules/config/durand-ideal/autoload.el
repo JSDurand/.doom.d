@@ -857,6 +857,33 @@ Otherwise execute `narrow-to-defun'."
      ((let ((current-prefix-arg nil))
         (ignore-errors (org-edit-special nil) t)))
      (t (message "No pre-defined behaviour."))))
+   ((derived-mode-p 'latex-mode)
+    (let ((latex-match-beg (save-excursion
+                             (LaTeX-find-matching-begin)
+                             (cons
+                              (point)
+                              (buffer-substring-no-properties
+                               (point) (line-end-position)))))
+          (latex-match-end (save-excursion
+                             (LaTeX-find-matching-end)
+                             (cons
+                              (point)
+                              (buffer-substring-no-properties
+                               (line-beginning-position) (point))))))
+      (cond
+       ((not (and
+              (string= (cdr latex-match-beg) "\\begin{document}")
+              (string= (cdr latex-match-end) "\\end{document}")))
+        (narrow-to-region (car latex-match-beg)
+                          (car latex-match-end)))
+       (t
+        (let ((beg (save-excursion
+                     (outline-previous-heading)
+                     (point)))
+              (end (save-excursion
+                     (outline-next-heading)
+                     (point))))
+          (narrow-to-region beg end))))))
    (t
     (narrow-to-defun))))
 
@@ -885,7 +912,9 @@ If \\[universal-argument], then ask for additional regexps to match buffers to k
   ;; If \\[universal-argument]\\[universal-argument], then turn off mu4e as well if necessary.
   (interactive "P")
   (cl-loop for timer in timer-idle-list
-           if (eq (timer--function timer) 'pdf-cache--prefetch-start)
+           if (cl-member (timer--function timer)
+                         '(pdf-cache--prefetch-start
+                           reftex-view-crossref-when-idle))
            do (cancel-timer timer))
   (let ((reg (when (equal arg '(4))
                (read-string "Additional regexp: "))))
@@ -904,14 +933,7 @@ If \\[universal-argument], then ask for additional regexps to match buffers to k
               (and graph-files
                    (y-or-n-p "Delete graph files?")))
       (cl-loop for file in graph-files
-               do (delete-file file))))
-  ;; (cond
-  ;;  ((and arg (or (get-process " *mu4e-proc*")
-  ;;                mu4e~update-timer))
-  ;;   (mu4e-quit)
-  ;;   (setf mu4e~update-timer nil)
-  ;;   (message "mu4e is turned off now.")))
-  )
+               do (delete-file file)))))
 
 ;;;###autoload
 (defun durand-edit-special ()
