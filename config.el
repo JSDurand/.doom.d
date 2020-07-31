@@ -660,6 +660,7 @@
 (map! :map doom-leader-open-map
       [?t] 'durand-open-terminal
       [?d] 'durand-open-discord
+      [?p] 'durand-open-preferences
       [?s] 'durand-open-browser)
 
 ;; bind SPC SPC to `counsel-find-file', and leave `+ivy/projectile-find-file' to
