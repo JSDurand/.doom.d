@@ -277,7 +277,9 @@
 
 ;;; remove org-agenda in motion states
 (add-transient-hook! #'durand-agenda
-  (setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes)))
+  (setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes))
+  (when (not (cl-member 'org-agenda-mode evil-emacs-state-modes))
+    (add-to-list evil-emacs-state-modes 'org-agenda-mode)))
 
 ;;; dired should start with the normal state
 (set-evil-initial-state!
@@ -866,3 +868,8 @@
 
 (set-company-backend! 'text-mode
   '(company-dabbrev company-yasnippet))
+
+;;; toggle mode line
+
+(map! :map doom-leader-toggle-map
+      [?m] 'durand-toggle-mode-line)

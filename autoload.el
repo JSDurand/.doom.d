@@ -344,3 +344,22 @@ Now I use ivy to achieve this behaviour."
                 :unwind 'reset-durand-changed
                 :caller 'ivy-switch-buffer
                 :keymap 'durand-switch-buffer-map))))
+
+;;;###autoload
+(defvar durand-cache-mode-line nil
+  "Buffer local cache for the `mode-line-format'.")
+
+(make-variable-buffer-local 'durand-cache-mode-line)
+
+;;;###autoload
+(defun durand-toggle-mode-line ()
+  "Toggle the mode line."
+  (interactive)
+  (cond
+   (durand-cache-mode-line
+    (setf mode-line-format durand-cache-mode-line
+          durand-cache-mode-line nil))
+   (t
+    (setf durand-cache-mode-line mode-line-format
+          mode-line-format nil)))
+  (force-mode-line-update))
