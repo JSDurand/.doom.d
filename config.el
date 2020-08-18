@@ -59,8 +59,8 @@
       modus-vivendi-theme-3d-modeline t
       modus-vivendi-theme-subtle-diffs t
       modus-vivendi-theme-intense-standard-completions t
-      modus-vivendi-theme-distinct-org-blocks t
-      modus-vivendi-theme-proportional-fonts t
+      modus-vivendi-theme-org-blocks 'rainbow
+      modus-vivendi-theme-variable-pitch-headings t
       modus-vivendi-theme-rainbow-headings t
       ;; modus-vivendi-theme-section-headings t
       modus-vivendi-theme-scale-headings t
@@ -279,7 +279,7 @@
 (add-transient-hook! #'durand-agenda
   (setf evil-motion-state-modes (cl-remove 'org-agenda-mode evil-motion-state-modes))
   (when (not (cl-member 'org-agenda-mode evil-emacs-state-modes))
-    (add-to-list evil-emacs-state-modes 'org-agenda-mode)))
+    (add-to-list 'evil-emacs-state-modes 'org-agenda-mode)))
 
 ;;; dired should start with the normal state
 (set-evil-initial-state!
