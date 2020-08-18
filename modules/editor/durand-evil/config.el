@@ -98,7 +98,7 @@
 (map! :map durand-evil-dollar-map
       [?\d] 'back-to-indentation
       [?t] (lambda () (interactive) (recenter 0))
-      [?z] (lambda () (interactive) (recenter (/ (window-body-height) 2)))
+      [?z] (lambda () (interactive) (recenter))
       [?b] (lambda () (interactive) (recenter -1))
       [?£] 'org-retreat)
 
