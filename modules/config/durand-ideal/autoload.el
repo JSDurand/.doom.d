@@ -41,7 +41,7 @@ When ARG is non-nil, show it in a pop-up window."
                            ))
         ;; ("account.ledger" . (lambda ()
         ;;                       (goto-char (point-max))))
-        ;; (".*tex$" . durand-tex-action)
+        (".*tex$" . recenter)
         ;; ("ideal.el" . (lambda ()
         ;;                 (ignore-errors
         ;;                   (goto-char (point-min))
