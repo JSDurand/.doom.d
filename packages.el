@@ -7,7 +7,7 @@
 ;; (package! builtin-package :disable t)
 
 (disable-packages! evil-snipe org-bookmark-heading durand-cat undo-tree
-                   flyspell-correct-popup)
+                   flyspell-correct-popup org-msg)
 ;; (package! org-pdfview)
 
 ;; (package! durand-cat :recipe (:host github :repo "JSDurand/durand-cat"))

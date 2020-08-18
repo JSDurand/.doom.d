@@ -154,8 +154,16 @@
         mu4e-update-interval nil)
   (mu4e-alert-enable-mode-line-display))
 
-(after! org-mu4e
-  (setf org-mu4e-convert-to-html nil))
+(use-package! org-mu4e
+  :hook (mu4e-compose-mode . org-mu4e-compose-org-mode)
+  :config
+  (setq org-mu4e-convert-to-html nil)
+  (when (version< mu4e-mu-version "1.4")
+    (setq org-mu4e-link-query-in-headers-mode nil))
+
+  ;; Only render to html once. If the first send fails for whatever reason,
+  ;; org-mu4e would do so each time you try again.
+  (setq-hook! 'message-send-hook org-mu4e-convert-to-html nil))
 
 (after! mu4e
   ;; Je ne veux pas quitter mu4e quand je touche "q".
