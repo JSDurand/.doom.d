@@ -263,9 +263,13 @@ This should be setted by the PERIOD-FUNC argument.")
   "Shops I frequently visit.")
 
 (setq durand-frequent-shops (list
-                             "即食樂"
-                             "來吃麵"
-                             "鍋兵鍋將"
+                             "新永泉"
+                             "Kebuke"
+                             "師園"
+                             "十杯"
+                             ;; "即食樂"
+                             ;; "來吃麵"
+                             ;; "鍋兵鍋將"
                              ;; "羅胖子"
                              ;; "牛魔王"
                              ;; "光華夜市鱔魚意麵"

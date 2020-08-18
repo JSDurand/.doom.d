@@ -127,50 +127,68 @@ Don't bind it to a key in `general-hydra/heads'"
                            (widen)
                            (goto-char (point-min))
                            (cl-loop while (re-search-forward org-heading-regexp nil t)
-                                    when (= (car (org-heading-components)) 4)
                                     for title = (save-excursion
                                                   (org-end-of-meta-data)
                                                   (org-skip-whitespace)
                                                   (buffer-substring-no-properties
                                                    (point) (line-end-position)))
-                                    when (not (string= title ""))
+                                    if (and (= (car (org-heading-components)) 4)
+                                            title
+                                            (not (string= title "")))
                                     collect title))))
-           (shops-list (append
-                        durand-frequent-shops
-                        (reverse
-                         (cl-remove-duplicates
-                          (remove nil shops-list)
-                          :key 'upcase
-                          :test 'string=))))
+           (shops-list (nreverse
+                        (cl-remove-duplicates
+                         (nreverse
+                          (append durand-frequent-shops
+                                  (remove nil shops-list)))
+                         :key 'upcase
+                         :test 'string=)))
            (chosen-shop (completing-read
                          "Chois un magasin: " shops-list
                          nil nil nil durand-complete-shop-history))
-           (items-list (save-excursion
-                         (save-restriction
-                           (widen)
-                           (goto-char (point-min))
-                           (cl-loop while (re-search-forward org-heading-regexp nil t)
-                                    when (= (car (org-heading-components)) 4)
-                                    for title = (save-excursion
-                                                  (org-end-of-meta-data)
-                                                  (org-skip-whitespace)
-                                                  (buffer-substring-no-properties
-                                                   (point) (line-end-position)))
-                                    when (and title (not (string= title "")))
-                                    when (string= (upcase title)
-                                                  (upcase chosen-shop))
-                                    append (let ((limite (save-excursion (outline-next-heading) (point))))
-                                             (cl-loop
-                                              while (re-search-forward "- " limite t)
-                                              collect (buffer-substring-no-properties
-                                                       (point)
-                                                       (line-end-position))))))))
-           (items-list (cl-remove-duplicates items-list :test 'string=))
-           (chosen-items (durand-choose-list (mapcar 'list items-list) nil "Chois une chose: " t nil t)))
+           (items-list-and-last
+            (save-excursion
+              (save-restriction
+                (widen)
+                (goto-char (point-min))
+                (cl-loop
+                 named parent
+                 with items
+                 while (re-search-forward org-heading-regexp nil t)
+                 for title = (save-excursion
+                               (org-end-of-meta-data)
+                               (org-skip-whitespace)
+                               (buffer-substring-no-properties
+                                (point) (line-end-position)))
+                 if (and (= (car (org-heading-components)) 4)
+                         title
+                         (not (string= title ""))
+                         (string= (upcase title)
+                                  (upcase chosen-shop)))
+                 do (setf items (cl-loop
+                                 named child
+                                 with limite = (save-excursion (outline-next-heading) (point))
+                                 while (re-search-forward "- " limite t)
+                                 collect (buffer-substring-no-properties
+                                          (point) (line-end-position))))
+                 and append items into all-items
+                 finally return (list all-items items)))))
+           (durand-choose-list-result (cadr items-list-and-last))
+           (items-list (cl-remove-duplicates (car items-list-and-last) :test 'string=))
+           (chosen-items (durand-choose-list (mapcar 'list items-list) nil "Chois une chose: " t nil t
+                                             nil t)))
       (concat chosen-shop
               "\n\n"
               (cl-loop for item in chosen-items
-                       concat (concat "- " item "\n"))))))
+                       unless (string= item "")
+                       concat (concat "- " item "\n"))
+              ;; REVIEW: Using `string-join' seems to be better suited to this
+              ;; job. But it will not exclude empty strings automatically, so
+              ;; using a loop is fine from my view point.
+              ;;
+              ;; (string-join chosen-items "\n- ")
+              ;; "\n"
+              ))))
 
 ;; Find the next link
 ;;;###autoload
@@ -606,10 +624,41 @@ The formula is SEC = sec-high * 2^{16} + sec-low + microsec * 10^{-6} + picosec 
           l))))
 
 ;;;###autoload
+(defun durand-account-format-time (time)
+  "Format TIME in a pretty and unified way."
+  (cl-assert (durand-account-time-p time))
+  (let ((time (decode-time time)))
+    (format
+     "%d-%s-%s"
+     (decoded-time-year time)
+     (pad-string-to (number-to-string (decoded-time-month time)) 2)
+     (pad-string-to (number-to-string (decoded-time-day time)) 2))))
+
+;;;###autoload
+(cl-defun durand-account-format-unit (&optional (unit 'day))
+  "Format the UNIT in a pretty and unified way."
+  (cond
+   ((null unit) "day")
+   ((symbolp unit) (symbol-name unit))
+   ((and (listp unit)
+         (= (length unit) 2)
+         (durand-account-time-p (car unit))
+         (durand-account-time-p (cadr unit)))
+    (let* ((start-value (car unit))
+           (end-value (cadr unit)))
+      (string-join
+       (list
+        (durand-account-format-time start-value)
+        (durand-account-format-time end-value))
+       " to ")))
+   (t
+    (user-error "Not supported unit: %S" unit))))
+
+;;;###autoload
 (defun durand-account-match-last-unit (str &optional unit)
   "Match the last UNIT. UNIT can be `day', `week', `month', `year',
 or a custom specifier of time period."
-  (setf durand-account-report-period-str (format "%s" (or unit 'day)))
+  (setf durand-account-report-period-str (durand-account-format-unit unit))
   (with-account
    (let* ((last-time-str (caar (last (org-find-all-days))))
           (last-time (durand-date-to-time last-time-str))
@@ -652,26 +701,35 @@ or a custom specifier of time period."
                    (time-equal-p beg str-time))
                (or (time-less-p str-time end)
                    (time-equal-p str-time end)))))
-       ((pred stringp)
-        (let* ((str-list (split-string unit ":"))
-               (beg-str (car str-list))
-               (end-str (cond
-                         ((not (string= (cadr str-list) ""))
-                          (cadr str-list))
-                         (t
-                          "+0")))
-               (beg (durand-account-normalize-time
-                     (org-read-date nil t beg-str "Chois le début:")))
-               (end (durand-account-normalize-time
-                     (org-read-date nil t end-str "Chois la fin:"))))
-          (and (or (time-less-p beg str-time)
-                   (time-equal-p beg str-time))
-               (or (time-less-p str-time end)
-                   (time-equal-p str-time end)))))
+       ;; ((pred stringp)
+       ;;  (let* ((str-list (split-string unit ":"))
+       ;;         (beg-str (car str-list))
+       ;;         (end-str (cond
+       ;;                   ((not (string= (cadr str-list) ""))
+       ;;                    (cadr str-list))
+       ;;                   (t
+       ;;                    "+0")))
+       ;;         (beg (durand-account-normalize-time
+       ;;               (org-read-date nil t beg-str "Chois le début:")))
+       ;;         (end (durand-account-normalize-time
+       ;;               (org-read-date nil t end-str "Chois la fin:"))))
+       ;;    (and (or (time-less-p beg str-time)
+       ;;             (time-equal-p beg str-time))
+       ;;         (or (time-less-p str-time end)
+       ;;             (time-equal-p str-time end)))))
        (_
-        (user-error "Unknown UNIT: %s" unit))))))
+        (user-error "Unknown unit: %S" unit))))))
 
 ;; convenient functions
+
+;;;###autoload
+(defvar durand-account-report-time-regexp
+  (format "\\(%s\\)-\\(%s\\)-\\(%s\\)"
+          "[[:digit:]]\\{4\\}"
+          "[[:digit:]]\\{2\\}"
+          "[[:digit:]]\\{2\\}")
+  "The regular expression to match the custom time specifier in
+  the report of account.")
 
 ;;;###autoload
 (cl-defun durand-change-parameter (&key unit report-mode sum-type exclude-type)
@@ -681,12 +739,35 @@ or a custom specifier of time period."
     (when (get-buffer "*ACCOUNT REPORT*")
       (switch-to-buffer "*ACCOUNT REPORT*")
       (goto-char (point-min))
-      (setf cur-u (let* ((str (buffer-substring-no-properties (point) (line-end-position))))
-                    (cond ((string= str "day") (intern str))
-                          ((string= str "week") (intern str))
-                          ((string= str "month") (intern str))
-                          ((string= str "year") (intern str))
-                          (t str)))
+      (setf cur-u (when (null unit)
+                    (let* ((str (buffer-substring-no-properties (point) (line-end-position))))
+                      (cond ((string= str "day") (intern str))
+                            ((string= str "week") (intern str))
+                            ((string= str "month") (intern str))
+                            ((string= str "year") (intern str))
+                            ((string-match
+                              (format
+                               "%s to %s"
+                               durand-account-report-time-regexp
+                               durand-account-report-time-regexp)
+                              str)
+                             (let ((match-one (match-string-no-properties 1 str))
+                                   (match-two (match-string-no-properties 2 str))
+                                   (match-three (match-string-no-properties 3 str))
+                                   (match-four (match-string-no-properties 4 str))
+                                   (match-five (match-string-no-properties 5 str))
+                                   (match-six (match-string-no-properties 6 str)))
+                               (list (durand-date-to-time
+                                      (format "%s-%s-%s"
+                                              match-one
+                                              match-two
+                                              match-three))
+                                     (durand-date-to-time
+                                      (format "%s-%s-%s"
+                                              match-four
+                                              match-five
+                                              match-six)))))
+                            (t str))))
             cur-rm (intern (progn
                              (forward-line)
                              (buffer-substring-no-properties (+ 13 (point)) (line-end-position))))
@@ -740,9 +821,9 @@ or a custom specifier of time period."
   "Match a custom time period"
   (interactive)
   (let (;; (beg (read-string "Le début: "))
-        (beg (org-read-date t t nil "Le début"))
+        (beg (durand-account-normalize-time (org-read-date t t nil "Le début")))
         ;; (end (read-string "La fin: "))
-        (end (org-read-date t t nil "La fin")))
+        (end (durand-account-normalize-time (org-read-date t t nil "La fin"))))
     ;; (durand-change-parameter :unit (string-join (list beg end) ":"))
     (durand-change-parameter :unit (list beg end))))
 
@@ -2367,21 +2448,26 @@ See the documentation of the function for more details.")
 
 ;;;###autoload
 (defun durand-choose-list (cands &optional all texte non-quick display-cadr no-require-match
-                                 no-sort)
+                                 no-sort keep-cache-result)
   "Choose from an alist. Multiple selection is supported.
 NO-SORT has no effect here: it is here to conform with the
 arg-list of another functions with the same name, that I defined
 when I am not using ivy.
 If ALL is non-nil, add a choice to select all of them.
-If NON-QUICK is non-nil, then offer the selection even when there is only one candidate.
+If NON-QUICK is non-nil, then offer the selection even when there
+is only one candidate.
 If DISPLAY-CADR is non-nil, then display cadr rather than car.
-If NO-REQUIRE-MATCH is t, then don't require the selection to match."
+If NO-REQUIRE-MATCH is t, then don't require the selection to match.
+If KEEP-CACHE-RESULT is non-nil, then don't set the result
+variable to nil in the beginning."
   (ignore no-sort)
   (if (and (= (length cands) 1) (null non-quick))
       (list (caar cands))
     (let ((cands (if all (cons '("all") cands) cands))
           (question (or texte "Chois un: ")))
-      (setf durand-choose-list-result nil
+      (setf durand-choose-list-result (cond
+                                       ((null keep-cache-result) nil)
+                                       (t durand-choose-list-result))
             durand-choose-list-det nil
             durand-choose-list-exc nil)
       (setf ivy--index 0
@@ -2394,37 +2480,59 @@ If NO-REQUIRE-MATCH is t, then don't require the selection to match."
                              ((listp x)
                               (cons (car x) x))
                              (t
-                              (user-error "durand-choose-list: argument not a list: %s" x))))
+                              (user-error "durand-choose-list: argument not a list: %S" x))))
                           cands))
-      (while (null durand-choose-list-det)
-        (setf durand-choose-list-det t
-              durand-choose-list-exc nil)
-        (let* ((ivy-format-functions-alist
-                '((durand-choose-list . (lambda (cands)
-                                          (durand-choose-list-format-function cands durand-choose-list-result)))))
-               (ele (ivy-read question cands
-                              :require-match (not no-require-match)
-                              :action '(1
-                                        ("o" identity "default")
-                                        ("m" (lambda (x)
-                                               (setf durand-choose-list-det nil))
-                                         "continue")
-                                        ("e" (lambda (x)
-                                               (setf durand-choose-list-det nil
-                                                     ivy--index 0
-                                                     durand-choose-list-exc t))
-                                         "exclude"))
-                              :preselect ivy--index
-                              :caller 'durand-choose-list)))
-          (ignore ivy-format-functions-alist)
-          (unless durand-choose-list-exc (push ele durand-choose-list-result))
-          (when durand-choose-list-exc
-            (setf cands
-                  (cl-remove-if
-                   (lambda (y)
-                     (string= (if (listp y) (car y) y)
-                              (if (stringp ele) ele (car ele))))
-                   cands)))))
+      (cl-loop
+       with durand-choose-list-exc
+       with durand-choose-list-det
+       with ivy-format-functions-alist =
+       '((durand-choose-list . (lambda (cands)
+                                 (durand-choose-list-format-function cands durand-choose-list-result))))
+       while (null durand-choose-list-det)
+       for element = (ivy-read question cands
+                               :require-match (not no-require-match)
+                               :action '(1
+                                         ("o" (lambda (x)
+                                                (setf durand-choose-list-det t
+                                                      durand-choose-list-exc nil))
+                                          "default")
+                                         ("m" (lambda (x)
+                                                (setf durand-choose-list-det nil
+                                                      durand-choose-list-exc nil))
+                                          "continue")
+                                         ("u" (lambda (x)
+                                                (setf durand-choose-list-det nil
+                                                      durand-choose-list-exc 'unmark))
+                                          "unmark")
+                                         ("e" (lambda (x)
+                                                (setf durand-choose-list-det nil
+                                                      durand-choose-list-exc t
+                                                      ivy--index (max 0 (1- ivy--index))))
+                                          "exclude"))
+                               :preselect ivy--index
+                               :caller 'durand-choose-list)
+       do
+       (ignore ivy-format-functions-alist)
+       (cond ((eq durand-choose-list-exc 'unmark)
+              (setf durand-choose-list-result
+                    (cl-remove element durand-choose-list-result
+                               :test 'string=)))
+             (durand-choose-list-exc
+              (setf durand-choose-list-result
+                    (cl-remove element durand-choose-list-result
+                               :test 'string=)
+                    cands
+                    (cl-remove
+                     element cands
+                     :test (lambda (x y)
+                             (string= x (if (listp y) (car y) y))))))
+             (t (setf durand-choose-list-result
+                      (cons element durand-choose-list-result)
+                      cands
+                      (cl-remove-duplicates
+                       (cons (list element) cands)
+                       :test 'string=
+                       :key (lambda (x) (if (listp x) (car x) x)))))))
       (when (member "all" durand-choose-list-result) (setf durand-choose-list-result (mapcar #'car (cdr cands))))
       (setf durand-choose-list-result (cl-remove-duplicates durand-choose-list-result :test #'string=)
             durand-choose-list-result
@@ -2526,19 +2634,25 @@ If DESC is non-`nil', then it is the description of the new link."
                                           "web_link-ARCHIVE")
                                 nil t))
          (roman-p (string-match "roman" tags))
+         (files '("/Users/durand/org/notes.org" "/Users/durand/org/math_article_links.org"))
          (prompt (if roman-p
                      "Chois un roman à mettre à jour: "
                    "Chois un web lien à mettre à jour: "))
          cands)
-    (with-current-file "/Users/durand/org/notes.org" nil
-      (setf cands (org-map-entries
-                   (lambda () (durand-org-link-info t))
-                   tags))
-      (unless roman-p (setf cands (nreverse cands)))
-      (let* ((choix (completing-read prompt cands nil t))
-             (item (cl-assoc choix cands :test #'string=))
-             (lien (read-string "Le lien: " (current-kill 0 t))))
-        (goto-char (cdr item))
+    (setf cands
+          (cl-loop for file in files
+                   append (with-current-file file nil
+                            (org-map-entries
+                             (lambda ()
+                               (let ((orig (durand-org-link-info t)))
+                                 (list (car orig) (cdr orig) file)))
+                             tags))))
+    (unless roman-p (setf cands (nreverse cands)))
+    (let* ((choix (completing-read prompt cands nil t))
+           (item (cl-assoc choix cands :test #'string=))
+           (lien (read-string "Le lien: " (current-kill 0 t))))
+      (with-current-file (caddr item) nil
+        (goto-char (cadr item))
         (org-update-link lien nil nil desc)))))
 
 ;;;###autoload
