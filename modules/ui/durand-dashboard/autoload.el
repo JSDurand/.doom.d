@@ -6,11 +6,13 @@
   (interactive "P")
   (cond
    ((null arg)
+    (+vterm/here nil))
+   ((equal arg '(4))
     (make-process
      :name "terminal"
      :command `("open" "-a" "terminal" ,(file-relative-name default-directory))
      :buffer nil))
-   (t
+   ((equal arg '(16))
     (make-process
      :name "close terminal"
      :buffer nil
