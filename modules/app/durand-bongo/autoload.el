@@ -269,8 +269,9 @@ insert an action track at point."
 ;; NOTE: Fix a bug: there is no face called `modeline'; it should be
 ;; `mode-line'.
 ;;;###autoload
-(defun bongo-seek ()
+(defadvice! durand-bongo-seek ()
   "Interactively seek in the current Bongo track."
+  :override 'bongo-seek
   (interactive)
   (setq bongo-seek-buffer (get-buffer-create "*Bongo Seek*"))
   (if bongo-seek-electric-mode
@@ -324,3 +325,27 @@ insert an action track at point."
     (evil-emacs-state)
     (setq buffer-read-only t)
     (bongo-seek-redisplay)))
+
+;;; HACK: Redefine a function to go to the bongo-default-directory when no track
+;;; is under point.
+;;;
+;;;###autoload
+(defadvice! durand-bongo-dired-line (&optional point)
+  "Open a Dired buffer containing the track at POINT.
+Modified by Durand."
+  :override 'bongo-dired-line
+  (interactive)
+  ;;; NOTE: The body-form inside condition-case is the original function body.
+  (condition-case nil
+      (save-excursion
+        (bongo-goto-point point)
+        (bongo-snap-to-object-line)
+        (dired (file-name-directory
+                (save-excursion
+                  (while (bongo-header-line-p)
+                    (bongo-down-section))
+                  (if (bongo-local-file-track-line-p)
+                      (bongo-line-file-name)
+                    (error "No local file track here")))))
+        (bongo-dired-library-mode 1))
+    ('error (dired bongo-default-directory))))

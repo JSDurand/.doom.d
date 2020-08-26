@@ -30,8 +30,8 @@
                                     bongo-default-directory
                                     ".*" t nil t)
                        for attr = (car (file-attributes file))
-                       when (and (stringp attr)
-                                 (file-directory-p attr))
+                       if (and (stringp attr)
+                               (file-directory-p attr))
                        collect attr)))
   (map! :map durand-view-map
         [?m] 'bongo
