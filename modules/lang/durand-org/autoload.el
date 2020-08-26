@@ -2530,7 +2530,7 @@ variable to nil in the beginning."
                       (cons element durand-choose-list-result)
                       cands
                       (cl-remove-duplicates
-                       (cons (list element) cands)
+                       (cons (list element element) cands)
                        :test 'string=
                        :key (lambda (x) (if (listp x) (car x) x)))))))
       (when (member "all" durand-choose-list-result) (setf durand-choose-list-result (mapcar #'car (cdr cands))))

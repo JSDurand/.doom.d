@@ -873,3 +873,7 @@
 
 (map! :map doom-leader-toggle-map
       [?m] 'durand-toggle-mode-line)
+
+;; I want to scroll slowly...
+
+(setf mouse-wheel-scroll-amount '(1 ((shift) . 2)))
