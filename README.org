@@ -54,7 +54,7 @@ brief map of this configuration.
 
 *** durand-bongo
 
-[[file:/Users/durand/.doom.d/modules/app/durand-bongo/README.org][durand-bongo]]
+[[file:modules/app/durand-bongo/README.org][durand-bongo]]
 
 *** durand-rss
 
