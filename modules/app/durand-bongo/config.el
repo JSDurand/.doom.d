@@ -2,7 +2,14 @@
 
 (use-package! bongo
   :commands bongo
+  :init
+  (require 'volume "/Users/durand/.doom.d/modules/app/durand-bongo/volume.el")
   :config
+  ;; NOTE: I don't like electic mode.
+  (setf volume-electric-mode nil)
+
+  (set-evil-initial-state! 'volume-mode 'emacs)
+
   (setf bongo-default-directory "~/Desktop/Centre/Musique")
   (setf bongo-prefer-library-buffers nil)
   (setf bongo-insert-whole-directory-trees t)
