@@ -1,0 +1,26 @@
+#+TITLE:   term/durand-eshell
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+My little configurations of eshell.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
++ =SPC à= goes to the last output, to insert new commands easily.
++ =SPC r= lets the user choose a recently visited directory, using =ivy=, to enter.

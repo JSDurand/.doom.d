@@ -1,6 +1,38 @@
-#+TITLE:   My doom emacs configuration
+#+TITLE:   My doom emacs configurations
 #+DATE:    décembre 17, 2019
 #+SINCE:   v2.0.9 doom
+
+* Contents                                                                                             :toc_3:
+- [[#description][Description]]
+- [[#prerequisites][Prerequisites]]
+- [[#map][Map]]
+  - [[#app][app]]
+    - [[#durand-bongo][durand-bongo]]
+    - [[#durand-rss][durand-rss]]
+  - [[#completion][completion]]
+    - [[#durand-completion][durand-completion]]
+    - [[#durand-ivy][durand-ivy]]
+  - [[#config][config]]
+    - [[#durand-ideal][durand-ideal]]
+  - [[#editor][editor]]
+    - [[#durand-evil][durand-evil]]
+    - [[#durand-template][durand-template]]
+  - [[#email][email]]
+    - [[#durand-gnus][durand-gnus]]
+    - [[#durand-mu][durand-mu]]
+  - [[#input][input]]
+    - [[#durand-greek][durand-greek]]
+  - [[#lang][lang]]
+    - [[#durand-org][durand-org]]
+    - [[#durand-tex][durand-tex]]
+  - [[#term][term]]
+    - [[#durand-eshell][durand-eshell]]
+  - [[#tools][tools]]
+    - [[#durand-pdf][durand-pdf]]
+  - [[#ui][ui]]
+    - [[#durand-dashboard][durand-dashboard]]
+    - [[#durand-modeline][durand-modeline]]
+    - [[#transpose-frame][transpose-frame]]
 
 * Description
 This is my doom emacs configuration.
@@ -9,4 +41,99 @@ Since I didn't lazy load some packages (by accident or by ignorance), the startu
 not very impressive, but I find it satisfying enough.
 
 * Prerequisites
-This has no prereqisites.
+This has no prerequisites.
+
+* Map
+
+For those who want to explore the structure of this bizarre configuration, or for myself
+in the future when I forget how on earth I structured my configurations, I shall provide a
+brief map of this configuration.
+
+
+** app
+
+*** durand-bongo
+
+[[file:/Users/durand/.doom.d/modules/app/durand-bongo/README.org][README.org]]
+
+*** durand-rss
+
+[[file:modules/app/durand-rss/README.org][durand-rss]]
+
+** completion
+
+*** durand-completion
+
+[[file:modules/completion/durand-completion/README.org][durand-completion]]
+
+*** durand-ivy
+
+[[file:modules/completion/durand-ivy/README.org][durand-ivy]]
+
+** config
+
+*** durand-ideal
+
+[[file:modules/config/durand-ideal/README.org][durand-ideal]]
+
+** editor
+
+*** durand-evil
+
+[[file:modules/editor/durand-evil/README.org][durand-evil]]
+
+*** durand-template
+
+[[file:modules/editor/durand-template/README.org][durand-template]]
+
+** email
+
+*** durand-gnus
+
+[[file:modules/email/durand-gnus/README.org][durand-gnus]]
+
+*** durand-mu
+
+[[file:modules/email/durand-mu/README.org][durand-mu]]
+
+** input
+
+*** durand-greek
+
+[[file:modules/input/durand-greek/README.org][durand-greek]]
+
+** lang
+
+*** durand-org
+
+[[file:modules/lang/durand-org/README.org][durand-org]]
+
+*** durand-tex
+
+[[file:modules/lang/durand-tex/README.org][durand-tex]]
+
+** term
+
+*** durand-eshell
+
+[[file:modules/term/durand-eshell/README.org][durand-eshell]]
+
+** tools
+
+*** durand-pdf
+
+[[file:modules/tools/durand-pdf/README.org][durand-pdf]]
+
+** ui
+
+*** durand-dashboard
+
+[[file:modules/ui/durand-dashboard/README.org][durand-dashboard]]
+
+*** durand-modeline
+
+[[file:modules/ui/durand-modeline/README.org][durand-modeline]]
+
+*** transpose-frame
+
+[[file:modules/ui/transpose-frame/README.org][transpose-frame]]

@@ -6,7 +6,6 @@
 - [[#description][Description]]
   - [[#module-flags][Module Flags]]
   - [[#plugins][Plugins]]
-  - [[#hacks][Hacks]]
 
 * Description
 My ivy configurations.
@@ -18,7 +17,5 @@ My ivy configurations.
 This module provides no flags.
 
 ** Plugins
-{A list of linked plugins}
-
-** Hacks
-{A list of internal modifications to included packages}
+This is a re-configuration of the ivy module in doom, so no additional packages are
+installed by this module.

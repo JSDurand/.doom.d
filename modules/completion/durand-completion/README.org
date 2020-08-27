@@ -4,6 +4,7 @@
 #+STARTUP: inlineimages nofold
 
 * Table of Contents :TOC_3:noexport:
+- [[#warning][Warning]]
 - [[#description][Description]]
   - [[#maintainers][Maintainers]]
   - [[#module-flags][Module Flags]]
@@ -14,7 +15,12 @@
   - [[#actions-on-candidates][Actions on candidates]]
   - [[#durand-choose-list][=durand-choose-list=]]
 
+* Warning
+
+Since I switch back to ivy now, the following descriptions are not valid anymore.
+
 * Description
+
 This is my completion framework using mainly the built-in tools such as =icomplete=. Also
 uses the package =orderless= for better matching, and uses the package =embark= for more
 actions on candidates, and of course the package =icomplete-vertical= for a visually

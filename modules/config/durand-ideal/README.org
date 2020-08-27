@@ -1,0 +1,34 @@
+#+TITLE:   config/durand-ideal
+#+DATE:    août 26, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+This module grows out of my personal configurations of emacs back when I was not using
+doom emacs. The purpose of it is to have an *ideal* emacs of my own.
+
+After I started using doom emacs, a lot of the functionalities of this module were
+transferred to other modules, so all that remains is a bunch of custom functions that I am
+too lazy to find suitable places for.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+The most prominent feature of this module is that it provides a lot of custom functions.
+For example, there is a function to open the browser for me.
+
+In the future when I have some more leisure time, I will try to document these functions
+better. But I will leave them for now. :p

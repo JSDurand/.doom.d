@@ -1,0 +1,44 @@
+#+TITLE:   ui/durand-modeline
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+My customized mode-line.
+
++ Truncate the length of the buffer name so that my mode-line does not get too crowded.
++ Instead of cursor position, in org-agenda, show the current/total number of pages instead.
++ Show the narrowing state even if other flags are present.
+  I always want to know if the buffer is narrowed.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
++ [[https://github.com/seagle0128/doom-modeline][doom-modeline]]
+
+** Hacks
++ Override ~doom-modeline--font-height~ to resepect the font height.
++ Re-define ~doom-modeline-update-buffer-file-state-icon~ to always show the narrowing
+  state.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+
++ Truncate the length of the buffer name so that my mode-line does not get too crowded.
++ Instead of cursor position, in org-agenda, show the current/total number of pages instead.
++ Show the narrowing state even if other flags are present.
+  I always want to know if the buffer is narrowed.

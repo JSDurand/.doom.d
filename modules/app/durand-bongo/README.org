@@ -1,0 +1,59 @@
+#+TITLE:   app/durand-bongo
+#+DATE:    août 26, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+- [[#configuration][Configuration]]
+- [[#troubleshooting][Troubleshooting]]
+
+* Description
+# A summary of what this module does.
+
+This module configures and tunes the package =bongo= to my preferences. It is heavily
+inspired and influenced by Protesilaos' configurations. It is highly recommended to have a
+look at his configurations, which are well documented and explained.
+
++ If possible, include a brief list of feature highlights here
++ Like code completion, syntax checking or available snippets
++ Include links to packages & external things where possible
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
++ [[https://github.com/dbrock/bongo][bongo]]
+
+** Hacks
++ I added a function to use ivy to select the songs to add to bongo playlist buffer.
++ I define an overriding advice so that ~bongo-dired-line~ goes to
+  ~bongo-default-directory~ when no track is under point. This provides a simple way to
+  jump to the music directory from within =bongo=.
+
+* Prerequisites
+This module has requires =mpv= to play music. For MacOS users, simply install =mpv= by
+
+#+BEGIN_SRC sh
+brew install mpv
+#+END_SRC
+
+* Features
+I modified some key-bindings and added some functions.
+
+* Configuration
+It is not advised to use this module directly since it is highly entangled with my own
+other settings in doom emacs. So it is not recommended to /confifure/ this module unless
+you know what you are doing, in which case it is not necessary for me to tell you how to
+configure this module. :P
+
+* Troubleshooting
+Just fire an issue if there are any issues.

@@ -1,0 +1,41 @@
+#+TITLE:   app/durand-rss
+#+DATE:    août 26, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+- [[#configuration][Configuration]]
+
+* Description
+This is my configuration of an rss-reader inside of emacs using =elfeed=.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
++ [[https://github.com/skeeto/elfeed][elfeed]]
+
+** Hacks
+No modifications to the internal mechanisms of the package =elfeed= are done in this
+module.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
++ =SPC e= opens up elfeed.
++ One can use ~completing-read-multiple~ to choose tags to filter the feeds. Simply press
+  =s= in elfeed search buffer and the selection interface will be present.
+
+* Configuration
+Since this is not designed for public use, there are no provided instructions to configure
+this module for others.

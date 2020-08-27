@@ -1,0 +1,31 @@
+#+TITLE:   editor/durand-template
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+- [[#configuration][Configuration]]
+
+* Description
+Currently this module only has one setting: add an init template to LaTeX mode. I created
+this module only in case that in the future I might want to have a system of templates and
+this module will then serve the purpose of managing those templates.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+Add an initialization template for LaTeX mode.
+
+* Configuration
+You can add more templates to more modes. :-)

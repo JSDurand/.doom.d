@@ -1,0 +1,36 @@
+#+TITLE:   ui/durand-dashboard
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+My own customized dashboard.
+
++ A cute cat in the dashboard helps me be refreshed.
++ Only show the shortcuts that I frequently use in the dashboard.
++ Reduce the number of elements shown in the dashboard to be pleasant on the eyes.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Hacks
+Redefine ~+doom-dashboard-functions~ to have my own dashboard.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+
++ A cute cat in the dashboard helps me be refreshed.
++ Only show the shortcuts that I frequently use in the dashboard.
++ Reduce the number of elements shown in the dashboard to be pleasant on the eyes.

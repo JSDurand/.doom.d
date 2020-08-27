@@ -3,23 +3,24 @@
 #+STARTUP: inlineimages
 
 * Table of Contents :TOC_3:noexport:
-- [[#working-description][WORKING Description]]
+- [[#description][Description]]
   - [[#module-flags][Module Flags]]
   - [[#plugins][Plugins]]
-  - [[#hacks][Hacks]]
 - [[#prerequisites][Prerequisites]]
 - [[#features][Features]]
 - [[#configuration][Configuration]]
 - [[#troubleshooting][Troubleshooting]]
 
-* WORKING Description
-My org configs.
+* Description
+My org configurations.
 
 + I have three specific files for =org-agenda=: notes.org, aujourdhui.org, and agenda.org.
   Other files may be added later, but at the moment I only use those three files for
   agenda.
 + My agenda is customized by having *pages*. Each page corresponds to a section in
   =org-super-agenda=. And there are key-bindings to navigate these pages conveniently.
+  here the strange key-binding is because I use a French keyboard layout, and these keys
+  are neighbours and easy to reach, for me.
 
   |-----+----------------|
   | key | action         |
@@ -31,8 +32,6 @@ My org configs.
   | DEL | first page     |
   | à   | last page      |
   |-----+----------------|
-
-  Here is a [[file:~/org/screen-shots/org%20agenda%20screen%20shot.png][screen shot]] of the agenda.
 
 + I hate to edit in a pop up window, since I have a rather small screen. So I add an
   advice to =org-edit-special= so that it deletes other windows after it pops up the buffer.
@@ -54,11 +53,8 @@ This module provides no flags.
 ** Plugins
 + [[https://github.com/alphapapa/org-super-agenda][org-super-agenda]]
 
-** TODO Hacks
-{A list of internal modifications to included packages}
-
 * Prerequisites
-This module has no prereqisites.
+This module has no prerequisites.
 
 * TODO Features
 An in-depth list of features, how to use them, and their dependencies.

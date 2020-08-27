@@ -3,6 +3,15 @@
 #+SINCE:   doom v2.0.9
 #+STARTUP: inlineimages
 
+* Review
+
+In retrospect, I think this module is on a weird direction: one should probably use the
+built-in /input-method/ to implement the ability to input greek letters, and there
+probably are multiple greek input methods already.
+
+But this module is still interesting, IMHO, in the sense that it can quickly convert code
+letters to greek letters, and vice versa.
+
 * Description
 This module is for inputting ancient Greek letters using code letters in English.
 
@@ -15,14 +24,9 @@ This module is for inputting ancient Greek letters using code letters in English
   which is an evil operator.
 + For non-evil users, one should bind the function =durand-greek-transform-from-beg-to-end=
   to some convenient key-binding.
+
 ** Module Flags
 This module provides no flags.
-
-** Plugins
-This module depends on no plugins.
-
-** Hacks
-There is no hack on packages, since it uses none.
 
 * Prerequisites
 This module has no prerequisites.
@@ -59,13 +63,13 @@ This module has no prerequisites.
 
 + In the buffer showing search results there are some simple key-bindings.
 
-  |-----+---------------------------------|
-  | key | action                          |
-  |-----+---------------------------------|
+  |-----+-----------------------------------|
+  | key | action                            |
+  |-----+-----------------------------------|
   | j   | =durand-goto-greek-search-result= |
   | n   | =forward-line=                    |
   | p   | =(forward-line -1)=               |
-  |-----+---------------------------------|
+  |-----+-----------------------------------|
 
 + As a side note, =durand-greek-mode= runs =turn-on-orgtbl= in the hook.
 
@@ -77,7 +81,12 @@ variable conveniently.
 
 * Usage
 
+One types the code letters in the buffer, and then use the evil operator
+=durand-greek-transform-from-beg-to-end= to transform the region to Greek letters. The
+region to convert is chosen by the usual evil means. For non-evil users, one might have to
+mark the region first, which is quite inconvenient. Thus it is strongly recommended to use
+evil mode along with this module.
+
 * Conversion Rules
 
-* TODO Troubleshooting
-Common issues and their solution, or places to look for help.
+See the variable =durand-greek-replace-list=.

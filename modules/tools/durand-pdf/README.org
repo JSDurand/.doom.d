@@ -1,0 +1,26 @@
+#+TITLE:   tools/durand-pdf
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+Mostly just some key-bindings in ~pdf-view-mode~.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
++ Enable ~pdf-sync-minor-mode~.
++ Bind keys for navigation.

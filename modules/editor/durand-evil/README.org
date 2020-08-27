@@ -1,0 +1,44 @@
+#+TITLE:   editor/durand-evil
+#+DATE:    août 26, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+- [[#configuration][Configuration]]
+
+* Description
+My configurations of the evil package.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Hacks
++ ~evil-append-line~ is modified to append at the end of the visual line.
++ ~universal-argument~ is bound to the key =(= for me to press it easily.
++ Define some additional text objects
+  - dollar =$=
+  - latex dollar =\(\)=
+  - latex equation environment =\[\]=
+  - slash =/=
+  - pipe =|=
+  - star =*=
+  - equal ===
+  - french quote =«»=
+  - latex environment =\begin...\end...=
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+This module is mostly to extend the default =evil= package and add some key-bindings.
+
+* Configuration
+You can look at the files [[file:/Users/durand/.doom.d/modules/editor/durand-evil/config.el][config.el]] and [[autoload.el][autoload.el]] to see the contents of this module.

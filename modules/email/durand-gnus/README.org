@@ -1,0 +1,29 @@
+#+TITLE:   email/durand-gnus
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+This consists of some primary settings of gnus.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+This configures gnus and gives it some sane defaults. But the main settings are not here:
+they are put in =~/.gnus= so that gnus will re-load them each time they are changed.
+
+Since I value the ability to center the screen, I bound the keys =zt=, =zz=, and =zb= to
+recenter to the top, middle, and the bottom of the screen, respectively.

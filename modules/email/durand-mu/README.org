@@ -1,0 +1,36 @@
+#+TITLE:   email/durand-mu
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#hacks][Hacks]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+My settings of mu4e, the email client for emacs that I found the easiest to set up.
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Hacks
+- ~mu4e-contacts-show-time~ is modified to print more friendly messages.
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
++ This requires user confirmation before sending emails, since I sometimes accidentally
+  press =C-c C-c= while I did not mean to send the mail...
++ doom removes the mark =D= for deleting mails, but I really need tha mark, so I added
+  that back.
++ doom switches to =org-msg=, but I don't like that package, since it does not respect
+  mu4e contexts, so I stole the old doom configs and put in this module, in order to
+  continue using =org-mu4e=.
+

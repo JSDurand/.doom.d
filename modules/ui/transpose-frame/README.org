@@ -1,0 +1,35 @@
+#+TITLE:   ui/transpose-frame
+#+DATE:    août 27, 2020
+#+STARTUP: inlineimages nofold
+
+* Table of Contents :TOC_3:noexport:
+- [[#description][Description]]
+  - [[#maintainers][Maintainers]]
+  - [[#module-flags][Module Flags]]
+  - [[#plugins][Plugins]]
+- [[#prerequisites][Prerequisites]]
+- [[#features][Features]]
+
+* Description
+This is in fact a separate package I found on the internet. But since it is relatively
+small, I just put the package in [[file:autoload.el][autoload.el]], and bind the keys in [[file:config.el][config.el]].
+
+ + =SPC w T= transpose-frame
+ + =SPC w y= rotate-frame-clockwise
+ + =SPC w e= rotate-frame-anticlockwise
+ + =SPC w g= rotate-frame
+
+** Maintainers
++ @JSDurand (Author)
+
+** Module Flags
+This module provides no flags.
+
+** Plugins
++ [[https://www.emacswiki.org/emacs/TransposeFrame][transpose-frame on EmacsWiki]]
+
+* Prerequisites
+This module has no prerequisites.
+
+* Features
+One can easily transpose frames. :-)
