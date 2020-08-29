@@ -857,7 +857,8 @@ Otherwise execute `narrow-to-defun'."
    ((and (buffer-narrowed-p) (not arg)) (widen))
    ((and (string-prefix-p "*Org Src" (buffer-name))
          (not arg))
-    (org-edit-src-exit))
+    (org-edit-src-exit)
+    (delete-other-windows))
    ((region-active-p)
     (narrow-to-region (region-beginning) (region-end)))
    ((derived-mode-p 'org-mode)
@@ -940,7 +941,7 @@ If \\[universal-argument], then ask for additional regexps to match buffers to k
              (boundp 'durand-recently-closed-files))
     (setf recentf-list nil
           durand-recently-closed-files nil))
-  (let* ((var_dir "/var/folders/m_/2kpvwt3d5v92hxy_gyt9324r0000gn/T")
+  (let* ((var_dir temporary-file-directory)
          (graph-files (directory-files var_dir 'full
                                        (rx bos "graph" (1+ anything) (or "dot" "svg") eos)
                                        t)))

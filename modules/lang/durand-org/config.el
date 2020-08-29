@@ -118,9 +118,7 @@
         [?-] 'org-agenda-previous-block
         [?j] 'org-agenda-jump-to-item))
 
-(advice-add 'org-edit-special :after '(lambda (&optional orig-fun)
-                                        "Make it full frame"
-                                        (delete-other-windows)))
+(advice-add 'org-edit-special :after 'org-edit-special-h)
 ;; (set-face-attribute 'org-block nil :background "gray5" :foreground "DarkOrange1")
 ;; (set-face-attribute 'bold nil :foreground "OrangeRed1")
 ;; (set-face-attribute 'org-verbatim nil :background "gray1")

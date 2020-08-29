@@ -4265,3 +4265,11 @@ relative to `org-directory', unless it is an absolute path."
 
   (when (featurep! :editor evil)
     (add-hook 'org-capture-mode-hook #'evil-insert-state)))
+
+;;;###autoload
+(defun org-edit-special-h (&rest orig-args)
+  "Make it full frame"
+  (ignore orig-args)
+  (delete-other-windows)
+  (setf org-src--saved-temp-window-config
+        (current-window-configuration)))
