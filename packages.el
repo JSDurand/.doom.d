@@ -12,6 +12,13 @@
 
 ;; (package! durand-cat :recipe (:host github :repo "JSDurand/durand-cat"))
 
+;; rime!
+
+(package! rime
+  :recipe (:host github
+           :repo "DogLooksGood/emacs-rime"
+           :files ("*.el" "Makefile" "lib.c")))
+
 (package! wrap-region)
 
 ;; (package! emacs-opencc :recipe (:host github :repo "xuchunyang/emacs-opencc"))

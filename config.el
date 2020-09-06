@@ -57,8 +57,8 @@
 (setq modus-vivendi-theme-slanted-constructs t
       modus-vivendi-theme-bold-constructs t
       modus-vivendi-theme-3d-modeline t
-      modus-vivendi-theme-subtle-diffs t
-      modus-vivendi-theme-intense-standard-completions t
+      modus-vivendi-theme-diffs nil
+      modus-vivendi-theme-completions nil
       modus-vivendi-theme-org-blocks 'rainbow
       modus-vivendi-theme-variable-pitch-headings t
       modus-vivendi-theme-rainbow-headings t
@@ -107,7 +107,7 @@
 
 ;;; My own yank-from-kill-ring function
 
-(map! :n [?\M-y] 'prot/icomplete-yank-kill-ring)
+;; (map! :n [?\M-y] 'prot/icomplete-yank-kill-ring)
 
 ;;; dollar map is a little strange
 
@@ -602,25 +602,35 @@
 (map! :map doom-leader-toggle-map
       [?i] 'toggle-input-method)
 ;;; I am trying pyim now
-;; (setf pyim-page-tooltip 'popup)
 
-;; (after! pyim (pyim-basedict-enable))
+;; (use-package! pyim
+;;   :after-call after-find-file pre-command-hook
+;;   :init
+;;   (setq pyim-dcache-directory (concat doom-cache-dir "pyim/"))
+;;   :config
+;;   (setq pyim-page-tooltip t
+;;         default-input-method "pyim")
 
-;; (map! :map pyim-mode-map
-;;       [?,] (cmd! (pyim-page-select-word-by-number 2))
-;;       [?\;] (cmd! (pyim-page-select-word-by-number 3))
-;;       [?:] (cmd! (pyim-page-select-word-by-number 4))
-;;       [?=] (cmd! (pyim-page-select-word-by-number 5))
-;;       [?\&] (lambda! (pyim-entered-backward-point))
-;;       [?\é] (cmd! (pyim-entered-forward-point))
-;;       [?\"] (cmd! (pyim-page-previous-page 1))
-;;       [?\'] (cmd! (pyim-page-next-page 1)))
+;;   (pyim-basedict-enable)
 
-;; But it still too slow for me to use fluently: mainly because of the dearth of
-;; a sufficiently large dictionary. It is kind of OK to input Chinese words by
-;; pinyin, but it is very important to select Chinese words by phrases, instead
-;; of picking them word by word in a million possibilities. Therefore this still
-;; needs huge improvements as of now.
+;;   (map! :map pyim-mode-map
+;;         [?,] (cmd! (pyim-page-select-word-by-number 2))
+;;         [?\;] (cmd! (pyim-page-select-word-by-number 3))
+;;         [?:] (cmd! (pyim-page-select-word-by-number 4))
+;;         [?=] (cmd! (pyim-page-select-word-by-number 5))
+;;         [?\&] (cmd! (pyim-entered-backward-point))
+;;         [?\é] (cmd! (pyim-entered-forward-point))
+;;         [?\"] (cmd! (pyim-page-previous-page 1))
+;;         [?\'] (cmd! (pyim-page-next-page 1))))
+
+;; REVIEW: But it still too slow for me to use fluently: mainly because of the
+;; dearth of a sufficiently large dictionary. It is kind of OK to input Chinese
+;; words by pinyin, but it is very important to select Chinese words by phrases,
+;; instead of picking them word by word in a million possibilities. Therefore
+;; this still needs huge improvements as of now.
+;;
+;; NOTE: I shall try this out again, since I really cannot stand using the
+;; built-in input method on mac, when I use it in emacs...
 
 ;; bind indent operator
 
@@ -877,3 +887,27 @@
 ;; I want to scroll slowly...
 
 (setf mouse-wheel-scroll-amount '(1 ((shift) . 2)))
+
+;; try out xwwp
+
+;; REVIEW: This is actually quite nice to use. Some of the most obvious problems (to me in the past) are all addressed, not perfectly, but acceptably, by this package.
+(use-package xwwp-full
+  :load-path "~/Desktop/xwwp"
+  :custom
+  (xwwp-follow-link-completion-system 'ivy)
+  :bind (:map xwidget-webkit-mode-map
+              ("v" . xwwp-follow-link)
+              ("t" . xwwp-ace-toggle)))
+
+;; try out librime to input Chinese in Emacs.
+
+(use-package! rime
+  :after-call after-find-file pre-command-hook
+  :custom
+  (rime-librime-root "~/elisp_packages/librime/dist")
+  :config
+  (add-to-list 'rime-translate-keybindings "RET")
+  (add-to-list 'rime-translate-keybindings "[")
+  (add-to-list 'rime-translate-keybindings "]")
+  (setf default-input-method "rime"
+        rime-show-candidate 'posframe))
