@@ -30,7 +30,12 @@
 ;;;###autoload
 (defvar durand-wifi-on-p nil
   "If WIFI is on or not.
-This is defined in \"evil-setting.el\"")
+This is defined in \"/Users/durand/.doom.d/modules/editor/durand-evil/autoload.el\"")
+
+;;;###autoload
+(defvar durand-bluetooth-on-p nil
+  "If BLUETOOTH is on or not.
+This is defined in \"/Users/durand/.doom.d/modules/editor/durand-evil/autoload.el\"")
 
 ;;;###autoload
 (defun durand-wifi-filter (proc output)
@@ -42,32 +47,69 @@ This is defined in \"evil-setting.el\""
   (setf durand-wifi-on-p (string-match "On$" output)))
 
 ;;;###autoload
-(defun durand-wifi ()
-  "Check if WIFI is enabled, then ask for confirmation to toggle WIFI. "
-  (interactive)
-  (make-process
-   :name "durand-wifi"
-   :buffer nil
-   :command '("networksetup" "-getairportpower" "en0")
-   :filter #'durand-wifi-filter
-   :sentinel #'ignore)
-  (accept-process-output (get-process "durand-wifi"))
-  (let* ((prompt (format "WIFI is %s. Do you want to turn WIFI %s"
-                         (if durand-wifi-on-p "on" "off")
-                         (if durand-wifi-on-p "off?" "on?")))
-         (decision (y-or-n-p prompt)))
-    (when decision
-      (let* ((new-state (if durand-wifi-on-p "off" "on")))
-        (make-process
-         :name "durand-toggle-wifi"
-         :buffer nil
-         :command `("networksetup"
-                    "-setairportpower"
-                    "en0"
-                    ,new-state)
-         :sentinel #'ignore
-         :filter #'ignore)
-        (message "WIFI turned %s" new-state)))))
+(defun durand-bluetooth-filter (proc output)
+  "Filter function to set the bluetooth variable.
+This should only be used for the process \"durand-bluetooth\".
+This is defined in \"/Users/durand/.doom.d/modules/editor/durand-evil/autoload.el\""
+  (unless (string= (process-name proc) "durand-bluetooth")
+    (user-error "Filter function applied to a wrong process."))
+  (setf durand-bluetooth-on-p (string-match "1" output)))
+
+;;;###autoload
+(defun durand-wifi-or-bluetooth (&optional arg)
+  "Check if WIFI is enabled, then ask for confirmation to toggle WIFI.
+If ARG is non-nil, do the same for bluetooth."
+  (interactive "P")
+  (cond
+   ((null arg)
+    (make-process
+     :name "durand-wifi"
+     :buffer nil
+     :command '("networksetup" "-getairportpower" "en0")
+     :filter #'durand-wifi-filter
+     :sentinel #'ignore)
+    (accept-process-output (get-process "durand-wifi"))
+    (let* ((prompt (format "WIFI is %s. Do you want to turn WIFI %s"
+                           (if durand-wifi-on-p "on" "off")
+                           (if durand-wifi-on-p "off?" "on?")))
+           (decision (y-or-n-p prompt)))
+      (when decision
+        (let* ((new-state (if durand-wifi-on-p "off" "on")))
+          (make-process
+           :name "durand-toggle-wifi"
+           :buffer nil
+           :command `("networksetup"
+                      "-setairportpower"
+                      "en0"
+                      ,new-state)
+           :sentinel #'ignore
+           :filter #'ignore)
+          (message "WIFI turned %s" new-state)))))
+   (t
+    (make-process
+     :name "durand-bluetooth"
+     :buffer nil
+     :command '("blueutil" "-p")
+     :filter #'durand-bluetooth-filter
+     :sentinel 'ignore)
+    (accept-process-output (get-process "durand-bluetooth"))
+    (let* ((prompt (format "BLUETOOTH is %s. Do you want to turn BLUETOOTH %s"
+                           (if durand-bluetooth-on-p "on" "off")
+                           (if durand-bluetooth-on-p "off?" "on?")))
+           (decision (y-or-n-p prompt)))
+      (when decision
+        (let* ((new-state (if durand-bluetooth-on-p "0" "1")))
+          (make-process
+           :name "durand-toggle-bluetooth"
+           :buffer nil
+           :command `("blueutil" "-p" ,new-state)
+           :sentinel 'ignore
+           'filter 'ignore)
+          (message "BLUETOOTH turned %s"
+                   (if durand-bluetooth-on-p "off" "on"))))))))
+
+(define-obsolete-function-alias 'durand-wifi 'durand-wifi-or-bluetooth "2020-09-01"
+  "Check if WIFI is enabled, then ask for confirmation to toggle WIFI.")
 
 ;;;###autoload
 (defun durand-open-index (&optional arg)
@@ -98,10 +140,64 @@ With ARG, open the index file even not in `js2-mode'."
 
 ;; view timer list and process list
 ;;;###autoload
-(defun durand-view-timers ()
-  "View the list of timers"
-  (interactive)
-  (list-timers))
+(defun durand-view-timers-or-temps (&optional arg)
+  "View the list of timers or view the CPU temperature info.
+If ARG is nil, view the list of timers.
+If ARG is '(4), view the information about CPU temperature and
+fans speed and some others.
+If ARG is '(16), view the battery information."
+  (interactive "P")
+  (cond
+   ((null arg) (list-timers))
+   ((equal arg (list 4))
+    (let (fan-speed cpu-die-temperature)
+      (with-temp-buffer
+        "*CPU and fans*" nil nil
+        (insert (funcall
+                 (plist-get (car (auth-source-search :host "local-computer"))
+                            :secret)))
+        (call-process-region
+         nil nil "sudo"
+         nil t nil "-S" "powermetrics"
+         "-i1" "-n1" "-ssmc")
+        (goto-char (point-min))
+        (search-forward "Fan" nil t)
+        (setf fan-speed
+              (progn (re-search-forward "[[:digit:]]+" (line-end-position) t)
+                     (string-to-number (match-string 0)))
+              cpu-die-temperature
+              (progn (re-search-forward "temperature: \\([[:digit:]]+\\.[[:digit:]]+\\)" nil t)
+                     (string-to-number (match-string 1)))))
+      (message "fan: %d, temp: %s"
+               fan-speed cpu-die-temperature)))
+   ((equal arg (list 16))
+    (let (remain full-capacity fullp charging cycle condition connected)
+      (with-temp-buffer
+        "*Battery info*" nil nil
+        (call-process "system_profiler" nil t nil
+                      "SPPowerDataType")
+        (goto-char (point-min))
+        (re-search-forward "Charge Remaining (mAh): \\([[:digit:]]+\\)" nil t)
+        (setf remain (string-to-number (match-string-no-properties 1)))
+        (re-search-forward "Fully Charged: \\(.+\\)$" nil t)
+        (setf fullp (match-string-no-properties 1))
+        (re-search-forward "Charging: \\(.+\\)$" nil t)
+        (setf charging (match-string-no-properties 1))
+        (re-search-forward "Full Charge Capacity (mAh): \\([[:digit:]]+\\)$" nil t)
+        (setf full-capacity (string-to-number (match-string-no-properties 1)))
+        (re-search-forward "Cycle Count: \\(.+\\)$" nil t)
+        (setf cycle (string-to-number (match-string-no-properties 1)))
+        (re-search-forward "Condition: \\(.+\\)$" nil t)
+        (setf condition (match-string-no-properties 1))
+        (re-search-forward "Connected: \\(.+\\)$" nil t)
+        (setf connected (match-string-no-properties 1)))
+      (message "Full: %d, remaining: %d, fullp: %s, charging: %s, connected: %s, cycles: %d, condition: %s"
+               full-capacity remain fullp charging connected cycle condition)))
+   (t
+    (user-error "Unsupported ARG: %S" arg))))
+
+(define-obsolete-function-alias 'durand-view-timers 'durand-view-timers-or-temps
+  "2020-09-02" "View the list of timers.")
 
 ;;;###autoload
 (defun durand-view-process (&optional arg)
@@ -148,7 +244,7 @@ Modified by Durand"
 ;; align operator
 
 ;;;###autoload (autoload 'evil-align-regexp "editor/durand-evil/autoload" nil t)
-(evil-define-operator evil-align-regexp (beg end _type &optional arg)
+(evil-define-operator evil-align-regexp (beg end type &optional arg)
   "Align regions by `align-regexp'.
 Treat block selections as selecting lines.
 And ARG behaves like in `align-regexp'.

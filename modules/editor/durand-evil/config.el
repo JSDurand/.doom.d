@@ -118,9 +118,9 @@ like youtube videos or others.")
       [?B] #'battery
       [?y] #'org-open-youtube
       [?w] #'org-open-weblink
-      [?W] #'durand-wifi
+      [?W] #'durand-wifi-or-bluetooth
       [?n] #'org-open-novels
-      [?t] #'durand-view-timers
+      [?t] #'durand-view-timers-or-temps
       [?P] #'durand-view-process
       [?p] #'durand-chercher-pdf
       [?d] #'durand-open-dashboard
