@@ -34,6 +34,10 @@ This module provides no flags.
 + [[https://github.com/dbrock/bongo][bongo]]
 
 ** Hacks
++ bongo has a bug concerning mpv: since mpv changed its calling convention from
+  ~-input-ipc-server SOCKET-FILE~ to ~-input-ipc-server=SOCKET-FILE~, its default setting
+  cannot run mpv correctly: mpv will exit abnormally with code 1. So I added an overriding
+  advice to fix this calling convention.
 + I added a function to use ivy to select the songs to add to bongo playlist buffer.
 + I define an overriding advice so that ~bongo-dired-line~ goes to
   ~bongo-default-directory~ when no track is under point. This provides a simple way to

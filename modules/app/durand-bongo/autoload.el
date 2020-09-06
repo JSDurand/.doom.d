@@ -129,11 +129,16 @@ Adapted from Protesilaos' dotemacs by Durand."
                           (bongo-insert-file
                            (file-truename (expand-file-name f base))))))))
 
+;; REVIEW: This is oft not overriding the original function, to the effect that
+;; the first time bongo starts, this function does not work, and I have to
+;; define this function again, in order to play the music. So I decided to make
+;; this into an overriding advice.
 ;;;###autoload
-(defun bongo-compose-remote-option (socket-file)
+(defadvice! durand-bongo-compose-remote-option (socket-file)
   "Get the command line argument for starting mpv's remote interface at SOCKET-FILE.
 This has to be fixed for mpv to work, since its argument parsing
 convention is changed."
+  :override 'bongo-compose-remote-option
   (when (equal bongo-mpv-remote-option 'unknown)
     (setq bongo-mpv-remote-option (bongo--mpv-get-remote-option)))
   (list (concat bongo-mpv-remote-option "=" socket-file)))
