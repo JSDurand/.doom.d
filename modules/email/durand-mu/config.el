@@ -4,7 +4,7 @@
   :after-call (durand-mu4e)
   ;; :defer 3
   :config
-
+  (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e")
   (require 'org-mu4e)
   (require 'message)
   (setf message-confirm-send t)
