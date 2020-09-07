@@ -556,6 +556,7 @@ Version 2018-06-04"
     "/Users/durand/Desktop/Centre/MaoBaoBao/Mao Problems/"
     "/Users/durand/Desktop/Centre/Mes notes/"
     "/Users/durand/Desktop/Centre/PDF/"
+    "/Users/durand/Desktop/Centre/À propos de NTU"
     "/Users/durand/Desktop/Centre/Pour thèse/"
     "/Users/durand/Desktop/Centre/TeX/"
     "/Users/durand/Desktop/Centre/Œuvres de professeur/"
@@ -949,7 +950,8 @@ If \\[universal-argument], then ask for additional regexps to match buffers to k
               (and graph-files
                    (y-or-n-p "Delete graph files?")))
       (cl-loop for file in graph-files
-               do (delete-file file)))))
+               do (delete-file file))))
+  (delete-directory "/private/tmp/mpv_thumbs_cache/" t))
 
 ;;;###autoload
 (defun durand-edit-special ()
