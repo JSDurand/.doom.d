@@ -151,9 +151,9 @@ The default is 25 minutes."
   (list-timers))
 
 ;;;###autoload
-;; (defun sim-2-tw-chinese (str)
-;;   (require 'opencc)
-;;   (opencc-string "s2tw" str))
+;(defun sim-2-tw-chinese (str)
+;  (require 'opencc)
+;  (opencc-string "s2tw" str))
 
 ;; in ediff merger two variants without markers
 
@@ -363,3 +363,41 @@ Now I use ivy to achieve this behaviour."
     (setf durand-cache-mode-line mode-line-format
           mode-line-format nil)))
   (force-mode-line-update))
+
+;;;###autoload
+(defun +magit-display-buffer-fn (buffer)
+  "Same as `magit-display-buffer-traditional', except...
+
+- If opened from a commit window, it will open below it.
+- Magit process windows are always opened in small windows below the current.
+- Everything else will reuse the same window.
+
+Modified by Durand."
+  (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
+    (display-buffer
+     buffer (cond
+             ((and (eq buffer-mode 'magit-status-mode)
+                   (get-buffer-window buffer))
+              '(display-buffer-reuse-window))
+             ;; Any magit buffers opened from a commit window should open below
+             ;; it. Also open magit process windows below.
+             ;; ((or (bound-and-true-p git-commit-mode)
+             ;;      (eq buffer-mode 'magit-process-mode))
+             ;;  (let ((size (if (eq buffer-mode 'magit-process-mode)
+             ;;                  0.35
+             ;;                0.7)))
+             ;;    `(display-buffer-below-selected
+             ;;      . ((window-height . ,(truncate (* (window-height) size)))))))
+
+             ;; Everything else should reuse the current window.
+             ((or (not (derived-mode-p 'magit-mode))
+                  (not (memq (with-current-buffer buffer major-mode)
+                             '(magit-process-mode
+                               magit-revision-mode
+                               magit-diff-mode
+                               magit-stash-mode
+                               magit-status-mode))))
+              '(display-buffer-same-window))
+
+             (t
+              '(+magit--display-buffer-in-direction))))))
