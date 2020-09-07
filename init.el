@@ -20,10 +20,11 @@
                                         ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
-       ivy
-       ;; (ivy
-       ;;  ;; +childframe
-       ;;  +fuzzy)
+       ;; ivy
+       (ivy
+        ;; +childframe
+        ;; +fuzzy
+        )
                                         ; a search engine for love and life
        durand-ivy
 
@@ -48,7 +49,7 @@
        (popup                     ; tame sudden yet inevitable temporary windows
         +all                      ; catch all popups that start with an asterix
         +defaults)                ; default popup rules
-       ;;pretty-code       ; replace bits of code with pretty symbols
+       ;; ligatures       ; replace bits of code with pretty symbols
        ;;tabs              ; an tab bar for Emacs
        ;; treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
@@ -105,7 +106,7 @@
         +dictionary             ; a dictionary in emacs is good.
         ;; +docsets
         )               ; ...or in Dash docsets locally
-       (lsp ;; +eglot
+       (lsp +eglot
             )
        ;;macos             ; MacOS-specific commands
        magit                    ; a git porcelain for Emacs
@@ -122,6 +123,7 @@
        sese                             ; edit subtitles in emacs
 
        :lang
+       yaml
        ;;agda              ; types of types of types of types...
        ;;assembly          ; assembly for fun or debugging
        (cc
