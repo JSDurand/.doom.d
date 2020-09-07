@@ -106,8 +106,8 @@
 
 (when (featurep! :completion ivy +childframe)
   (after! ivy-posframe
-    (cl-loop for fn in '(;; durand-switch-buffer
-                         ;; ivy-switch-buffer
+    (cl-loop for fn in '(durand-switch-buffer
+                         ivy-switch-buffer
                          durand-org-complete-capture-account
                          counsel-describe-function
                          counsel-describe-variable
@@ -115,6 +115,8 @@
                          doom/help-packages
                          doom/help-package-homepage
                          counsel-M-x
+                         counsel-find-file
+                         durand-bookmark-jump-headlong
                          counsel-minibuffer-history)
              do (setf (alist-get fn ivy-posframe-display-functions-alist)
-                      nil))))
+                      'ivy-display-function-fallback))))
