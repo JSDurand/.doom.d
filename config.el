@@ -47,6 +47,14 @@
  doom-unicode-font nil
  doom-big-font nil)
 
+;;; NOTE: If the height of `variable-pitch' is an integer, then it will be the
+;;; absolute height of the face, which then will not inherit the height of the
+;;; default face, and then the command `text-scale-adjust' adjusts only the
+;;; height of the default face, thus the face `variable-pitch' will be
+;;; unaffected, which is not desired. So we explicitly set it to a floating
+;;; number to inherit the height of the default face.
+(set-face-attribute 'variable-pitch nil :family "Avenir" :height 1.0)
+
 ;;; disable line numbers, as that is a performace killer for me.
 
 (setq-default display-line-numbers-type nil)
