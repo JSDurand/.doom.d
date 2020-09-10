@@ -2,15 +2,15 @@
 
 (use-package! bongo
   :commands bongo
-  :init
-  (require 'volume "/Users/durand/.doom.d/modules/app/durand-bongo/volume.el")
+  ;; :init
+  ;; (require 'volume "/Users/durand/.doom.d/modules/app/durand-bongo/volume.el")
   :config
   ;; NOTE: I don't like electic mode.
   (setf volume-electric-mode nil)
 
   (set-evil-initial-state! 'volume-mode 'emacs)
 
-  (setf bongo-default-directory "~/Desktop/Centre/Musique")
+  (setf bongo-default-directory (expand-file-name "~/Desktop/Centre/Musique"))
   (setf bongo-prefer-library-buffers nil)
   (setf bongo-insert-whole-directory-trees t)
   (setf bongo-logo nil)
@@ -24,8 +24,7 @@
   (setf bongo-header-line-mode nil)
   (setf bongo-header-line-function nil)
   (setf bongo-mode-line-indicator-mode nil)
-  (setf bongo-enabled-backends '(;; vlc
-                                 mpv))
+  (setf bongo-enabled-backends '(mpv))
   (setf bongo-seek-electric-mode nil)
   (add-hook 'bongo-playlist-mode-hook 'evil-emacs-state)
   (setf bongo-custom-backend-matchers
@@ -65,3 +64,9 @@
          ("m" . bongo)
          :map bongo-dired-library-mode-map
          ("<C-return>" . prot/bongo-library-insert-and-play-random)))
+
+(use-package! volume
+  :commands volume
+  :load-path "/Users/durand/.doom.d/modules/app/durand-bongo/"
+  :config
+  (add-hook 'volume-mode-hook 'evil-emacs-state))
