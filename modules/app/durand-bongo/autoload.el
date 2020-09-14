@@ -4,14 +4,14 @@
 (defun contrib/bongo-add-dired-files ()
   "Add marked files inside of a Dired buffer to the Bongo library."
   (interactive)
-  (let (file-point file (files nil))
+  (let (file-point file files)
     (dired-map-over-marks
      (setq file-point (dired-move-to-filename)
            file (dired-get-filename)
            files (append files (list file)))
      nil t)
     (ignore file-point)
-    (with-current-buffer bongo-default-playlist-buffer-name
+    (with-current-buffer (bongo-playlist-buffer)
       (mapc 'bongo-insert-file files))))
 
 ;;;###autoload
@@ -71,7 +71,8 @@ as a library buffer (see `prot/bongo-dired-library')."
     (unless (bongo-playlist-buffer-p)
       (bongo-playlist-buffer))
     (contrib/bongo-add-dired-files)
-    (prot/bongo-play-random)))
+    ;; (prot/bongo-play-random)
+    ))
 
 ;;;###autoload
 (defun durand-bongo-insert-delete-playlist ()
@@ -108,7 +109,8 @@ Adapted from Protesilaos' dotemacs by Durand."
                                  (ivy--reset-state ivy-last))
                            "delete playlist")
                           ("e" find-file "edit")))
-      (prot/bongo-play-random))))
+      ;; (prot/bongo-play-random)
+      )))
 
 ;;;###autoload
 (defun durand-bongo-dired-ivy-find-to-add ()
@@ -354,3 +356,13 @@ Modified by Durand."
                     (error "No local file track here")))))
         (bongo-dired-library-mode 1))
     ('error (dired bongo-default-directory))))
+
+;;; NOTE: I would like bongo to jump to bongo-playlist-buffer immediately,
+;;; otherwise sometimes it jumps to the dired buffer, which is annoying.
+
+;;;###autoload
+(defadvice! durand-bongo-buffer ()
+  "Return the buffer (bongo-playlist-buffer)."
+  :override 'bongo-buffer
+  (interactive)
+  (bongo-playlist-buffer))
