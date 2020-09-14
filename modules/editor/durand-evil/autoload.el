@@ -128,15 +128,20 @@ With ARG, open the index file even not in `js2-mode'."
 (defun durand-view-videos ()
   "View videos"
   (interactive)
-  (eshell t)
+  (make-process
+   :name "terminal"
+   :command `("open" "-a" "terminal" "/Users/durand/Desktop/Centre/Vidéos")
+   :buffer nil)
+  ;; (eshell t)
   ;; (insert "cd ~/Desktop/Centre/Vidéos")
-  (insert "vid")
-  (eshell-send-input)
+  ;; (insert "vid")
+  ;; (eshell-send-input)
   ;; (insert "alias play \"mpv --no-terminal --autofit=100%x100% --no-border --geometry=+0+-24 \\$*\"")
-  (eshell-send-input)
-  (insert "ls -lah")
-  (eshell-send-input)
-  (insert "play "))
+  ;; (eshell-send-input)
+  ;; (insert "ls -lah")
+  ;; (eshell-send-input)
+  ;; (insert "play ")
+  )
 
 ;; view timer list and process list
 ;;;###autoload
