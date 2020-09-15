@@ -78,8 +78,8 @@
           :match-func (lambda (msg)
                         (when msg
                           (or
-                           (mu4e-message-contact-field-matches msg :from "tan\\|mlh\\|hsialc")
-                           (mu4e-message-contact-field-matches msg :to "tan\\|mlh\\|hsialc"))))
+                           (mu4e-message-contact-field-matches msg :from "tan\\|mlh\\|hsialc\\|tingyu.lee\\|tingyulee")
+                           (mu4e-message-contact-field-matches msg :to "tan\\|mlh\\|hsialc\\|tingyu.lee\\|tingyulee"))))
           :vars '((user-mail-address . "mmemmew@gmail.com")
                   (user-full-name . "李俊緯")
                   (mu4e-compose-signature . "生 俊緯")
