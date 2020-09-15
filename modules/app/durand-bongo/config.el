@@ -46,6 +46,8 @@
         [?\C-c ?n] 'durand-bongo-play-next-or-first
         [?\C-c ?p] 'durand-bongo-play-previous-or-last
         :map bongo-playlist-mode-map
+        [?n] 'bongo-next-object-line
+        [?p] 'bongo-previous-object-line
         [?j] 'durand-bongo-save-playlist
         [?\C-c ?n] 'durand-bongo-play-next-or-first
         [?\C-c ?p] 'durand-bongo-play-previous-or-last)
