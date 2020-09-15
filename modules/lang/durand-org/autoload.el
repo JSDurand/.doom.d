@@ -116,11 +116,44 @@ Don't bind it to a key in `general-hydra/heads'"
   (interactive)
   (recenter 0))
 
+;;; Pick the favourite items in the list
+;;;
+;;; NOTE: An item is said to be favourite if and only if it appears more than
+;;; `durand-fav-threshold' of the times in the list.
+
+;;;###autoload
+(defvar durand-fav-threshold 0
+  "The threshold that determines when an item is a favourite.")
+
+(setf durand-fav-threshold 0.9)
+
+;;;###autoload
+(defun durand-pick-favs (items)
+  "Pick the favourite items in the list.
+ITEMS is a list of lists of strings, and an item is said to be a
+favourite if and only if it appears more than
+`durand-fav-threshold' of the times in the list."
+  (let* ((total (length items))
+         (items-and-freqs
+          (cl-loop with result
+                   for items-in-entry in items
+                   do
+                   (cl-loop
+                    for item in items-in-entry
+                    do
+                    (setf (alist-get item result nil nil #'string=)
+                          (let ((asso (alist-get item result nil nil #'string=)))
+                            (1+ (or asso 0)))))
+                   finally return result)))
+    (cl-loop for (item . freq) in items-and-freqs
+             if (>= freq (floor (* total durand-fav-threshold)))
+             collect item)))
+
 ;;; completion for accounts
 
 ;;;###autoload
 (defun durand-org-complete-capture-account ()
-  "Offer completion for shops and items when capturing accounts."
+  "Offer completion for shops and items and costs when capturing accounts."
   (with-current-file (expand-file-name "account/account.org" org-directory) nil
     (let* ((shops-list (save-excursion
                          (save-restriction
@@ -146,14 +179,14 @@ Don't bind it to a key in `general-hydra/heads'"
            (chosen-shop (completing-read
                          "Chois un magasin: " shops-list
                          nil nil nil durand-complete-shop-history))
-           (items-list-and-last
+           (items-list
             (save-excursion
               (save-restriction
                 (widen)
                 (goto-char (point-min))
                 (cl-loop
                  named parent
-                 with items
+                 ;; with items
                  while (re-search-forward org-heading-regexp nil t)
                  for title = (save-excursion
                                (org-end-of-meta-data)
@@ -165,16 +198,29 @@ Don't bind it to a key in `general-hydra/heads'"
                          (not (string= title ""))
                          (string= (upcase title)
                                   (upcase chosen-shop)))
-                 do (setf items (cl-loop
-                                 named child
-                                 with limite = (save-excursion (outline-next-heading) (point))
-                                 while (re-search-forward "- " limite t)
-                                 collect (buffer-substring-no-properties
-                                          (point) (line-end-position))))
-                 and append items into all-items
-                 finally return (list all-items items)))))
-           (durand-choose-list-result (cadr items-list-and-last))
-           (items-list (cl-remove-duplicates (car items-list-and-last) :test 'string=))
+                 append (list
+                         (cl-loop
+                          named child
+                          with limite = (save-excursion (outline-next-heading) (point))
+                          while (re-search-forward "- " limite t)
+                          collect (buffer-substring-no-properties
+                                   (point) (line-end-position))))
+
+                 ;; REVIEW: The code below is to collect the items I ordered the
+                 ;; last time. Since I now want to analyse the frequencies of
+                 ;; the ordered items, I commented the code below.
+                 ;;
+                 ;; do (setf items (cl-loop
+                 ;;                 named child
+                 ;;                 with limite = (save-excursion (outline-next-heading) (point))
+                 ;;                 while (re-search-forward "- " limite t)
+                 ;;                 collect (buffer-substring-no-properties
+                 ;;                          (point) (line-end-position))))
+                 ;; and append items into all-items
+                 ;; finally return (list all-items items)
+                 ))))
+           (durand-choose-list-result (durand-pick-favs items-list))
+           (items-list (cl-remove-duplicates (-flatten items-list) :test 'string=))
            (chosen-items (durand-choose-list (mapcar 'list items-list) nil "Chois une chose: " t nil t
                                              nil t)))
       (concat chosen-shop
@@ -2415,6 +2461,14 @@ If ARG is `youtube' or `all', then return (text list point)"
      (t
       (cons texte pt)))))
 
+;;; Some specific faces for this function
+
+;;;###autoload
+(defface durand-result-arrow-face
+  '((t
+     (:inherit minibuffer-prompt :foreground "skyblue" :height 250)))
+  "Face for the arrow on the result items used by `durand-ivy-format-function-arrow'.")
+
 ;;;###autoload
 (defun durand-choose-list-format-function (cands matched)
   "Format candidates to `durand-choose-list'."
@@ -2422,14 +2476,18 @@ If ARG is `youtube' or `all', then return (text list point)"
    (lambda (e)
      (concat (propertize
               (format "%s "
-                      (all-the-icons-material "school" :face 'durand-arrow-face)))
+                      (all-the-icons-material
+                       "school"
+                       :face (cond ((cl-member e matched :test #'string=)
+                                    'durand-result-arrow-face)
+                                   (t 'durand-arrow-face)))))
              (ivy--add-face e 'ivy-current-match)))
    (lambda (e)
      (if (cl-member e matched :test #'string=)
          (concat (propertize
                   (format "%s "
-                          (all-the-icons-material "school" :face 'durand-arrow-face)))
-                 (ivy--add-face e 'ivy-current-match))
+                          (all-the-icons-material "school" :face 'durand-result-arrow-face)))
+                 e)
        (concat "   " e)))
    cands "\n"))
 
@@ -2763,7 +2821,7 @@ attempts to handle them."
 ;; (add-to-list org-link-escape-chars 20)
 
 
-;; the original open link function is broken over links with spaces, and here is a fix.
+;;; HACK: the original open link function is broken over links with spaces, and here is a fix.
 ;;;###autoload
 (defun org-open-at-point-decoded (&optional arg reference-buffer)
   "Open link, timestamp, footnote or tags at point.
