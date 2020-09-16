@@ -220,14 +220,15 @@
         "fP" 'doom/open-private-config))
 
 ;;; mu4e and elfeed
-;; (load! "mu-el.el" doom-private-dir)
+
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e")
 
 ;;; pop up rule for timer list
 (set-popup-rule! "timer-list"
-                 :side 'bottom
-                 :quit t
-                 :modeline nil
-                 :size 0.23)
+  :side 'bottom
+  :quit t
+  :modeline nil
+  :size 0.23)
 
 (set-popup-rule! "current time"
                  :side 'bottom
