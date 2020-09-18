@@ -30,6 +30,8 @@
 
 (package! mu4e-alert)
 
+(package! escr :recipe (:host github :repo "atykhonov/escr"))
+
 ;; try out vivendi
 (package! modus-vivendi-theme)
 (package! modus-operandi-theme)

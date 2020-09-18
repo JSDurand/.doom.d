@@ -920,3 +920,16 @@
   (add-to-list 'rime-translate-keybindings "]")
   (setf default-input-method "rime"
         rime-show-candidate 'posframe))
+
+;;; screen shot
+
+;; REVIEW: On MacOSX imagemagick does not have x11 enabled, and homebrew
+;; officially does not support this feature anymore, so basically I have to
+;; build imagemagick from source myself. I have tried to install it by using
+;; interactive mode in homebrew, but to no avail. So I guess I will just leave
+;; this package as it is here...
+(use-package! escr
+  :commands (escr-region-screenshot escr-frame-screenshot escr-window-screenshot)
+  :config
+  (setf escr-screenshot-directory
+        (expand-file-name "screenshots" doom-private-dir)))
