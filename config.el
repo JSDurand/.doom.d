@@ -899,7 +899,9 @@
 
 ;; try out xwwp
 
-;; REVIEW: This is actually quite nice to use. Some of the most obvious problems (to me in the past) are all addressed, not perfectly, but acceptably, by this package.
+;; REVIEW: This is actually quite nice to use. Some of the most obvious problems
+;; (to me in the past) are all addressed, not perfectly, but acceptably, by this
+;; package.
 (use-package xwwp-full
   :load-path "~/Desktop/xwwp"
   :custom
