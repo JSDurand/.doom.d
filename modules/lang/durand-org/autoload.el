@@ -2506,7 +2506,7 @@ See the documentation of the function for more details.")
 
 ;;;###autoload
 (defun durand-choose-list (cands &optional all texte non-quick display-cadr no-require-match
-                                 no-sort keep-cache-result)
+                                 no-sort keep-cache-result keep-text)
   "Choose from an alist. Multiple selection is supported.
 NO-SORT has no effect here: it is here to conform with the
 arg-list of another functions with the same name, that I defined
@@ -2517,7 +2517,8 @@ is only one candidate.
 If DISPLAY-CADR is non-nil, then display cadr rather than car.
 If NO-REQUIRE-MATCH is t, then don't require the selection to match.
 If KEEP-CACHE-RESULT is non-nil, then don't set the result
-variable to nil in the beginning."
+variable to nil in the beginning.
+If KEEP-TEXT is non-nil, then keep the text the user entered."
   (ignore no-sort)
   (if (and (= (length cands) 1) (null non-quick))
       (list (caar cands))
@@ -2539,7 +2540,8 @@ variable to nil in the beginning."
                               (cons (car x) x))
                              (t
                               (user-error "durand-choose-list: argument not a list: %S" x))))
-                          cands))
+                          cands)
+            ivy-text nil)
       (cl-loop
        with durand-choose-list-exc
        with durand-choose-list-det
@@ -2568,6 +2570,7 @@ variable to nil in the beginning."
                                                       ivy--index (max 0 (1- ivy--index))))
                                           "exclude"))
                                :preselect ivy--index
+                               :initial-input (when keep-text ivy-text)
                                :caller 'durand-choose-list)
        do
        (ignore ivy-format-functions-alist)
@@ -2688,6 +2691,10 @@ open all: offer every link to open."
   "Update the html link to a novel, or to a web_link.
 If DESC is non-`nil', then it is the description of the new link."
   (interactive)
+;;; HACK: Refocus the selected frame.
+;;; I was doing this in the applescript. But for some reason it is messed up. So
+;;; I let emacs gain focus by itself now.
+  (select-frame-set-input-focus (selected-frame))
   (let* ((tags (completing-read "tag: " '("roman-ARCHIVE"
                                           "web_link-ARCHIVE")
                                 nil t))
@@ -4243,7 +4250,7 @@ Set the fill-column to `durand-org-fill-column'."
            "* WITHDRAW NTD %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil nil)\n"
            :kill-buffer t)
           ("l" "Store links" entry
-           (file+headline "~/org/notes.org" "Links")
+           (file "/Users/durand/org/math_article_links.org")
            "* TO-THINK %? %(org-insert-time-stamp (org-read-date nil t \"+0d\") nil t)\n%a\n" :kill-buffer t)
           ("g" "GNUS" entry
            (file "~/org/notes.org")
