@@ -153,11 +153,19 @@ fans speed and some others.
 If ARG is '(16), view the battery information."
   (interactive "P")
   (cond
-   ((null arg) (list-timers))
-   ((equal arg (list 4))
-    (let (fan-speed cpu-die-temperature)
+   ((null arg)
+    (let (fan-speed
+          cpu-die-temperature
+          remain
+          full-capacity
+          fullp
+          charging
+          cycle
+          condition
+          connected
+          battery-temp)
       (with-temp-buffer
-        "*CPU and fans*" nil nil
+;;; NOTE: First fans information
         (insert (funcall
                  (plist-get (car (auth-source-search :host "local-computer"))
                             :secret)))
@@ -172,13 +180,10 @@ If ARG is '(16), view the battery information."
                      (string-to-number (match-string 0)))
               cpu-die-temperature
               (progn (re-search-forward "temperature: \\([[:digit:]]+\\.[[:digit:]]+\\)" nil t)
-                     (string-to-number (match-string 1)))))
-      (message "fan: %d, temp: %s"
-               fan-speed cpu-die-temperature)))
-   ((equal arg (list 16))
-    (let (remain full-capacity fullp charging cycle condition connected)
-      (with-temp-buffer
-        "*Battery info*" nil nil
+                     (string-to-number (match-string 1))))
+
+;;; NOTE: Now battery charge information
+        (erase-buffer)
         (call-process "system_profiler" nil t nil
                       "SPPowerDataType")
         (goto-char (point-min))
@@ -195,9 +200,25 @@ If ARG is '(16), view the battery information."
         (re-search-forward "Condition: \\(.+\\)$" nil t)
         (setf condition (match-string-no-properties 1))
         (re-search-forward "Connected: \\(.+\\)$" nil t)
-        (setf connected (match-string-no-properties 1)))
-      (message "Full: %d, remaining: %d, fullp: %s, charging: %s, connected: %s, cycles: %d, condition: %s"
-               full-capacity remain fullp charging connected cycle condition)))
+        (setf connected (match-string-no-properties 1))
+
+;;; NOTE: Now battery temperature
+        (erase-buffer)
+        (call-process "ioreg" nil t nil "-n" "AppleSmartBattery" "-r")
+        (goto-char (point-min))
+        (re-search-forward "Temperature..=." nil t)
+        (re-search-forward "[[:digit:]]+" nil t)
+        (setf battery-temp
+              (/ (string-to-number (match-string-no-properties 0))
+                 100.0)))
+      (message
+       (concat
+        (format "fan: %d, temp: %s, battery temp: %.2f"
+                fan-speed cpu-die-temperature battery-temp)
+        "\n"
+        (format "Full: %d, remaining: %d, fullp: %s, charging: %s, connected: %s, cycles: %d, condition: %s"
+                full-capacity remain fullp charging connected cycle condition)))))
+   ((equal arg (list 4)) (list-timers))
    (t
     (user-error "Unsupported ARG: %S" arg))))
 
