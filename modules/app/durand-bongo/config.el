@@ -71,4 +71,6 @@
   :commands volume
   :load-path "/Users/durand/.doom.d/modules/app/durand-bongo/"
   :config
-  (add-hook 'volume-mode-hook 'evil-emacs-state))
+  (add-hook 'volume-mode-hook 'evil-emacs-state)
+  (map! :map volume-mode-map
+        [?s] 'volume-set))
