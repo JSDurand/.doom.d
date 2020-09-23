@@ -78,6 +78,22 @@
       modus-vivendi-theme-scale-4 1.2
       modus-vivendi-theme-scale-5 1.3)
 
+(setq modus-operandi-theme-slanted-constructs t
+      modus-operandi-theme-bold-constructs t
+      modus-operandi-theme-3d-modeline t
+      modus-operandi-theme-diffs nil
+      modus-operandi-theme-completions nil
+      modus-operandi-theme-org-blocks 'rainbow
+      modus-operandi-theme-variable-pitch-headings t
+      modus-operandi-theme-rainbow-headings t
+      ;; modus-operandi-theme-section-headings t
+      modus-operandi-theme-scale-headings t
+      modus-operandi-theme-scale-1 1.05
+      modus-operandi-theme-scale-2 1.1
+      modus-operandi-theme-scale-3 1.15
+      modus-operandi-theme-scale-4 1.2
+      modus-operandi-theme-scale-5 1.3)
+
 ;;; try modus vivendi theme
 (setf doom-theme 'modus-vivendi)
 ;; (setf doom-theme 'modus-operandi)
@@ -921,7 +937,33 @@
   (add-to-list 'rime-translate-keybindings "[")
   (add-to-list 'rime-translate-keybindings "]")
   (setf default-input-method "rime"
-        rime-show-candidate 'posframe))
+        rime-show-candidate 'posframe
+        rime-user-data-dir (expand-file-name "rime" doom-private-dir))
+
+;;; HACK: Fix a function
+  (defadvice! durand-rime-send-keybinding-a ()
+    "Fix a weird function."
+    :override 'rime-send-keybinding
+    (let* ((parsed (rime--parse-key-event last-input-event))
+           (key-raw (car parsed))
+           (key (if (numberp key-raw)
+                    key-raw
+                  (pcase key-raw
+                    ('home 65360)
+                    ('left 65361)
+                    ('up 65362)
+                    ('right 65363)
+                    ('down 65364)
+                    ('prior 65365)
+                    ('next 65366)
+                    ('delete 65535)
+                    (_ key-raw))))
+           (mask (cdr parsed)))
+      (unless (numberp key)
+        (error "Can't send this keybinding to librime"))
+      (rime-lib-process-key key mask)
+      (rime--redisplay)
+      (rime--refresh-mode-state))))
 
 ;;; screen shot
 
@@ -935,3 +977,8 @@
   :config
   (setf escr-screenshot-directory
         (expand-file-name "screenshots" doom-private-dir)))
+
+;;; toggle modus themes
+
+(map! :map doom-leader-toggle-map
+      [?M] 'durand-toggle-modus)

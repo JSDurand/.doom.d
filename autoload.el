@@ -401,3 +401,22 @@ Modified by Durand."
 
              (t
               '(+magit--display-buffer-in-direction))))))
+
+;;; toggle vivendi and operandi themes
+
+;;;###autoload
+(defun durand-toggle-modus ()
+  "Toggle between operandi and vivendi themes."
+  (interactive)
+  (let (current target)
+    (cond
+     ((equal custom-enabled-themes (list 'modus-vivendi))
+      (setf current 'modus-vivendi
+            target 'modus-operandi))
+     ((equal custom-enabled-themes (list 'modus-operandi))
+      (setf current 'modus-operandi
+            target 'modus-vivendi))
+     (t
+      (user-error "The current theme is neither modus-vivendi nor modus-operandi. So I cannot toggle them.")))
+    (disable-theme current)
+    (load-theme target t)))
