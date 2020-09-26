@@ -43,9 +43,12 @@ Adapted from Protesilaos' dotemacs."
 (defun prot/bongo-clear-playlist-and-stop ()
   "Stop playback and clear the entire `bongo' playlist buffer.
 Contrary to the standard `bongo-erase-buffer', this also removes
-the currently-playing track."
+the currently-playing track.
+
+Modified by Durand so that this also runs while not in a bongo
+buffer."
   (interactive)
-  (when (bongo-playlist-buffer-p)
+  (with-bongo-playlist-buffer
     (bongo-stop)
     (bongo-erase-buffer)))
 
@@ -89,7 +92,7 @@ Adapted from Protesilaos' dotemacs by Durand."
                  bongo-default-directory)))
          (dotless directory-files-no-dot-files-regexp)
          (playlist (directory-files path t dotless)))
-    (when (bongo-playlist-buffer-p)
+    (with-bongo-playlist-buffer
       ;; (bongo-insert-playlist-contents
       ;;  (completing-read "Select playlist: " playlists nil t))
       (ivy-read "Choose a playlist file: " playlist
@@ -114,22 +117,37 @@ Adapted from Protesilaos' dotemacs by Durand."
 
 ;;;###autoload
 (defun durand-bongo-dired-ivy-find-to-add ()
-  "Use `ivy' to find files to add to bongo."
+  "Use `durand-choose-list' to find files to add to bongo."
   (interactive)
   (require 'counsel)
   (require 'grep)
   (counsel-require-program find-program)
-  (cl-assert
-   (and (derived-mode-p 'dired-mode)
-        (file-in-directory-p default-directory bongo-default-directory)))
-  (let* ((all-files (counsel--find-return-list counsel-file-jump-args))
-         (base default-directory))
-    (ivy-read "Choose music to add: " all-files
-              :require-match t
-              :action (lambda (f)
-                        (with-current-buffer bongo-default-playlist-buffer-name
-                          (bongo-insert-file
-                           (file-truename (expand-file-name f base))))))))
+  ;; (cl-assert
+  ;;  (and (derived-mode-p 'dired-mode)
+  ;;       (file-in-directory-p default-directory bongo-default-directory)))
+  (let* ((default-directory
+           (cond
+            ((and (derived-mode-p 'dired-mode)
+                  (file-in-directory-p default-directory bongo-default-directory))
+             default-directory)
+            (t
+             bongo-default-directory)))
+         (all-files (counsel--find-return-list counsel-file-jump-args))
+         (base default-directory)
+         (chosen-files (durand-choose-list (mapcar 'list all-files) nil "Choose music to add: " t
+                                           nil nil t nil t)))
+    (cl-loop for song in chosen-files
+             do
+             (with-bongo-playlist-buffer
+               (bongo-insert-file
+                (file-truename (expand-file-name song base)))))
+    ;; (ivy-read "Choose music to add: " all-files
+    ;;           :require-match t
+    ;;           :action (lambda (f)
+    ;;                     (with-current-buffer bongo-default-playlist-buffer-name
+    ;;                       (bongo-insert-file
+    ;;                        (file-truename (expand-file-name f base))))))
+    ))
 
 ;; REVIEW: This is oft not overriding the original function, to the effect that
 ;; the first time bongo starts, this function does not work, and I have to
@@ -273,6 +291,37 @@ insert an action track at point."
       (durand-bongo-previous-or-last n)
       (bongo-start)))))
 
+;;;###autoload
+(defun durand-bongo-play-first ()
+  "Play the first song."
+  (interactive)
+  (with-bongo-playlist-buffer
+    (with-imminent-bongo-player-start
+      (bongo-stop)
+      (when bongo-mark-played-tracks
+        (bongo-mark-current-track-line-as-played))
+      (goto-char (or (bongo-point-at-first-track-line)
+                     (prog1 (point)
+                       (message "No track in the playlist buffer."))))
+      (bongo-set-current-track-position)
+      (bongo-start))))
+
+;;;###autoload
+(defun durand-bongo-play-last ()
+  "Play the first song."
+  (interactive)
+  (with-bongo-playlist-buffer
+    (with-imminent-bongo-player-start
+      (bongo-stop)
+      (when bongo-mark-played-tracks
+        (bongo-mark-current-track-line-as-played))
+      (goto-char (or (bongo-point-at-last-track-line)
+                     (prog1 (point)
+                       (message "No track in the playlist buffer."))))
+      (bongo-set-current-track-position)
+      (bongo-start))))
+
+
 ;; NOTE: Fix a bug: there is no face called `modeline'; it should be
 ;; `mode-line'.
 ;;;###autoload
@@ -286,8 +335,7 @@ insert an action track at point."
           (save-window-excursion
             (require 'electric)
             (message nil)
-            (let ((echo-keystrokes 0)
-                  (garbage-collection-messages nil)
+            (let ((garbage-collection-messages nil)
                   (bongo-seeking-electrically t))
               (ignore bongo-seeking-electrically)
               (set-window-buffer (minibuffer-window) bongo-seek-buffer)
@@ -366,3 +414,108 @@ Modified by Durand."
   :override 'bongo-buffer
   (interactive)
   (bongo-playlist-buffer))
+
+;;; hydra
+
+;; NOTE: I would like to have a hydra to do some basic bongo commands, like go
+;; to the next song, or control the volume.
+
+;;;###autoload
+(defun durand-bongo-next-song (&optional n)
+  "Play the next N song."
+  (interactive "p")
+  (with-bongo-playlist-buffer
+    (durand-bongo-play-next-or-first n)))
+
+;;;###autoload
+(defun durand-bongo-previous-song (&optional n)
+  "Play the previous N song."
+  (interactive "p")
+  (with-bongo-playlist-buffer
+    (durand-bongo-play-previous-or-last n)))
+
+;;;###autoload
+(defun durand-bongo-seek-anywhere ()
+  "A wrapper around `durand-bongo-seek'."
+  (interactive)
+  (with-bongo-playlist-buffer
+    (durand-bongo-seek)
+    (setf durand-bongo-hydra-volume-return-p t)))
+
+;;;###autoload
+(defun bongo-seek-forward-5 (&optional n)
+  "Seek 5 N seconds forward in the currently playing track."
+  (interactive "p")
+  (bongo-seek-forward (* 5 (or n 1))))
+
+;;;###autoload
+(defun bongo-seek-backward-5 (&optional n)
+  "Seek 5 N seconds backward in the currently playing track."
+  (interactive "p")
+  (bongo-seek-backward (* 5 (or n 1))))
+
+;;;###autoload
+(defun durand-bongo-kill-line ()
+  "Kill the currently playing bongo line."
+  (interactive)
+  (with-bongo-playlist-buffer
+    (bongo-recenter)
+    (bongo-kill-line)))
+
+;; NOTE: I would like to stay in my hydra after setting the volume, so I wrote
+;; this hacky workaround.
+
+;;;###autoload
+(defvar durand-bongo-hydra-volume-return-p nil
+  "Whether to return to the hydra after quitting the volume buffer.")
+
+;;;###autoload
+(defun durand-bongo-volume ()
+  "Stay in the hydra after adjusting the volume."
+  (interactive)
+  (volume)
+  (setf durand-bongo-hydra-volume-return-p t))
+
+;;;###autoload
+(defadvice! durand-bongo-volume-call-hydra-a (&rest _args)
+  "Call `durand-bongo-hydra/body' if `durand-bongo-hydra-volume-return-p' is non-nil."
+  :after '(volume-quit bongo-seek-quit)
+  (when durand-bongo-hydra-volume-return-p
+    (durand-bongo-hydra/body)))
+
+;;;###autoload
+(defhydra durand-bongo-hydra (nil
+                              nil
+                              :hint nil
+                              :color blue
+                              :pre (setf durand-bongo-hydra-volume-return-p nil))
+  "
+_q_: quit    _n_: next song       _f_  : forward  5      _F_: forward  10  _<tab>_: show
+_v_: volume  _p_: previous song   _b_  : backward 5      _B_: backward 10
+_s_: seek    _d_: clear           _SPC_: pause / resume  _<_: first
+_m_: bongo   _i_: insert          _I_  : playlist        _>_: last
+"
+  ("q" nil)
+  ("v" durand-bongo-volume)
+  ("s" durand-bongo-seek-anywhere)
+  ("m" bongo)
+  ("n" durand-bongo-next-song :color amaranth)
+  ("p" durand-bongo-previous-song :color amaranth)
+  ("d" prot/bongo-clear-playlist-and-stop :color amaranth)
+  ("i" durand-bongo-dired-ivy-find-to-add :color amaranth)
+  ("f" bongo-seek-forward-5 :color amaranth)
+  ("b" bongo-seek-backward-5 :color amaranth)
+  ("SPC" bongo-pause/resume :color amaranth)
+  ("I" durand-bongo-insert-delete-playlist :color amaranth)
+  ("F" bongo-seek-forward-10 :color amaranth)
+  ("B" bongo-seek-backward-10 :color amaranth)
+  ("<" durand-bongo-play-first :color amaranth)
+  (">" durand-bongo-play-last :color amaranth)
+  ("<tab>" bongo-show :color amaranth))
+
+;;; NOTE: volume-set does not refresh the display, so let's fix that.
+
+(defadvice! durand-bongo-refresh-after-set-a (&rest _args)
+  "Refresh the display after we set the volume."
+  :after 'volume-set
+  (volume-redisplay))

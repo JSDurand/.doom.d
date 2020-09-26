@@ -124,7 +124,7 @@ like youtube videos or others.")
       [?P] #'durand-view-process
       [?p] #'durand-chercher-pdf
       [?d] #'durand-open-dashboard
-      [?c] #'volume
+      [?c] #'durand-bongo-hydra/body
       [?v] #'durand-view-videos)
 
 (map! :map durand-download-map
