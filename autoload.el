@@ -419,4 +419,6 @@ Modified by Durand."
      (t
       (user-error "The current theme is neither modus-vivendi nor modus-operandi. So I cannot toggle them.")))
     (disable-theme current)
-    (load-theme target t)))
+    (load-theme target t)
+    (require 'org)
+    (set-face-attribute 'org-document-title nil :font "Snell Roundhand-30")))
