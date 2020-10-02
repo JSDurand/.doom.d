@@ -11,12 +11,14 @@
     ;; (setq-default pdf-view-display-size 'fit-width)
 
     (map! (:map pdf-view-mode-map
-            :n [return] durand-evil-ret-map
-            ;; :n (kbd "s-m") 'set-durand-mode-line
-            :n [?§] 'durand-pdf-scroll-up-or-next-page
-            :n [?è] 'durand-pdf-scroll-down-or-previous-page
-            :n [?!] 'evil-collection-pdf-view-next-line-or-next-page
-            :n [?ç] 'evil-collection-pdf-view-previous-line-or-previous-page
-            :n [?q] 'bury-buffer))
+           :n [return] durand-evil-ret-map
+           ;; :n (kbd "s-m") 'set-durand-mode-line
+           :n [?§] 'durand-pdf-scroll-up-or-next-page
+           :n [?è] 'durand-pdf-scroll-down-or-previous-page
+           :n [?!] 'evil-collection-pdf-view-next-line-or-next-page
+           :n [?ç] 'evil-collection-pdf-view-previous-line-or-previous-page
+           :n [?\)] 'pdf-view-next-page-command
+           :n [?-] 'pdf-view-previous-page-command
+           :n [?q] 'bury-buffer))
 
     (evil-collection-require 'pdf)))
