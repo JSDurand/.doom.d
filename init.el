@@ -209,6 +209,8 @@
        durand-rss                       ; my elfeed configs
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;write             ; emacs for writers (fiction, notes, papers, etc.)
+       ;; durand-weather                   ; check weather information
+
        :input
        ;; chinese
        ;;japanese

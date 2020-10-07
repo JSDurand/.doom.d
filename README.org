@@ -9,6 +9,7 @@
   - [[#app][app]]
     - [[#durand-bongo][durand-bongo]]
     - [[#durand-rss][durand-rss]]
+    - [[#durand-weather][durand-weather]]
   - [[#completion][completion]]
     - [[#durand-completion][durand-completion]]
     - [[#durand-ivy][durand-ivy]]
@@ -59,6 +60,10 @@ brief map of this configuration.
 *** durand-rss
 
 [[file:modules/app/durand-rss/README.org][durand-rss]]
+
+*** durand-weather
+
+[[file:/Users/durand/.doom.d/modules/app/durand-weather/README.org][durand-weather]]
 
 ** completion
 
