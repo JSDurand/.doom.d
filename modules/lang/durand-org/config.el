@@ -321,7 +321,7 @@ This should be setted by the PERIOD-FUNC argument.")
 ;;       [tab] 'org-smart-complete-item-or-shop-or-jump-to-next-item)
 
 (setq org-agenda-use-time-grid nil)
-; The time grid in agenda view is a little annoying
+                                        ; The time grid in agenda view is a little annoying
 (setq org-agenda-start-with-follow-mode nil)
 (setq org-agenda-start-with-log-mode nil)
 (setq org-global-properties '((Effort_ALL . "0 0:10 0:20 0:30 0:40 0:50 1:00 1:30 2:00")))
@@ -341,35 +341,35 @@ This should be setted by the PERIOD-FUNC argument.")
            ((agenda ""
                     ((org-super-agenda-groups
                       '((:name "Progress today"
-                               :log t
-                               :order -1)
+                         :log t
+                         :order -1)
                         (:name "Morning Tasks"
-                               :log t
-                               :tag "morning"
-                               :order 1)
+                         :log t
+                         :tag "morning"
+                         :order 1)
                         (:name "Afternoon Taks"
-                               :log t
-                               :tag "afternoon"
-                               :order 2)
+                         :log t
+                         :tag "afternoon"
+                         :order 2)
                         (:name "Night Taks"
-                               :log t
-                               :tag "night"
-                               :order 3)
+                         :log t
+                         :tag "night"
+                         :order 3)
                         (:name "Deadlines" :deadline t)
                         (:name "Health"
-                               :tag "santé"
-                               :log t
-                               :order 5)
+                         :tag "santé"
+                         :log t
+                         :order 5)
                         (:name "MATH"
-                               :tag "math"
-                               :order -1)
+                         :tag "math"
+                         :order -1)
                         (:name "Très Important"
-                               :priority "A"
-                               :order -1)
+                         :priority "A"
+                         :order -1)
                         (:name "Scheduled"
-                               :and (:scheduled t :not (:priority "A"))
-                               :order 5
-                               :log t)))
+                         :and (:scheduled t :not (:priority "A"))
+                         :order 5
+                         :log t)))
                      (org-agenda-span 'day)
                      (org-agenda-sorting-strategy '(priority-down time-up))))
             ;; (tags "plan"
@@ -413,6 +413,9 @@ This should be setted by the PERIOD-FUNC argument.")
 
 (add-hook 'org-mode-hook 'durand-org-activate-auto-fill t)
 
+;;; my own preparations in org-mode
+(add-hook 'org-mode-hook 'durand-org-preparation t)
+
 (after! org-capture
   (add-hook 'org-capture-mode-hook (lambda ()
                                      "Activate fill-column in org capture"
@@ -420,11 +423,11 @@ This should be setted by the PERIOD-FUNC argument.")
                                      (setq-local fill-column 90)
                                      (auto-fill-mode 1))))
 (add-hook 'org-log-buffer-setup-hook
-	  (lambda ()
-	    "Activate fill-column in org capture"
-	    (interactive)
-	    (setq-local fill-column 90)
-	    (auto-fill-mode 1)))
+          (lambda ()
+            "Activate fill-column in org capture"
+            (interactive)
+            (setq-local fill-column 90)
+            (auto-fill-mode 1)))
 
 ;; major mode for durand-org-view-notes
 

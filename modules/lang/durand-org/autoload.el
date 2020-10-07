@@ -4189,6 +4189,12 @@ Set the fill-column to `durand-org-fill-column'."
   (setf fill-column durand-org-fill-column)
   (auto-fill-mode 1))
 
+;;;###autoload
+(defun durand-org-preparation ()
+  "Prepare some settings to speed up org performance."
+  (flycheck-mode -1)
+  (spell-fu-mode -1))
+
 ;; FIXME: This is not working!
 ;;;###autoload
 ;; (defadvice! durand-org-noter-kill-session-buffers (&rest _args)
