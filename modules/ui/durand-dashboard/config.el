@@ -27,7 +27,7 @@
         ;;  :icon (all-the-icons-octicon "browser" :face 'font-lock-keyword-face)
         ;;  :when (fboundp 'org-open-weblink)
         ;;  :action org-open-weblink)
-        ("Open org-agenda"
+        ("Open durand-agenda"
          :icon (all-the-icons-octicon "calendar" :face 'font-lock-keyword-face)
          :when (fboundp 'durand-agenda)
          :action durand-agenda)
