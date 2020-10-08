@@ -1178,14 +1178,13 @@ If this information is not given, the function uses the tree at point."
         (let* ((num 1)
                (res (list (point-min)))
                fin)
-          (while (not fin)
-            (let ((pos (next-single-property-change (line-end-position) 'durand-agenda-regular-header)))
-              (if pos
-                  (progn
-                    (setf num (1+ num)
-                          res (append res (list pos)))
-                    (goto-char pos))
-                (setf fin t))))
+          (cl-loop
+           for pos = (next-single-property-change (line-end-position) 'durand-agenda-regular-header)
+           while pos
+           do
+           (setf num (1+ num)
+                 res (append res (list pos)))
+           (goto-char pos))
           (setf
            org-agenda-total-blocks num
            org-agenda-block-seps res))))))
@@ -1240,8 +1239,8 @@ If this information is not given, the function uses the tree at point."
   (widen)
   (let* ((end (or
                (let ((chois (next-single-property-change (line-end-position) 'durand-agenda-regular-header)))
-                 (when chois
-                   (1- chois)))
+                 (and chois
+                      (1- chois)))
                (point-max)))
          (start (save-excursion
                   (goto-char
@@ -2310,15 +2309,15 @@ The two lists should have the same lengths."
 
 ;;;###autoload
 (defun durand-merge-two-lists (a b)
-  "merge two lists whose elements are strings"
-  (let ((la (length a))
-        (lb (length b)))
-    (cond
-     ((< la lb)
-      (setf a (append a (make-list (- lb la) ""))))
-     ((> la lb)
-      (setf b (append b (make-list (- la lb) "")))))
-    (cl-mapcar #'concat a b)))
+  "Merge two lists whose elements are strings"
+  (let* ((la (length a))
+         (lb (length b))
+         (maxl (max la lb)))
+    (cl-loop for i from 1 to maxl
+             collect
+             (concat
+              (or (nth (1- i) a) "")
+              (or (nth (1- i) b) "")))))
 
 ;;;###autoload
 (defun durand-org-agenda-goto-view-note ()
