@@ -173,7 +173,7 @@ favourite if and only if it appears more than
                         (cl-remove-duplicates
                          (nreverse
                           (append durand-frequent-shops
-                                  (remove nil shops-list)))
+                                  (nreverse (remove nil shops-list))))
                          :key 'upcase
                          :test 'string=)))
            (chosen-shop (completing-read
@@ -4192,7 +4192,8 @@ Set the fill-column to `durand-org-fill-column'."
 (defun durand-org-preparation ()
   "Prepare some settings to speed up org performance."
   (flycheck-mode -1)
-  (spell-fu-mode -1))
+  (spell-fu-mode -1)
+  (writegood-mode -1))
 
 ;; FIXME: This is not working!
 ;;;###autoload
