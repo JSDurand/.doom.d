@@ -64,12 +64,15 @@
 
 (setq modus-vivendi-theme-slanted-constructs t
       modus-vivendi-theme-bold-constructs t
-      modus-vivendi-theme-3d-modeline t
+      ;; modus-vivendi-theme-3d-modeline t
+      modus-vivendi-theme-mode-line '3d
       modus-vivendi-theme-diffs nil
       modus-vivendi-theme-completions nil
       modus-vivendi-theme-org-blocks 'rainbow
+      modus-vivendi-theme-rainbow-org-src-blocks t
       modus-vivendi-theme-variable-pitch-headings t
-      modus-vivendi-theme-rainbow-headings t
+      modus-vivendi-theme-headings '((t . rainbow))
+      ;; modus-vivendi-theme-rainbow-headings t
       ;; modus-vivendi-theme-section-headings t
       modus-vivendi-theme-scale-headings t
       modus-vivendi-theme-scale-1 1.05
@@ -80,12 +83,15 @@
 
 (setq modus-operandi-theme-slanted-constructs t
       modus-operandi-theme-bold-constructs t
-      modus-operandi-theme-3d-modeline t
+      ;; modus-operandi-theme-3d-modeline t
+      modus-operandi-theme-mode-line '3d
       modus-operandi-theme-diffs nil
       modus-operandi-theme-completions nil
       modus-operandi-theme-org-blocks 'rainbow
+      modus-operandi-theme-rainbow-org-src-blocks t
       modus-operandi-theme-variable-pitch-headings t
-      modus-operandi-theme-rainbow-headings t
+      modus-operandi-theme-headings '((t . rainbow))
+      ;; modus-operandi-theme-rainbow-headings t
       ;; modus-operandi-theme-section-headings t
       modus-operandi-theme-scale-headings t
       modus-operandi-theme-scale-1 1.05
@@ -280,7 +286,7 @@
 (set-frame-parameter nil 'alpha 90)
 (add-to-list 'default-frame-alist '(width . 118))
 (add-to-list 'default-frame-alist '(font . "Droid Sans Mono for Powerline-20"))
-(add-to-list 'default-frame-alist '(alpha . 90))
+(add-to-list 'default-frame-alist '(alpha . 100))
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
