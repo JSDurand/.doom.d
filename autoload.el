@@ -422,3 +422,25 @@ Modified by Durand."
     (load-theme target t)
     (require 'org)
     (set-face-attribute 'org-document-title nil :font "Snell Roundhand-30")))
+
+;;; convert video name to youtube url and copy the result
+
+;;;###autoload
+(defun durand-convert-youtube-video-to-url (video-name)
+  "Convert VIDEO-NAME to its original url."
+  (interactive (list (read-string "Video name: ")))
+  (cond
+   ((string-match "\\.[^.]+$" video-name)
+    ;; with extension
+    (kill-new
+     (concat
+      "https://www.youtube.com/watch?v="
+      (substring-no-properties
+       video-name
+       (- (match-beginning 0) 11)
+       (match-beginning 0)))))
+   (t
+    ;; no extension
+    (kill-new
+     (concat "https://www.youtube.com/watch?v="
+             (substring-no-properties video-name -11))))))
