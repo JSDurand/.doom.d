@@ -281,9 +281,9 @@
 
 (setq initial-frame-alist
       '((width . 118)
-        (alpha . 90)))
+        (alpha . 100)))
 (set-frame-width nil 118)
-(set-frame-parameter nil 'alpha 90)
+(set-frame-parameter nil 'alpha 100)
 (add-to-list 'default-frame-alist '(width . 118))
 (add-to-list 'default-frame-alist '(font . "Droid Sans Mono for Powerline-20"))
 (add-to-list 'default-frame-alist '(alpha . 100))
