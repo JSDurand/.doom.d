@@ -178,8 +178,11 @@
 
 ;;; show aux and toc files so that I can delete them
 
-(add-hook! 'dired-load-hook
-           (require 'dired-x))
+(with-eval-after-load 'dired
+  (require 'dired-x))
+
+;; (add-hook! 'dired-load-hook
+;;   (require 'dired-x))
 
 (setq-hook! 'dired-mode-hook
   dired-omit-extensions
