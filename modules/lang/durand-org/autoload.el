@@ -600,30 +600,30 @@ EXCLUDE-TYPE can be nil or a regexp matching what would not be summed."
         (t
          (user-error "Unknown report mode: %s" report-mode)))
        (with-current-buffer-window
-        "*ACCOUNT REPORT*" nil nil
-        (insert (format "%s\nREPORT MODE: %s\nSUM-TYPE: %s\nEXCLUDE-TYPE: %s\n%s\n" durand-account-report-period-str
-                        report-mode sum-type exclude-type
-                        (make-string (- (window-width) 2) ?-)))
-        (let ((all-total 0))
-          (dotimes (i (/ (length combined) 2))
-            (let ((day-total 0)
-                  (date (nth (* 2 i) combined))
-                  (date-info (nth (1+ (* 2 i)) combined)))
-              (insert (format "%s:\n" date))
-              (dotimes (j (/ (length date-info) 2))
-                (when (and (or (eq sum-type 'all)
-                               (string-match sum-type (format "%s" (nth (* 2 j) date-info))))
-                           (or (eq exclude-type 'nothing)
-                               (not (string-match exclude-type (format "%s" (nth (* 2 j) date-info))))))
-                  (cl-incf all-total (nth (1+ (* 2 j)) date-info))
-                  (cl-incf day-total (nth (1+ (* 2 j)) date-info)))
-                (insert (format "  %s: %s\n"
-                                (nth (* 2 j) date-info)
-                                (nth (1+ (* 2 j)) date-info))))
-              (insert (format "  %s: %s\n  %s: %s\n"
-                              'day-total day-total
-                              'all-total all-total)))))
-        (account-report-mode))
+           "*ACCOUNT REPORT*" nil nil
+         (insert (format "%s\nREPORT MODE: %s\nSUM-TYPE: %s\nEXCLUDE-TYPE: %s\n%s\n" durand-account-report-period-str
+                         report-mode sum-type exclude-type
+                         (make-string (- (window-width) 2) ?-)))
+         (let ((all-total 0))
+           (dotimes (i (/ (length combined) 2))
+             (let ((day-total 0)
+                   (date (nth (* 2 i) combined))
+                   (date-info (nth (1+ (* 2 i)) combined)))
+               (insert (format "%s:\n" date))
+               (dotimes (j (/ (length date-info) 2))
+                 (when (and (or (eq sum-type 'all)
+                                (string-match sum-type (format "%s" (nth (* 2 j) date-info))))
+                            (or (eq exclude-type 'nothing)
+                                (not (string-match exclude-type (format "%s" (nth (* 2 j) date-info))))))
+                   (cl-incf all-total (nth (1+ (* 2 j)) date-info))
+                   (cl-incf day-total (nth (1+ (* 2 j)) date-info)))
+                 (insert (format "  %s: %s\n"
+                                 (nth (* 2 j) date-info)
+                                 (nth (1+ (* 2 j)) date-info))))
+               (insert (format "  %s: %s\n  %s: %s\n"
+                               'day-total day-total
+                               'all-total all-total)))))
+         (account-report-mode))
        ;; (select-window (get-buffer-window "*ACCOUNT REPORT*"))
        ;; (delete-other-windows)
        ))))
@@ -1638,9 +1638,9 @@ and whose `caddr' is a list of strings, the content of the note."
   (defvar org-note-regexp nil
     "The regexp for notes in a org heading.")
   (setq org-note-regexp (concat
-			                   "^\\([ \t]*\\)- \\(?:Note taken on\\|CLOSING NOTE\\) \\("
-			                   org-element--timestamp-regexp
-			                   "\\).*$")))
+                         "^\\([ \t]*\\)- \\(?:Note taken on\\|CLOSING NOTE\\) \\("
+                         org-element--timestamp-regexp
+                         "\\).*$")))
 
 ;;;###autoload
 (defun durand-org-get-logs ()
@@ -2093,14 +2093,14 @@ Also give colors to \vert and \ast differently."
                                    (propertize "\\\\vert"
                                                'font-lock-face
                                                '(:foreground "red"
-                                                             :background "gray10"))
+                                                 :background "gray10"))
                                    nil nil x)))
                         (while (string-match "\\*" x)
                           (setf x (replace-match
                                    (propertize "\\\\ast"
                                                'font-lock-face
                                                '(:foreground "gold"
-                                                             :background "gray10"))
+                                                 :background "gray10"))
                                    nil nil x)))
                         x)
                       res))))
@@ -2374,7 +2374,8 @@ The two lists should have the same lengths."
   "Helper function that gets rid of todos, tags, and properties"
   (let* ((answer (substring-no-properties str))
          (case-fold-search nil)
-         (org-todo-regexp "\\(ALMOST\\|DONE\\|HARD\\(?:-WORKING\\)?\\|IMPOSSIBLE\\|PENDING\\|S\\(?:OLVED\\|TART\\)\\|TO\\(?:-THINK\\|DO\\)\\|WORKING\\)")
+         (org-todo-regexp
+          (get-text-property 0 'org-todo-regexp str))
          (remove-list `(,org-todo-regexp
                         ,durand-org-tag-group-re
                         ,org-priority-regexp
@@ -2382,7 +2383,8 @@ The two lists should have the same lengths."
                         " +$")))
     (dolist (re remove-list answer)
       (when (string-match re answer)
-        (setf answer (replace-match "" nil nil answer))))))
+        (setf answer (replace-match "" nil nil answer))))
+    (substring-no-properties answer)))
 
 ;; Collect all agenda items and jump to the selected one
 ;;;###autoload
@@ -2397,7 +2399,7 @@ The two lists should have the same lengths."
           (let ((item-pos (next-single-property-change (point-at-eol) 'org-marker)))
             (goto-char item-pos)
             (push (cons
-                   (org-agenda-filter-extras (get-text-property (point) 'txt))
+                   (org-agenda-filter-extras (buffer-substring (point) (line-end-position)))
                    item-pos)
                   items)))
         (when items
@@ -3128,10 +3130,10 @@ keyword but not archived, instead of A_VOIR."
                                          position
                                          file))))))))
     (let* ((choix (completing-read "Chois un titre à mettre à jour: " cands nil t)
-            ;; (icomplete-vertical-do '(:height (/ (frame-height) 4))
-            ;;     (completing-read "Chois un titre à mettre à jour: " cands
-            ;;                      nil t))
-            )
+                  ;; (icomplete-vertical-do '(:height (/ (frame-height) 4))
+                  ;;     (completing-read "Chois un titre à mettre à jour: " cands
+                  ;;                      nil t))
+                  )
            (item (cl-assoc choix cands :test #'string=)))
       (with-current-file (caddr item) nil
         (goto-char (cadr item))
@@ -3196,13 +3198,13 @@ the link comes from the most recently stored link, so choose carefully the targe
          (cands
           (cl-loop for file in files
                    append (with-current-file file nil
-                             (org-map-entries
-                              (lambda ()
-                                (let ((orig (durand-org-link-info t)))
-                                  (list (car orig)
-                                        (cdr orig)
-                                        file)))
-                              tag))))
+                            (org-map-entries
+                             (lambda ()
+                               (let ((orig (durand-org-link-info t)))
+                                 (list (car orig)
+                                       (cdr orig)
+                                       file)))
+                             tag))))
          (cands (mapcar (lambda (x)
                           (cons (durand-org-filter-dates (car x))
                                 (cdr x)))
@@ -3785,16 +3787,16 @@ If INITIAL is set, use that to pad; if BACKP, then pad at the end."
                                 (car x)))
                         temps))
          (clé (assoc-default ;; (minibuffer-with-setup-hook 'durand-headlong-minibuffer-setup-hook
-                             ;;   (completing-read "Chois un clé: " choix
-                             ;;                    nil t "^"))
+               ;;   (completing-read "Chois un clé: " choix
+               ;;                    nil t "^"))
 
-                             (ivy-read "Chois un clé: " choix
-                                       :require-match t
-                                       :caller 'durand-capture
-                                       :update-fn 'durand-self-insert-complete-and-exit
-                                       :unwind 'reset-durand-changed
-                                       :initial-input "^")
-                             choix)))
+               (ivy-read "Chois un clé: " choix
+                         :require-match t
+                         :caller 'durand-capture
+                         :update-fn 'durand-self-insert-complete-and-exit
+                         :unwind 'reset-durand-changed
+                         :initial-input "^")
+               choix)))
     (org-capture nil clé)))
 
 ;;;###autoload
@@ -3943,57 +3945,57 @@ decreases scheduled or deadline date by one day.
 
 Modified by Durand <2020-04-28 Mar 14:55>"
   (cond ((null value) (setq value ""))
-	      ((not (stringp value)) (error "Properties values should be strings"))
-	      ((not (org--valid-property-p property))
-	       (user-error "Invalid property name: \"%s\"" property)))
+        ((not (stringp value)) (error "Properties values should be strings"))
+        ((not (org--valid-property-p property))
+         (user-error "Invalid property name: \"%s\"" property)))
   (org-with-point-at pom
     (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
-	      (org-back-to-heading-or-point-min t)
+        (org-back-to-heading-or-point-min t)
       (org-with-limited-levels (org-back-to-heading-or-point-min t)))
     (let ((beg (point)))
       (cond
        ((equal property "TODO")
-	      (cond ((not (org-string-nw-p value)) (setq value 'none))
-	            ((not (member value org-todo-keywords-1))
-	             (user-error "\"%s\" is not a valid TODO state" value)))
-	      (org-todo value)
-	      (org-align-tags))
+        (cond ((not (org-string-nw-p value)) (setq value 'none))
+              ((not (member value org-todo-keywords-1))
+               (user-error "\"%s\" is not a valid TODO state" value)))
+        (org-todo value)
+        (org-align-tags))
        ((equal property "PRIORITY")
-	      (org-priority (if (org-string-nw-p value) (string-to-char value) ?\s))
-	      (org-align-tags))
+        (org-priority (if (org-string-nw-p value) (string-to-char value) ?\s))
+        (org-align-tags))
        ((equal property "SCHEDULED")
-	      (forward-line)
-	      (if (and (looking-at-p org-planning-line-re)
-		             (re-search-forward
-		              org-scheduled-time-regexp (line-end-position) t))
-	          (cond ((string= value "earlier") (org-timestamp-change -1 'day))
-		              ((string= value "later") (org-timestamp-change 1 'day))
-		              ((string= value "") (org-schedule '(4)))
-		              (t (org-schedule nil value)))
-	        (if (member value '("earlier" "later" ""))
-	            (call-interactively #'org-schedule)
-	          (org-schedule nil value))))
+        (forward-line)
+        (if (and (looking-at-p org-planning-line-re)
+                 (re-search-forward
+                  org-scheduled-time-regexp (line-end-position) t))
+            (cond ((string= value "earlier") (org-timestamp-change -1 'day))
+                  ((string= value "later") (org-timestamp-change 1 'day))
+                  ((string= value "") (org-schedule '(4)))
+                  (t (org-schedule nil value)))
+          (if (member value '("earlier" "later" ""))
+              (call-interactively #'org-schedule)
+            (org-schedule nil value))))
        ((equal property "DEADLINE")
-	      (forward-line)
-	      (if (and (looking-at-p org-planning-line-re)
-		             (re-search-forward
-		              org-deadline-time-regexp (line-end-position) t))
-	          (cond ((string= value "earlier") (org-timestamp-change -1 'day))
-		              ((string= value "later") (org-timestamp-change 1 'day))
-		              ((string= value "") (org-deadline '(4)))
-		              (t (org-deadline nil value)))
-	        (if (member value '("earlier" "later" ""))
-	            (call-interactively #'org-deadline)
-	          (org-deadline nil value))))
+        (forward-line)
+        (if (and (looking-at-p org-planning-line-re)
+                 (re-search-forward
+                  org-deadline-time-regexp (line-end-position) t))
+            (cond ((string= value "earlier") (org-timestamp-change -1 'day))
+                  ((string= value "later") (org-timestamp-change 1 'day))
+                  ((string= value "") (org-deadline '(4)))
+                  (t (org-deadline nil value)))
+          (if (member value '("earlier" "later" ""))
+              (call-interactively #'org-deadline)
+            (org-deadline nil value))))
        ((member property org-special-properties)
-	      (error "The %s property cannot be set with `org-entry-put'" property))
+        (error "The %s property cannot be set with `org-entry-put'" property))
        (t
-	      (let* ((range (org-get-property-block beg 'force))
-	             (end (cdr range))
-	             (case-fold-search t))
-	        (goto-char (car range))
+        (let* ((range (org-get-property-block beg 'force))
+               (end (cdr range))
+               (case-fold-search t))
+          (goto-char (car range))
           ;; NOTE: Added by Durand
-	        (cond
+          (cond
            ((re-search-forward (org-re-property property nil t) end t)
             (let ((match-beg (match-beginning 0))
                   (match-fin (match-end 0)))
@@ -4005,14 +4007,14 @@ Modified by Durand <2020-04-28 Mar 14:55>"
             (forward-char -1)))
           ;; NOTE: Commented by Durand
           ;; (if (re-search-forward (org-re-property property nil t) end t)
-	        ;;     (progn (delete-region (match-beginning 0) (match-end 0))
-		      ;;            (goto-char (match-beginning 0)))
-	        ;;   (goto-char end)
-	        ;;   (insert "\n")
-	        ;;   (backward-char))
-	        (insert ":" property ":")
-	        (when value (insert " " value))
-	        (org-indent-line)))))
+          ;;     (progn (delete-region (match-beginning 0) (match-end 0))
+          ;;            (goto-char (match-beginning 0)))
+          ;;   (goto-char end)
+          ;;   (insert "\n")
+          ;;   (backward-char))
+          (insert ":" property ":")
+          (when value (insert " " value))
+          (org-indent-line)))))
     (run-hook-with-args 'org-property-changed-functions property value)))
 
 ;;; quickly edit using org-noter
@@ -4118,49 +4120,49 @@ This function is for interactive use only;
 in Lisp code use `org-set-tags' instead."
   (interactive "P")
   (let ((org-use-fast-tag-selection
-	       (unless (equal '(16) arg) org-use-fast-tag-selection)))
+         (unless (equal '(16) arg) org-use-fast-tag-selection)))
     (cond
      ((equal '(4) arg) (org-align-tags t))
      ((and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let (org-loop-over-headlines-in-active-region) ;  hint: infinite recursion.
-	      (org-map-entries
-	       #'org-set-tags-command
-	       nil
-	       (if (eq org-loop-over-headlines-in-active-region 'start-level)
-	           'region-start-level
-	         'region)
-	       (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
+        (org-map-entries
+         #'org-set-tags-command
+         nil
+         (if (eq org-loop-over-headlines-in-active-region 'start-level)
+             'region-start-level
+           'region)
+         (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
      (t
       (save-excursion
-	      (org-back-to-heading)
-	      (let* ((all-tags (org-get-tags))
-	             (table (setq org-last-tags-completion-table
-			                      (org--tag-add-to-alist
-			                       (and org-complete-tags-always-offer-all-agenda-tags
-				                          (org-global-tags-completion-table
-				                           (org-agenda-files)))
-			                       (or org-current-tag-alist (org-get-buffer-tags)))))
-	             (current-tags
-		            (cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
-			                        all-tags))
-	             (inherited-tags
-		            (cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
-				                          all-tags))
-	             (tags
-		            (replace-regexp-in-string
+        (org-back-to-heading)
+        (let* ((all-tags (org-get-tags))
+               (table (setq org-last-tags-completion-table
+                            (org--tag-add-to-alist
+                             (and org-complete-tags-always-offer-all-agenda-tags
+                                  (org-global-tags-completion-table
+                                   (org-agenda-files)))
+                             (or org-current-tag-alist (org-get-buffer-tags)))))
+               (current-tags
+                (cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
+                              all-tags))
+               (inherited-tags
+                (cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
+                                  all-tags))
+               (tags
+                (replace-regexp-in-string
                  ;; Ignore all forbidden characters in tags.
-		             "[^[:alnum:]_@#%]+" ":"
-		             (if (or (eq t org-use-fast-tag-selection)
-			                   (and org-use-fast-tag-selection
-			                        (delq nil (mapcar #'cdr table))))
-		                 (org-fast-tag-selection
-		                  current-tags
-		                  inherited-tags
-		                  table
-		                  (and org-fast-tag-selection-include-todo org-todo-key-alist))
-		               (let ((org-add-colon-after-tag-completion (< 1 (length table))))
+                 "[^[:alnum:]_@#%]+" ":"
+                 (if (or (eq t org-use-fast-tag-selection)
+                         (and org-use-fast-tag-selection
+                              (delq nil (mapcar #'cdr table))))
+                     (org-fast-tag-selection
+                      current-tags
+                      inherited-tags
+                      table
+                      (and org-fast-tag-selection-include-todo org-todo-key-alist))
+                   (let ((org-add-colon-after-tag-completion (< 1 (length table))))
                      ;; I change this part
-		                 (org-trim
+                     (org-trim
                       (org-make-tag-string
                        (completing-read-multiple
                         "Tags: "
@@ -4169,11 +4171,11 @@ in Lisp code use `org-set-tags' instead."
                                  ":" ","
                                  (org-make-tag-string current-tags))
                         'org-tags-history))))))))
-	        (org-set-tags tags)))))
+          (org-set-tags tags)))))
     ;; `save-excursion' may not replace the point at the right
     ;; position.
     (when (and (save-excursion (skip-chars-backward "*") (bolp))
-	             (looking-at-p " "))
+               (looking-at-p " "))
       (forward-char))))
 
 ;;;###autoload
@@ -4344,3 +4346,292 @@ relative to `org-directory', unless it is an absolute path."
   (delete-other-windows)
   (setf org-src--saved-temp-window-config
         (current-window-configuration)))
+
+;;;###autoload
+(defadvice! durand-org-capture-fill-template-a (&optional template initial annotation)
+  "Fill a template and return the filled template as a string.
+The template may still contain \"%?\" for cursor positioning."
+  :override 'org-capture-fill-template
+  (let* ((template (or template (org-capture-get :template)))
+         (buffer (org-capture-get :buffer))
+         (file (buffer-file-name (or (buffer-base-buffer buffer) buffer)))
+         (time (let* ((c (or (org-capture-get :default-time) (current-time)))
+                      (d (decode-time c)))
+                 (if (< (nth 2 d) org-extend-today-until)
+                     (encode-time 0 59 23 (1- (nth 3 d)) (nth 4 d) (nth 5 d))
+                   c)))
+         (v-t (format-time-string (org-time-stamp-format nil) time))
+         (v-T (format-time-string (org-time-stamp-format t) time))
+         (v-u (format-time-string (org-time-stamp-format nil t) time))
+         (v-U (format-time-string (org-time-stamp-format t t) time))
+         (v-c (and kill-ring (current-kill 0)))
+         (v-x (or (org-get-x-clipboard 'PRIMARY)
+                  (org-get-x-clipboard 'CLIPBOARD)
+                  (org-get-x-clipboard 'SECONDARY)
+                  "")) ;ensure it is a string
+         ;; `initial' and `annotation' might have been passed.  But if
+         ;; the property list has them, we prefer those values.
+         (v-i (or (plist-get org-store-link-plist :initial)
+                  (and (stringp initial) (org-no-properties initial))
+                  (org-capture-get :initial)
+                  ""))
+         (v-a
+          (let ((a (or (plist-get org-store-link-plist :annotation)
+                       annotation
+                       (org-capture-get :annotation)
+                       "")))
+            ;; Is the link empty?  Then we do not want it...
+            (if (equal a "[[]]") "" a)))
+         (l-re "\\[\\[\\(.*?\\)\\]\\(\\[.*?\\]\\)?\\]")
+         (v-A (if (and (stringp v-a) (not (string= v-a "")) (string-match l-re v-a))
+                  (replace-match "[[\\1][%^{Link description}]]" nil nil v-a)
+                v-a))
+         (v-l (if (and (stringp v-a) (not (string= v-a "")) (string-match l-re v-a))
+                  (replace-match "[[\\1]]" nil nil v-a)
+                v-a))
+         (v-L (if (and (stringp v-a) (not (string= v-a "")) (string-match l-re v-a))
+                  (replace-match "\\1" nil nil v-a)
+                v-a))
+         (v-n user-full-name)
+         (v-k (if (marker-buffer org-clock-marker)
+                  (org-no-properties org-clock-heading)
+                ""))
+         (v-K (if (marker-buffer org-clock-marker)
+                  (org-link-make-string
+                   (format "%s::*%s"
+                           (buffer-file-name (marker-buffer org-clock-marker))
+                           v-k)
+                   v-k)
+                ""))
+         (v-f (or (org-capture-get :original-file-nondirectory) ""))
+         (v-F (or (org-capture-get :original-file) ""))
+         (org-capture--clipboards
+          (delq nil
+                (list v-i
+                      (org-get-x-clipboard 'PRIMARY)
+                      (org-get-x-clipboard 'CLIPBOARD)
+                      (org-get-x-clipboard 'SECONDARY)
+                      v-c))))
+    (setq org-store-link-plist (plist-put org-store-link-plist :annotation v-a))
+    (setq org-store-link-plist (plist-put org-store-link-plist :initial v-i))
+    (unless template
+      (setq template "")
+      (message "no template") (ding)
+      (sit-for 1))
+    (save-window-excursion
+      (org-switch-to-buffer-other-window (get-buffer-create "*Capture*"))
+      (erase-buffer)
+      (setq buffer-file-name nil)
+      (setq mark-active nil)
+      (insert template)
+      (goto-char (point-min))
+      ;; %[] insert contents of a file.
+      (save-excursion
+        (while (re-search-forward "%\\[\\(.+\\)\\]" nil t)
+          (let ((filename (expand-file-name (match-string 1)))
+                (beg (copy-marker (match-beginning 0)))
+                (end (copy-marker (match-end 0))))
+            (unless (org-capture-escaped-%)
+              (delete-region beg end)
+              (set-marker beg nil)
+              (set-marker end nil)
+              (condition-case error
+                  (insert-file-contents filename)
+                (error
+                 (insert (format "%%![couldn not insert %s: %s]"
+                                 filename
+                                 error))))))))
+      ;; Mark %() embedded elisp for later evaluation.
+      (org-capture-expand-embedded-elisp 'mark)
+      ;; Expand non-interactive templates.
+      (let ((regexp "%\\(:[-A-Za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlLntTuUx]\\)"))
+        (save-excursion
+          (while (re-search-forward regexp nil t)
+            ;; `org-capture-escaped-%' may modify buffer and cripple
+            ;; match-data.  Use markers instead.  Ditto for other
+            ;; templates.
+            (let ((pos (copy-marker (match-beginning 0)))
+                  (end (copy-marker (match-end 0)))
+                  (value (match-string 1))
+                  (time-string (match-string 2)))
+              (unless (org-capture-escaped-%)
+                (delete-region pos end)
+                (set-marker pos nil)
+                (set-marker end nil)
+                (let* ((inside-sexp? (org-capture-inside-embedded-elisp-p))
+                       (replacement
+                        (pcase (string-to-char value)
+                          (?< (format-time-string time-string time))
+                          (?:
+                           (or (plist-get org-store-link-plist (intern value))
+                               ""))
+                          (?i
+                           (if inside-sexp? v-i
+                             ;; Outside embedded Lisp, repeat leading
+                             ;; characters before initial place holder
+                             ;; every line.
+                             (let ((lead (concat "\n"
+                                                 (org-current-line-string t))))
+                               (replace-regexp-in-string "\n" lead v-i nil t))))
+                          (?a v-a)
+                          (?A v-A)
+                          (?c v-c)
+                          (?f v-f)
+                          (?F v-F)
+                          (?k v-k)
+                          (?K v-K)
+                          (?l v-l)
+                          (?L v-L)
+                          (?n v-n)
+                          (?t v-t)
+                          (?T v-T)
+                          (?u v-u)
+                          (?U v-U)
+                          (?x v-x))))
+                  (insert
+                   (if inside-sexp?
+                       ;; Escape sensitive characters.
+                       (replace-regexp-in-string "[\\\"]" "\\\\\\&" replacement)
+                     replacement))))))))
+      ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.
+      (org-capture-expand-embedded-elisp)
+      ;; Expand interactive templates.  This is the last step so that
+      ;; template is mostly expanded when prompting happens.  Turn on
+      ;; Org mode and set local variables.  This is to support
+      ;; completion in interactive prompts.
+      (let ((org-inhibit-startup t)) (org-mode))
+      (org-clone-local-variables buffer "\\`org-")
+      (let (strings)			; Stores interactive answers.
+        (save-excursion
+          (let ((regexp "%\\^\\(?:{\\([^}]*\\)}\\)?\\([CgGLptTuU]\\)?"))
+            (while (re-search-forward regexp nil t)
+              (let* ((items (and (match-end 1)
+                                 (save-match-data
+                                   (split-string (match-string-no-properties 1)
+                                                 "|"))))
+                     (key (match-string 2))
+                     (beg (copy-marker (match-beginning 0)))
+                     (end (copy-marker (match-end 0)))
+                     (prompt (nth 0 items))
+                     (default (nth 1 items))
+                     (completions (nthcdr 2 items)))
+                (unless (org-capture-escaped-%)
+                  (delete-region beg end)
+                  (set-marker beg nil)
+                  (set-marker end nil)
+                  (pcase key
+                    ((or "G" "g")
+                     (let* ((org-last-tags-completion-table
+                             (org-global-tags-completion-table
+                              (cond ((equal key "G") (org-agenda-files))
+                                    (file (list file))
+                                    (t nil))))
+                            (org-add-colon-after-tag-completion t)
+                            (ins (mapconcat
+                                  #'identity
+                                  (org-split-string
+                                   (completing-read
+                                    (if prompt (concat prompt ": ") "Tags: ")
+                                    'org-tags-completion-function nil nil nil
+                                    'org-tags-history)
+                                   "[^[:alnum:]_@#%]+")
+                                  ":")))
+                       (when (org-string-nw-p ins)
+                         (unless (eq (char-before) ?:) (insert ":"))
+                         (insert ins)
+                         (unless (eq (char-after) ?:) (insert ":"))
+                         (when (org-at-heading-p) (org-align-tags)))))
+                    ((or "C" "L")
+                     (let ((insert-fun (if (equal key "C") #'insert
+                                         (lambda (s) (org-insert-link 0 s)))))
+                       (pcase org-capture--clipboards
+                         (`nil nil)
+                         (`(,value) (funcall insert-fun value))
+                         (`(,first-value . ,_)
+                          (funcall insert-fun
+                                   (read-string "Clipboard/kill value: "
+                                                first-value
+                                                'org-capture--clipboards
+                                                first-value)))
+                         (_ (error "Invalid `org-capture--clipboards' value: %S"
+                                   org-capture--clipboards)))))
+                    ("p"
+                     ;; We remove keyword properties inherited from
+                     ;; target buffer so `org-read-property-value' has
+                     ;; a chance to find allowed values in sub-trees
+                     ;; from the target buffer.
+                     (setq-local org-keyword-properties nil)
+                     (let* ((origin (set-marker (make-marker)
+                                                (org-capture-get :pos)
+                                                (org-capture-get :buffer)))
+                            ;; Find location from where to get allowed
+                            ;; values.  If `:target-entry-p' is
+                            ;; non-nil, the current headline in the
+                            ;; target buffer is going to be a parent
+                            ;; headline, so location is fine.
+                            ;; Otherwise, find the parent headline in
+                            ;; the target buffer.
+                            (pom (if (org-capture-get :target-entry-p) origin
+                                   (let ((level (progn
+                                                  (while (org-up-heading-safe))
+                                                  (org-current-level))))
+                                     (org-with-point-at origin
+                                       (let ((l (if (org-at-heading-p)
+                                                    (org-current-level)
+                                                  most-positive-fixnum)))
+                                         (while (and l (>= l level))
+                                           (setq l (org-up-heading-safe)))
+                                         (if l (point-marker)
+                                           (point-min-marker)))))))
+                            (value (org-read-property-value prompt pom)))
+                       (org-set-property prompt value)))
+                    ((or "t" "T" "u" "U")
+                     ;; These are the date/time related ones.
+                     (let* ((upcase? (equal (upcase key) key))
+                            (org-end-time-was-given nil)
+                            (time (org-read-date upcase? t nil prompt)))
+                       (org-insert-time-stamp
+                        time (or org-time-was-given upcase?)
+                        (member key '("u" "U"))
+                        nil nil (list org-end-time-was-given))))
+                    (`nil
+                     ;; Load history list for current prompt.
+                     (setq org-capture--prompt-history
+                           (gethash prompt org-capture--prompt-history-table))
+                     (push (org-completing-read
+                            (concat (or prompt "Enter string")
+                                    (and default (format " [%s]" default))
+                                    ": ")
+                            completions
+                            nil nil nil 'org-capture--prompt-history default)
+                           strings)
+                     (insert (car strings))
+                     ;; Save updated history list for current prompt.
+                     (puthash prompt org-capture--prompt-history
+                              org-capture--prompt-history-table))
+                    (_
+                     (error "Unknown template placeholder: \"%%^%s\""
+                            key))))))))
+        ;; Replace %n escapes with nth %^{...} string.
+        (setq strings (nreverse strings))
+        (save-excursion
+          (while (re-search-forward "%\\\\\\([1-9][0-9]*\\)" nil t)
+            (unless (org-capture-escaped-%)
+              (replace-match
+               (nth (1- (string-to-number (match-string 1))) strings)
+               nil t)))))
+      ;; Make sure there are no empty lines before the text, and that
+      ;; it ends with a newline character or it is empty.
+      (skip-chars-forward " \t\n")
+      (delete-region (point-min) (line-beginning-position))
+      (goto-char (point-max))
+      (skip-chars-backward " \t\n")
+      (if (bobp) (delete-region (point) (line-end-position))
+        (end-of-line)
+        (delete-region (point) (point-max))
+        (insert "\n"))
+      ;; Return the expanded template and kill the capture buffer.
+      (untabify (point-min) (point-max))
+      (set-buffer-modified-p nil)
+      (prog1 (buffer-substring-no-properties (point-min) (point-max))
+        (kill-buffer (current-buffer))))))

@@ -94,6 +94,18 @@ but it truncates the buffer name within `durand-buffer-name-max'."
     "Almost the same as `doom-modeline-segment--buffer-position',
 except when in `org-agenda-mode' it uses `org-agenda-show-blocks-number' instead."
     (cond
+     ((derived-mode-p 'durand-agenda-mode)
+      (let* ((active (doom-modeline--active))
+             (po (durand-agenda-section-indicator))
+             (face (if active 'mode-line 'mode-line-inactive))
+             (mouse-face 'mode-line-highlight))
+        (concat
+         (doom-modeline-spc)
+         (doom-modeline-spc)
+         (propertize po
+                     'face face
+                     'help-echo "org agenda block position"
+                     'mouse-face mouse-face))))
      ((derived-mode-p 'org-agenda-mode)
       (let* ((active (doom-modeline--active))
              (po (org-agenda-show-blocks-number))

@@ -45,7 +45,7 @@
  doom-font "Droid Sans Mono for Powerline-20"
  doom-variable-pitch-font "Avenir" ; inherits `doom-font''s :size
  doom-unicode-font nil
- doom-big-font nil)
+ doom-big-font "Droid Sans Mono for Powerline-25")
 
 ;;; NOTE: If the height of `variable-pitch' is an integer, then it will be the
 ;;; absolute height of the face, which then will not inherit the height of the
@@ -420,6 +420,7 @@
       :map doom-leader-buffer-map
       [?v] 'ibuffer
       [?b] 'durand-buffers-major-mode
+      [?c] 'clone-indirect-buffer-other-window
       :leader
       [?,] 'durand-switch-buffer)
 
@@ -991,3 +992,6 @@
 
 (map! :map doom-leader-toggle-map
       [?M] 'durand-toggle-modus)
+
+;;; fringe
+(setq! fringe-mode 0)

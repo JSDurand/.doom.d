@@ -29,7 +29,7 @@
        durand-ivy
 
        :ui
-       deft                   ; notational velocity for Emacs
+       ;; deft                   ; notational velocity for Emacs
        doom                   ; what makes DOOM look the way it does
        doom-dashboard         ; a nifty splash screen for Emacs
        durand-dashboard       ; my dashboard configs

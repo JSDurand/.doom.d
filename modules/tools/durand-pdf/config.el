@@ -22,3 +22,7 @@
            :n [?q] 'bury-buffer))
 
     (evil-collection-require 'pdf)))
+
+(use-package! pdf-continuous-scroll-mode
+  :after pdf-view
+  :hook (pdf-view-mode . pdf-continuous-mode))

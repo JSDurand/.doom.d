@@ -239,7 +239,7 @@
         '(("g" ((in-mode . "gnus-summary-mode")
                 (in-mode . "gnus-article-mode")))))
 
-  (set-face-attribute 'org-document-title nil :font "Snell Roundhand-30")
+  (set-face-attribute 'org-document-title nil :font "Futura-30")
 
   (add-hook 'org-capture-mode-hook (lambda ()
                                      "Activate account minor mode if in capturing accounts"
@@ -396,7 +396,11 @@ This should be setted by the PERIOD-FUNC argument.")
                       (:name "TeX" :tag "tex")
                       (:name "Question" :tag "question")))
                    (org-agenda-overriding-header "TO-THINK"))))
-           ((org-agenda-block-separator nil)))))
+           ((org-agenda-block-separator nil)))
+          ("n" "test"
+           ((durand-agenda-command-test)))
+          ("m" "sections with time"
+           ((durand-agenda-command-sections-time)))))
   :config
   (advice-add 'org-agenda-log-mode :after 'evil-emacs-state)
   (add-hook 'org-agenda-mode-hook #'org-agenda-first-block)
