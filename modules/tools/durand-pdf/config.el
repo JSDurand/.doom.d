@@ -25,4 +25,4 @@
 
 (use-package! pdf-continuous-scroll-mode
   :after pdf-view
-  :hook (pdf-view-mode . pdf-continuous-mode))
+  :hook (pdf-view-mode . pdf-continuous-scroll-mode))
