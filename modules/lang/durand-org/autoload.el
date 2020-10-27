@@ -4635,3 +4635,9 @@ The template may still contain \"%?\" for cursor positioning."
       (set-buffer-modified-p nil)
       (prog1 (buffer-substring-no-properties (point-min) (point-max))
         (kill-buffer (current-buffer))))))
+
+;;;###autoload
+(defadvice! durand-roam-focus-a (&rest _args)
+  "Refocus emacs for org-roam protocol."
+  :before '(org-roam-protocol-open-file org-roam-protocol-open-ref)
+  (select-frame-set-input-focus (selected-frame)))
