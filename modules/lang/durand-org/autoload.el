@@ -4179,7 +4179,7 @@ in Lisp code use `org-set-tags' instead."
       (forward-char))))
 
 ;;;###autoload
-(defvar durand-org-fill-column 90
+(defvar durand-org-fill-column 70
   "The variable controlling the fill-column in Org buffers.
 Set this locally to a different value so as to bypass hook problems.")
 
@@ -4195,7 +4195,8 @@ Set the fill-column to `durand-org-fill-column'."
   "Prepare some settings to speed up org performance."
   (flycheck-mode -1)
   (spell-fu-mode -1)
-  (writegood-mode -1))
+  (writegood-mode -1)
+  (+org-pretty-mode -1))
 
 ;; FIXME: This is not working!
 ;;;###autoload
@@ -4641,3 +4642,15 @@ The template may still contain \"%?\" for cursor positioning."
   "Refocus emacs for org-roam protocol."
   :before '(org-roam-protocol-open-file org-roam-protocol-open-ref)
   (select-frame-set-input-focus (selected-frame)))
+
+;;;###autoload
+(defun durand-org-roam-server-open ()
+  "Open the server page in the browser `durand-browser'."
+  (interactive)
+  (make-process
+   :name "roam-server-open"
+   :command (list "open" "-a" durand-browser
+                  (format "http://%s:%s"
+                          org-roam-server-host
+                          org-roam-server-port))
+   :buffer nil))

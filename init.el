@@ -218,7 +218,8 @@
 
        :config
        ;;literate
-       (default +bindings +smartparens)
+       (default +bindings ;; +smartparens
+         )
        durand-ideal
        )
 (custom-set-variables

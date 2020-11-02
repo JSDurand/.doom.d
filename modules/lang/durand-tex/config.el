@@ -26,7 +26,18 @@
 
 (unless (boundp 'abbrev-prefix-map)
   (defvar abbrev-prefix-map (make-sparse-keymap)
-    "Keymap for expanding abbreviations in TeX and LaTeX."))
+    "Keymap for expanding abbreviations in TeX and LaTeX.")
+  (define-key abbrev-prefix-map [?$] 'durand-insert-display-equation)
+  (define-key abbrev-prefix-map [?o] 'durand-insert-o-things))
+
+(use-package! cdlatex
+  :commands (cdlatex-math-symbol)
+  :config
+  (setf (alist-get ?$ cdlatex-math-symbol-alist
+                   nil nil '=)
+        (list "\\[?\\]")
+        cdlatex-math-symbol-prefix
+        ?ù))
 
 ;;;###autoload
 (defvar tex-heading-list nil

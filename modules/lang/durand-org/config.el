@@ -9,7 +9,9 @@
 (use-package! org-tempo
   :after org
   :config
-  (add-to-list 'org-structure-template-alist '("g" . "src durand-greek")))
+  (add-to-list 'org-structure-template-alist '("g" . "src durand-greek"))
+  (setf (alist-get "el" org-structure-template-alist nil nil 'string=)
+        "src emacs-lisp"))
 ;; (after! org-tempo
 ;;   (add-to-list 'org-structure-template-alist '("g" . "src durand-greek")))
 (after! org
@@ -20,6 +22,7 @@
         org-tags-column -110
         org-hide-emphasis-markers nil
         org-special-ctrl-a/e nil))
+(setq org-highlight-latex-and-related '(native latex script entities))
 (setq org-agenda-files '("~/org/agenda.org"
                          "~/org/notes.org"
                          "~/org/aujourdhui.org"
@@ -62,8 +65,11 @@
         :n [?g ?o] 'org-open-at-point-decoded)
 
   (map! :map org-mode-map
-        [?\ù] abbrev-prefix-map
+        [?\ù] #'cdlatex-math-symbol
         [?\§] (lambda () (interactive) (insert "\\"))
+        :i [?\)] #'end-exit-paren
+        :i [backspace] 'durand-delete-pair
+        :i [?$] (cmd! (sp-insert-pair "\\("))
         [?\C-c tab] 'durand-forward-link
         [?\C-c S-tab] 'find-previous-link-in-buffer
         [f8] 'org-account-prefix-map
@@ -328,7 +334,8 @@ This should be setted by the PERIOD-FUNC argument.")
 (setq org-columns-default-format "%40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM %PRIORITY")
 
 (after! org-agenda
-  (setf org-agenda-start-day "+0d"))
+  (setf org-agenda-start-day "+0d"
+        org-agenda-dim-blocked-tasks nil))
 
 (after! calendar
   (setf diary-file (expand-file-name "diary" org-directory)))
@@ -424,13 +431,13 @@ This should be setted by the PERIOD-FUNC argument.")
   (add-hook 'org-capture-mode-hook (lambda ()
                                      "Activate fill-column in org capture"
                                      (interactive)
-                                     (setq-local fill-column 90)
+                                     (setq-local fill-column durand-org-fill-column)
                                      (auto-fill-mode 1))))
 (add-hook 'org-log-buffer-setup-hook
           (lambda ()
             "Activate fill-column in org capture"
             (interactive)
-            (setq-local fill-column 90)
+            (setq-local fill-column durand-org-fill-column)
             (auto-fill-mode 1)))
 
 ;; major mode for durand-org-view-notes
@@ -492,18 +499,18 @@ This should be setted by the PERIOD-FUNC argument.")
 (define-key org-account-prefix-map [?v] #'durand-org-view-notes)
 (define-key org-account-prefix-map [?a] #'durand-show-account-report)
 
-(after! org-fancy-priorities
-  (setf org-fancy-priorities-list
-        (list "I"
-              "II"
-              "III"
-              "IV"
-              "V")
-        ;; (append (-take 3 org-fancy-priorities-list) (list "■" "■" ))
-        org-priority-faces
-        (append (-take 3 org-priority-faces)
-                (list '(?D :foreground "lightskyblue1")
-                      '(?E :foreground "DeepSkyBlue1")))))
+;; (after! org-fancy-priorities
+;;   (setf org-fancy-priorities-list
+;;         (list "I"
+;;               "II"
+;;               "III"
+;;               "IV"
+;;               "V")
+;;         ;; (append (-take 3 org-fancy-priorities-list) (list "■" "■" ))
+;;         org-priority-faces
+;;         (append (-take 3 org-priority-faces)
+;;                 (list '(?D :foreground "lightskyblue1")
+;;                       '(?E :foreground "DeepSkyBlue1")))))
 
 ;; set up org-pdfview
 
@@ -568,7 +575,13 @@ This should be setted by the PERIOD-FUNC argument.")
              org-roam-dailies-yesterday)
   :config
   ;; set it explicitly to org-directory
-  (setf org-roam-directory (expand-file-name "roam" org-directory))
+  (setf org-roam-directory (expand-file-name "roam" org-directory)
+        org-roam-dailies-capture-templates
+        '(("d" "daily"
+           plain #'org-roam-capture--get-point ""
+           :immediate-finish t
+           :file-name "journal/%<%Y-%m-%d>"
+           :head "#+title: %<%Y-%m-%d>")))
   ;; use separators
   (setf org-roam-capture-templates
         '(("d" "default" plain #'org-roam-capture--get-point "%?"
@@ -582,4 +595,33 @@ This should be setted by the PERIOD-FUNC argument.")
         ;; use safari for viewing svg files
         org-roam-graph-viewer 'durand-view-svg
         org-roam-graph-executable (executable-find "neato")
-        org-roam-graph-extra-config '(("overlap" . "false"))))
+        org-roam-graph-extra-config '(("overlap" . "false")))
+  ;; Org mode tags matter
+  (setf org-roam-tag-sources '(prop vanilla)))
+
+(use-package! org-roam-server
+  :after org-roam
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8080
+        org-roam-server-authenticate nil
+        org-roam-server-export-inline-images t
+        org-roam-server-serve-files nil
+        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+        org-roam-server-network-poll t
+        org-roam-server-network-arrows nil
+        org-roam-server-network-label-truncate t
+        org-roam-server-network-label-truncate-length 60
+        org-roam-server-network-label-wrap-length 20)
+  (org-roam-server-mode))
+
+;; org-ql
+
+;; (use-package! org-ql
+;;   :after-call durand-agenda
+;;   :after org-agenda
+;;   (setf (alist-get "n" org-agenda-custom-commands nil nil #'string=)
+;;         '("test"
+;;           ((org-ql-block '(and (ts-a :to 1 :from -1)
+;;                                (todo))
+;;                          ((org-ql-block-header "Testing")))))))
