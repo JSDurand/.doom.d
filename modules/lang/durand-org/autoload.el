@@ -4654,3 +4654,53 @@ The template may still contain \"%?\" for cursor positioning."
                           org-roam-server-host
                           org-roam-server-port))
    :buffer nil))
+
+;;;###autoload
+(defadvice! durand-org-init-babel-h ()
+  "My own customisations."
+  :override #'+org-init-babel-h
+  (setq org-src-preserve-indentation t  ; use native major-mode indentation
+        org-src-tab-acts-natively t     ; we do this ourselves
+        ;; You don't need my permission (just be careful, mkay?)
+        org-confirm-babel-evaluate nil
+        org-link-elisp-confirm-function nil
+        ;; Show src buffer in popup, and don't monopolize the frame
+        org-src-window-setup 'current-window
+        ;; Our :lang common-lisp module uses sly, so...
+        org-babel-lisp-eval-fn #'sly-eval)
+
+  ;; I prefer C-c C-c over C-c ' (more consistent)
+  (define-key org-src-mode-map (kbd "C-c C-c") #'org-edit-src-exit)
+
+  (defadvice! +org-fix-newline-and-indent-in-src-blocks-a (&optional indent _arg _interactive)
+    "Mimic `newline-and-indent' in src blocks w/ lang-appropriate indentation."
+    :after #'org-return
+    (when (and indent
+               org-src-tab-acts-natively
+               (org-in-src-block-p t))
+      (org-babel-do-in-edit-buffer
+       (call-interactively #'indent-for-tab-command))))
+
+  (defadvice! +org-inhibit-mode-hooks-a (orig-fn datum name &optional initialize &rest args)
+    "Prevent potentially expensive mode hooks in `org-babel-do-in-edit-buffer' ops."
+    :around #'org-src--edit-element
+    (apply orig-fn datum name
+           (if (and (eq org-src-window-setup 'switch-invisibly)
+                    (functionp initialize))
+               ;; org-babel-do-in-edit-buffer is used to execute quick, one-off
+               ;; logic in the context of another major mode, but initializing a
+               ;; major mode with expensive hooks can be terribly expensive.
+               ;; Since Doom adds its most expensive hooks to
+               ;; MAJOR-MODE-local-vars-hook, we can savely inhibit those.
+               (lambda ()
+                 (let ((doom-inhibit-local-var-hooks t))
+                   (funcall initialize)))
+             initialize)
+           args))
+
+  ;; Refresh inline images after executing src blocks (useful for plantuml or
+  ;; ipython, where the result could be an image)
+  (add-hook 'org-babel-after-execute-hook #'org-redisplay-inline-images)
+
+  (after! python
+    (setq org-babel-python-command python-shell-interpreter)))
