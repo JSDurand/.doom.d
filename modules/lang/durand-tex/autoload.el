@@ -477,6 +477,11 @@ Modified by Durand."
       (with-current-buffer buffer
         (run-hooks 'pdf-sync-forward-hook)))))
 
+;;;###autoload
+(defun turn-off-spell-fu ()
+  "Turn off spell-fu-mode"
+  (spell-fu-mode -1))
+
 ;; (set-popup-rule! "pdf$"
 ;;   :side 'bottom
 ;;   :size 0.5

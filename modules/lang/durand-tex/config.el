@@ -65,7 +65,16 @@
 ;; add mathscr
 (after! latex
   (setf (alist-get ?\C-c LaTeX-font-list)
-        '("\\textsc{" "}" "\\mathscr{" "}")))
+        '("\\textsc{" "}" "\\mathscr{" "}")
+        +latex-indent-item-continuation-offset
+        0)
+  (defadvice! +latex--re-indent-itemize-and-enumerate-a (orig-fn &rest args)
+    :around #'LaTeX-fill-region-as-para-do
+    (let ((LaTeX-indent-environment-list
+           (append LaTeX-indent-environment-list
+                   '(("itemize"   +latex-indent-item-fn)
+                     ("enumerate" +latex-indent-item-fn)))))
+      (apply orig-fn args))))
 
 ;; (add-hook 'TeX-mode-hook 'olivetti-mode)
 ;; oft macros are close to each other, this makes it easy to distinguish them.
@@ -74,7 +83,7 @@
   "oft macros are close to each other, this makes it easy to distinguish them."
   (modify-syntax-entry ?\\ "_" (syntax-table)))
 
-(add-hook! LaTeX-mode '(change-syntax-entry olivetti-mode outline-minor-mode))
+(add-hook! LaTeX-mode '(change-syntax-entry olivetti-mode outline-minor-mode turn-off-spell-fu))
 (add-hook! TeX-mode '(change-syntax-entry olivetti-mode outline-minor-mode))
 ;; (modify-syntax-entry ?\\ "_" TeX-mode-syntax-table)
 ;; (modify-syntax-entry ?\\ "_" LaTeX-mode-syntax-table)
