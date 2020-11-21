@@ -187,7 +187,7 @@ If ARG is '(16), view the battery information."
         (call-process "system_profiler" nil t nil
                       "SPPowerDataType")
         (goto-char (point-min))
-        (re-search-forward "Charge Remaining (mAh): \\([[:digit:]]+\\)" nil t)
+        (re-search-forward "State of Charge (%): \\([[:digit:]]+\\)" nil t)
         (setf remain (string-to-number (match-string-no-properties 1)))
         (re-search-forward "Fully Charged: \\(.+\\)$" nil t)
         (setf fullp (match-string-no-properties 1))
@@ -216,8 +216,8 @@ If ARG is '(16), view the battery information."
         (format "fan: %d, temp: %s, battery temp: %.2f"
                 fan-speed cpu-die-temperature battery-temp)
         "\n"
-        (format "Full: %d, remaining: %d, fullp: %s, charging: %s, connected: %s, cycles: %d, condition: %s"
-                full-capacity remain fullp charging connected cycle condition)))))
+        (format "Full: %d, remaining: %d%s, fullp: %s, charging: %s, connected: %s, cycles: %d, condition: %s"
+                full-capacity remain "%%" fullp charging connected cycle condition)))))
    ((equal arg (list 4)) (list-timers))
    (t
     (user-error "Unsupported ARG: %S" arg))))
