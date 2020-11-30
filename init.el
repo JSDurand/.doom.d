@@ -80,6 +80,7 @@
        electric             ; smarter, keyword-based electric-indent
        ibuffer           ; interactive buffer management
        durand-ibuffer    ; my filters
+       zoom-frm          ; zooming
        ;; vc                ; version-control and Emacs, sitting in a tree
        :checkers
        syntax

@@ -995,3 +995,7 @@
 
 ;;; fringe
 (setq! fringe-mode 0)
+
+;;; don't recenter when deleting backward
+(after! lispy
+  (setf lispy-delete-backward-recenter nil))

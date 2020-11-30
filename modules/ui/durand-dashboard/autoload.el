@@ -1,6 +1,20 @@
 ;;; ui/durand-dashboard/autoload.el -*- lexical-binding: t; -*-
 
 ;;;###autoload
+(defvar durand-terminal-open-p nil
+  "A variable to indicate whether or not the terminal is opened.")
+
+;;;###autoload
+(defun durand-terminal-filter (proc out)
+  "Filter function to open or activate terminal.
+This should only be used by `durand-open-terminal'.
+PROC is the process, and OUT is the output."
+  (cond
+   ((string= (process-name proc) "terminal-detector"))
+   (t (user-error "The filter is used in a wrong place, by %S" proc)))
+  (setq durand-terminal-open-p (string= out "true")))
+
+;;;###autoload
 (defun durand-open-terminal (&optional arg)
   "Open terminal at the current directory."
   (interactive "P")
@@ -9,12 +23,28 @@
     (+vterm/here nil))
    ((equal arg '(4))
     (make-process
-     :name "terminal"
-     :command `("open" "-a" "terminal" ,(file-relative-name default-directory))
-     :buffer nil))
+     :name "terminal-detector"
+     :command `("osascript" "-e"
+                ,(format "tell application \"System Events\" to (name of processes) contains \"%s\""
+                         "Terminal"))
+     :filter #'durand-terminal-filter
+     :sentinel #'ignore
+     :buffer nil)
+    (accept-process-output (get-process "terminal-detector"))
+    (cond
+     (durand-terminal-open-p
+      (make-process
+       :name "open-terminal"
+       :command '("open" "-a" "terminal" "./")
+       :buffer nil))
+     (t
+      (make-process
+       :name "activate-terminal"
+       :command '("osascript" "-e" "tell application \"Terminal\" to activate")
+       :buffer nil))))
    ((equal arg '(16))
     (make-process
-     :name "close terminal"
+     :name "close-terminal"
      :buffer nil
      :command '("osascript" "-e" "tell application \"Terminal\" to quit")))))
 

@@ -10,7 +10,6 @@
        ((derived-mode-p 'dired-mode)
         (let ((bongo-dirs durand-bongo-music-dir)
               found)
-          (message "bd: %S" bongo-dirs)
           (while (and (not found)
                       (consp bongo-dirs))
             (cond
