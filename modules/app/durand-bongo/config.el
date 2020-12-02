@@ -49,6 +49,7 @@
         [?n] 'bongo-next-object-line
         [?p] 'bongo-previous-object-line
         [?j] 'durand-bongo-save-playlist
+        "TAB" #'bongo-show
         [?\C-c ?n] 'durand-bongo-play-next-or-first
         [?\C-c ?p] 'durand-bongo-play-previous-or-last)
 
