@@ -150,7 +150,9 @@
 (after! dired
   (map! :map dired-mode-map
         :n [?z ?j] 'dired-next-subdir
-        :n [?z ?k] 'dired-prev-subdir))
+        :n [?z ?k] 'dired-prev-subdir
+        :n [?h] 'dired-up-directory
+        :n [?l] 'dired-find-file))
 
 ;;; dictionary mode map
 

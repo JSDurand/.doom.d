@@ -287,7 +287,8 @@ where the macro part is without the backslash.")
        (cons "s" "sum")
        (cons "p" "prod")
        (cons "+" "oplus")
-       (cons "o" "circ")))
+       (cons "o" "circ")
+       (list "{" "{" "}")))
 
 ;;;###autoload
 (defun durand-insert-o-things ()
@@ -309,7 +310,19 @@ The list is in the variable `durand-o-things-list'"
                          :caller 'durand-insert-o-things
                          :re-builder 'ivy--regex-plus)
                ))
-    (insert (format "\\%s" (assoc-default thing durand-o-things-list #'string=)))))
+    (let ((associated (alist-get thing durand-o-things-list nil nil #'string=)))
+      (cond
+       ((null (consp associated))
+        ;; length = 1
+        (insert (format "\\%s" (assoc-default thing durand-o-things-list #'string=))))
+       ((null (cddr associated))
+        ;; length = 2
+        (insert (format "\\left\\%s" (car associated)))
+        (save-excursion
+          (insert
+           (format "\\right\\%s" (cadr associated)))))
+       (t
+        (user-error "Weird associated: %S" associated))))))
 
 (add-hook! 'LaTeX-mode-hook
            'LaTeX-math-mode)
