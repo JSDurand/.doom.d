@@ -519,3 +519,15 @@ _m_: bongo   _i_: insert          _I_  : playlist        _>_: last
   "Refresh the display after we set the volume."
   :after 'volume-set
   (volume-redisplay))
+
+;;; Don't insert text in the playlist buffer.
+
+;;;###autoload
+(defadvice! durand-bongo-default-playlist-buffer-a ()
+  "Don't insert text in the playlist buffer."
+  :override #'bongo-default-playlist-buffer
+  (or (get-buffer bongo-default-playlist-buffer-name)
+      (let ((buffer (get-buffer-create bongo-default-playlist-buffer-name)))
+        (prog1 buffer
+          (with-current-buffer buffer
+            (bongo-playlist-mode))))))
